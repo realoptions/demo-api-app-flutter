@@ -49,28 +49,6 @@ const List<String> choices = const <String>[
   "Merton"
 ];
 
-class ModelSelection extends StatefulWidget{
-  ModelSelection({Key key, this.initialSelection}):super(key:key);
-  final String initialSelection;
-  @override
-  _RadioButtons createState()=>_RadioButtons();
-}
-class _RadioButtons extends State<ModelSelection>{
-  String _selectedModel=widget.initialSelection;
-  @override
-  Widget build(BuildContext context){
-    return Column(
-      children: choices.map((choice)=> RadioListTile<String>(
-          title: Text(choice),
-          value: choice,
-          groupValue: _selectedModel,
-          onChanged: (choice){setState((){_selectedModel=choice;})}
-        )
-      ).toList()
-    );
-  }
-}
-
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
@@ -122,12 +100,16 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icon(Icons.more_vert),
                onPressed: () {
                 showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-                  return Column(
+                  return ListView(
+                    shrinkWrap: true,
                     children: choices.map((choice)=> RadioListTile<String>(
                         title: Text(choice),
                         value: choice,
                         groupValue: _selectedModel,
-                        onChanged: _select
+                        onChanged: (choice){
+                          _select(choice);
+                          Navigator.pop(context);
+                        }
                       )
                     ).toList()
                   );
