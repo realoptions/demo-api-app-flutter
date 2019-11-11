@@ -18,9 +18,9 @@ class MyApp extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.teal,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Options'),
     );
   }
 }
@@ -43,8 +43,15 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+const List<String> choices = const <String>[
+  "Heston",
+  "CGMY",
+  "Merton"
+];
+
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  String _selectedModel=choices[0];
 
   void _incrementCounter() {
     setState(() {
@@ -55,6 +62,10 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _counter++;
     });
+  }
+  void _select(String choice) {
+    // Causes the app to rebuild with the new _selectedChoice.
+    
   }
 
   @override
@@ -71,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.
-          title: Text(widget.title),
+          title: Text(widget.title+": "+_selectedModel),
           bottom: TabBar(
             tabs: [
               Tab(icon: Icon(Icons.directions_car)),
@@ -79,6 +90,24 @@ class _MyHomePageState extends State<MyHomePage> {
               Tab(icon: Icon(Icons.directions_bike)),
             ],
           ),
+          actions: <Widget>[
+          
+            IconButton(
+              icon: Icon(Icons.more_vert),
+               onPressed: () {
+                showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
+                  return ListView(
+                    shrinkWrap: true,
+                    children:choices.map((choice)=>PopupMenuItem<String>(
+                      value: choice,
+                      child: Text(choice),
+                      //leading: Icon(),
+                    )).toList()
+                  );
+                });
+              },
+            ),
+          ],
         ),
         body: TabBarView(
           children:[
