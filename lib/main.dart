@@ -49,6 +49,29 @@ const List<String> choices = const <String>[
   "Merton"
 ];
 
+class ModelSelection extends StatefulWidget{
+  ModelSelection({Key key, this.initialSelection}):super(key:key);
+  final String initialSelection;
+  @override
+  _RadioButtons createState()=>_RadioButtons();
+}
+class _RadioButtons extends State<ModelSelection>{
+  String _selectedModel=widget.initialSelection;
+  @override
+  Widget build(BuildContext context){
+    return Column(
+      children: choices.map((choice)=> RadioListTile<String>(
+          title: Text(choice),
+          value: choice,
+          groupValue: _selectedModel,
+          onChanged: (choice){setState((){_selectedModel=choice;})}
+        )
+      ).toList()
+    );
+  }
+}
+
+
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   String _selectedModel=choices[0];
@@ -64,6 +87,9 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
   void _select(String choice) {
+    setState((){
+      _selectedModel=choice;
+    });
     // Causes the app to rebuild with the new _selectedChoice.
     
   }
@@ -96,13 +122,14 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icon(Icons.more_vert),
                onPressed: () {
                 showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-                  return ListView(
-                    shrinkWrap: true,
-                    children:choices.map((choice)=>PopupMenuItem<String>(
-                      value: choice,
-                      child: Text(choice),
-                      //leading: Icon(),
-                    )).toList()
+                  return Column(
+                    children: choices.map((choice)=> RadioListTile<String>(
+                        title: Text(choice),
+                        value: choice,
+                        groupValue: _selectedModel,
+                        onChanged: _select
+                      )
+                    ).toList()
                   );
                 });
               },
