@@ -71,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // Causes the app to rebuild with the new _selectedChoice.
     
   }
-
+  
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -95,7 +95,40 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
           actions: <Widget>[
-          
+            IconButton(
+              icon: Icon(Icons.lock),
+               onPressed: () {
+                showDialog<void>(context: context, builder: (BuildContext context) {
+                  return new AlertDialog(
+                    contentPadding: const EdgeInsets.all(16.0),
+                    content: new Row(
+                      children: <Widget>[
+                        new Expanded(
+                          child: new TextField(
+                            autofocus: true,
+                            decoration: new InputDecoration(
+                                labelText: 'API Key'
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    actions: <Widget>[
+                      new FlatButton(
+                          child: const Text('CANCEL'),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          }),
+                      new FlatButton(
+                          child: const Text('OPEN'),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          })
+                    ],
+                  );
+                });
+              },
+            ),
             IconButton(
               icon: Icon(Icons.more_vert),
                onPressed: () {
