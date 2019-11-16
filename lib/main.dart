@@ -53,8 +53,8 @@ const List<String> choices = const <String>[
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   String _selectedModel=choices[0];
-  Future<List<ApiKey>> _key=retrieveKey();
-
+  bool _keyIsCorrect=false;
+  String _key="";
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -72,8 +72,35 @@ class _MyHomePageState extends State<MyHomePage> {
     
   }
 
+  Future<List<ApiKey>> _getKey() async{
+    return await retrieveKey();    
+  }
+  void _setKeyCorrect() {
+    setState((){
+      _keyIsCorrect=true;
+    });
+  }
 
-  
+  Widget _buildTab(hasKey) {
+    
+    if(hasKey){
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            'You have cliecked the button this many times:',
+          ),
+          Text(
+            '$_counter',
+            style: Theme.of(context).textTheme.display1,
+          ),
+        ],
+      );
+    }
+    else{
+      return Text("You need to add your API key");
+    }
+  }
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -82,134 +109,110 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return DefaultTabController(
-      length:3, 
-      child: Scaffold(
-        appBar: AppBar(
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
-          title: Text(widget.title+": "+_selectedModel),
-          bottom: TabBar(
-            tabs: [
-              Tab(icon: Icon(Icons.directions_car)),
-              Tab(icon: Icon(Icons.directions_transit)),
-              Tab(icon: Icon(Icons.directions_bike)),
-            ],
-          ),
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(Icons.lock),
-               onPressed: () {
-                showDialog<void>(context: context, builder: (BuildContext context) {
-                  return new AlertDialog(
-                    contentPadding: const EdgeInsets.all(16.0),
-                    content: new Row(
-                      children: <Widget>[
-                        new Expanded(
-                          child: new TextField(
-                            autofocus: true,
-                            decoration: new InputDecoration(
-                                labelText: 'API Key'
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                    actions: <Widget>[
-                      new FlatButton(
-                          child: const Text('CANCEL'),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          }),
-                      new FlatButton(
-                          child: const Text('OPEN'),
-                          onPressed: () async {
-                            await insertKey(ApiKey(id:1, key:"need to add key here"));
-                            _key=retrieveKey();
-                            Navigator.pop(context);
-                          })
+    return FutureBuilder<List<ApiKey> >(
+      builder: (context, snapshot){
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+            return Text('Should never get here');
+          case ConnectionState.active:
+          case ConnectionState.waiting:
+            return Text('Awaiting result...');
+          case ConnectionState.done:
+            return DefaultTabController(
+              length:3, 
+              child: Scaffold(
+                appBar: AppBar(
+                  // Here we take the value from the MyHomePage object that was created by
+                  // the App.build method, and use it to set our appbar title.
+                  title: Text(widget.title+": "+_selectedModel),
+                  bottom: TabBar(
+                    tabs: [
+                      Tab(icon: Icon(Icons.directions_car)),
+                      Tab(icon: Icon(Icons.directions_transit)),
+                      Tab(icon: Icon(Icons.directions_bike)),
                     ],
-                  );
-                });
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.more_vert),
-               onPressed: () {
-                showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-                  return ListView(
-                    shrinkWrap: true,
-                    children: choices.map((choice)=> RadioListTile<String>(
-                        title: Text(choice),
-                        value: choice,
-                        groupValue: _selectedModel,
-                        onChanged: (choice){
-                          _select(choice);
-                          Navigator.pop(context);
-                        }
-                      )
-                    ).toList()
-                  );
-                });
-              },
-            ),
-          ],
-        ),
-        body: TabBarView(
-          children:[
-            FutureBuilder<List<ApiKey>>(
-              builder: (context, snapshot){
-                if(snapshot.hasData && snapshot.data.length>0){
-                  return Center(
-                    // Center is a layout widget. It takes a single child and positions it
-                    // in the middle of the parent.
-                    child: Column(
-                      // Column is also a layout widget. It takes a list of children and
-                      // arranges them vertically. By default, it sizes itself to fit its
-                      // children horizontally, and tries to be as tall as its parent.
-                      //
-                      // Invoke "debug painting" (press "p" in the console, choose the
-                      // "Toggle Debug Paint" action from the Flutter Inspector in Android
-                      // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-                      // to see the wireframe for each widget.
-                      //
-                      // Column has various properties to control how it sizes itself and
-                      // how it positions its children. Here we use mainAxisAlignment to
-                      // center the children vertically; the main axis here is the vertical
-                      // axis because Columns are vertical (the cross axis would be
-                      // horizontal).
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                          'You have pushed the button this many times:',
-                        ),
-                        Text(
-                          '$_counter',
-                          style: Theme.of(context).textTheme.display1,
-                        ),
-                      ],
+                  ),
+                  actions: <Widget>[
+                    IconButton(
+                      icon: Icon(Icons.lock),
+                      onPressed: () {
+                        showDialog<void>(context: context, builder: (BuildContext context) {
+                          return new AlertDialog(
+                            contentPadding: const EdgeInsets.all(16.0),
+                            content: new Row(
+                              children: <Widget>[
+                                new Expanded(
+                                  child: new TextField(
+                                    autofocus: true,
+                                    onChanged: (String val){
+                                      _key=val;
+                                    },
+                                    decoration: new InputDecoration(
+                                        labelText: 'API Key'
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                            actions: <Widget>[
+                              new FlatButton(
+                                  child: const Text('CANCEL'),
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  }),
+                              new FlatButton(
+                                  child: const Text('SAVE'),
+                                  onPressed: () async {
+                                    await insertKey(ApiKey(id:1, key:_key));
+                                    //_setKeyCorrect();
+                                    Navigator.pop(context);
+                                  })
+                            ],
+                          );
+                        });
+                      },
                     ),
-                  );
-                }
-                else{
-                  return Text("You need to add your API key");
-                }
-              },
-              future: _key
-            ),
-            
-            Icon(Icons.directions_transit),
-            Icon(Icons.directions_bike),
-          ]
-        
-        ),
-        floatingActionButton: FloatingActionButton(
-            onPressed: _incrementCounter,
-            tooltip: 'Increment',
-            child: Icon(Icons.add),
-        ), // This trailing comma makes auto-formatting nicer for build methods.;
-      )
+                    IconButton(
+                      icon: Icon(Icons.more_vert),
+                      onPressed: () {
+                        showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
+                          return ListView(
+                            shrinkWrap: true,
+                            children: choices.map((choice)=> RadioListTile<String>(
+                                title: Text(choice),
+                                value: choice,
+                                groupValue: _selectedModel,
+                                onChanged: (choice){
+                                  //_select(choice);
+                                  Navigator.pop(context);
+                                }
+                              )
+                            ).toList()
+                          );
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                body: TabBarView(
+                  children:[
+                    _buildTab(snapshot.data.length>0),
+                    Icon(Icons.directions_transit),
+                    Icon(Icons.directions_bike),
+                  ]
+                
+                ),
+                floatingActionButton: FloatingActionButton(
+                    onPressed: (){},//_incrementCounter,
+                    tooltip: 'Increment',
+                    child: Icon(Icons.add),
+                ), // This trailing comma makes auto-formatting nicer for build methods.;
+              )
+            );
+          }
+          return null;//never gets here
+      },
+      future:_getKey()
     );
-    
   }
 }

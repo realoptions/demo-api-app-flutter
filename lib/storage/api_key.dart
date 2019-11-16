@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:path/path.dart';
+//import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 class ApiKey {
   final int id;
@@ -51,7 +51,7 @@ Future<List<ApiKey>>retrieveKey() async {
 
   // Query the table for all The Dogs.
   final List<Map<String, dynamic>> maps = await db.query('api_key_store');
-
+  print(maps.length);
   // Convert the List<Map<String, dynamic> into a List<Dog>.
   return List.generate(maps.length, (i) {
     return ApiKey(
