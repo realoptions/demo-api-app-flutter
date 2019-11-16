@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:demo_api_app_flutter/storage/api_key.dart';
+import 'package:demo_api_app_flutter/app_bar.dart';
+import 'package:demo_api_app_flutter/pages/intro.dart';
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -43,18 +46,26 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-const List<String> choices = const <String>[
-  "Heston",
-  "CGMY",
-  "Merton"
-];
+class FormPage extends StatefulWidget {
+  FormPage({Key key, this.setApiKey}) : super(key: key);
 
+  // This widget is the home page of your application. It is stateful, meaning
+  // that it has a State object (defined below) that contains fields that affect
+  // how it looks.
 
-class _MyHomePageState extends State<MyHomePage> {
+  // This class is the configuration for the state. It holds the values (in this
+  // case the title) provided by the parent (in this case the App widget) and
+  // used by the build method of the State. Fields in a Widget subclass are
+  // always marked "final".
+
+  final VoidCallback setApiKey; //I don't think this will work
+
+  @override
+  _FormPage createState() => _FormPage();
+}
+
+class _FormPage extends State<FormPage>{
   int _counter = 0;
-  String _selectedModel=choices[0];
-  bool _keyIsCorrect=false;
-  String _key="";
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -65,26 +76,9 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
   }
-  void _select(String choice) {
-    setState((){
-      _selectedModel=choice;
-    });
-    
-  }
-
-  Future<List<ApiKey>> _getKey() async{
-    return await retrieveKey();    
-  }
-  void _setKeyCorrect() {
-    setState((){
-      _keyIsCorrect=true;
-    });
-  }
-
-  Widget _buildTab(hasKey) {
-    
-    if(hasKey){
-      return Column(
+  @override
+  Widget build(BuildContext context) {
+    return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Text(
@@ -96,11 +90,38 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       );
-    }
-    else{
-      return Text("You need to add your API key");
-    }
   }
+}
+
+const List<String> choices = const <String>[
+  "Heston",
+  "CGMY",
+  "Merton"
+];
+
+
+
+class _MyHomePageState extends State<MyHomePage> {
+  
+  String _selectedModel=choices[0];
+  String _key="";
+  void _select(String choice) {
+    setState((){
+      _selectedModel=choice;
+    });
+  }
+
+  Future<List<ApiKey>> _getKey() async{
+    return await retrieveKey();    
+  }
+
+  _setKey(String apiKey) async{
+    await insertKey(ApiKey(id: 1, key: apiKey));
+    setState((){
+      _key=apiKey;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -109,110 +130,37 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return FutureBuilder<List<ApiKey> >(
-      builder: (context, snapshot){
-        switch (snapshot.connectionState) {
-          case ConnectionState.none:
-            return Text('Should never get here');
-          case ConnectionState.active:
-          case ConnectionState.waiting:
-            return Text('Awaiting result...');
-          case ConnectionState.done:
-            return DefaultTabController(
-              length:3, 
-              child: Scaffold(
-                appBar: AppBar(
-                  // Here we take the value from the MyHomePage object that was created by
-                  // the App.build method, and use it to set our appbar title.
-                  title: Text(widget.title+": "+_selectedModel),
-                  bottom: TabBar(
-                    tabs: [
-                      Tab(icon: Icon(Icons.directions_car)),
-                      Tab(icon: Icon(Icons.directions_transit)),
-                      Tab(icon: Icon(Icons.directions_bike)),
-                    ],
-                  ),
-                  actions: <Widget>[
-                    IconButton(
-                      icon: Icon(Icons.lock),
-                      onPressed: () {
-                        showDialog<void>(context: context, builder: (BuildContext context) {
-                          return new AlertDialog(
-                            contentPadding: const EdgeInsets.all(16.0),
-                            content: new Row(
-                              children: <Widget>[
-                                new Expanded(
-                                  child: new TextField(
-                                    autofocus: true,
-                                    onChanged: (String val){
-                                      _key=val;
-                                    },
-                                    decoration: new InputDecoration(
-                                        labelText: 'API Key'
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                            actions: <Widget>[
-                              new FlatButton(
-                                  child: const Text('CANCEL'),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  }),
-                              new FlatButton(
-                                  child: const Text('SAVE'),
-                                  onPressed: () async {
-                                    await insertKey(ApiKey(id:1, key:_key));
-                                    //_setKeyCorrect();
-                                    Navigator.pop(context);
-                                  })
-                            ],
-                          );
-                        });
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.more_vert),
-                      onPressed: () {
-                        showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-                          return ListView(
-                            shrinkWrap: true,
-                            children: choices.map((choice)=> RadioListTile<String>(
-                                title: Text(choice),
-                                value: choice,
-                                groupValue: _selectedModel,
-                                onChanged: (choice){
-                                  //_select(choice);
-                                  Navigator.pop(context);
-                                }
-                              )
-                            ).toList()
-                          );
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                body: TabBarView(
-                  children:[
-                    _buildTab(snapshot.data.length>0),
-                    Icon(Icons.directions_transit),
-                    Icon(Icons.directions_bike),
-                  ]
-                
-                ),
-                floatingActionButton: FloatingActionButton(
-                    onPressed: (){},//_incrementCounter,
-                    tooltip: 'Increment',
-                    child: Icon(Icons.add),
-                ), // This trailing comma makes auto-formatting nicer for build methods.;
-              )
-            );
-          }
-          return null;//never gets here
-      },
-      future:_getKey()
-    );
+    
+    switch (_key) {
+      case "":
+        return Introduction(onApiKeyChange: _setKey,);
+      default:
+        return DefaultTabController(
+          length:3, 
+          child: Scaffold(
+            appBar: MyAppBar(
+              title: widget.title,
+              onApiKeyChange: _setKey,
+              selectedModel: _selectedModel,
+              onSelection: _select,
+              choices: choices
+            ),
+            body: TabBarView(
+              children:[
+                Text("Hello world"),
+                Icon(Icons.directions_transit),
+                Icon(Icons.directions_bike),
+              ]
+            
+            ),
+            floatingActionButton: FloatingActionButton(
+                onPressed: (){},//_incrementCounter,
+                tooltip: 'Increment',
+                child: Icon(Icons.add),
+            ), // This trailing comma makes auto-formatting nicer for build methods.;
+          )
+        );
+      }
+      //return null;//never gets here
   }
 }
