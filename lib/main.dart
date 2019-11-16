@@ -46,52 +46,6 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class FormPage extends StatefulWidget {
-  FormPage({Key key, this.setApiKey}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final VoidCallback setApiKey; //I don't think this will work
-
-  @override
-  _FormPage createState() => _FormPage();
-}
-
-class _FormPage extends State<FormPage>{
-  int _counter = 0;
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            'You have cliecked the button this many times:',
-          ),
-          Text(
-            '$_counter',
-            style: Theme.of(context).textTheme.display1,
-          ),
-        ],
-      );
-  }
-}
 
 const List<String> choices = const <String>[
   "Heston",
@@ -99,68 +53,98 @@ const List<String> choices = const <String>[
   "Merton"
 ];
 
-
-
 class _MyHomePageState extends State<MyHomePage> {
   
   String _selectedModel=choices[0];
   String _key="";
+  bool _isLoading=true;
+  bool _isFirstLoad=true; //there has to be a better way than this...
   void _select(String choice) {
     setState((){
       _selectedModel=choice;
     });
   }
-
-  Future<List<ApiKey>> _getKey() async{
-    return await retrieveKey();    
-  }
-
-  _setKey(String apiKey) async{
-    await insertKey(ApiKey(id: 1, key: apiKey));
+  void _setLoading(bool isLoading){
     setState((){
-      _key=apiKey;
+      _isLoading=isLoading;
     });
   }
 
+  _getKey(){
+    _setLoading(true);
+    retrieveKey().then((apiKey){
+      if(apiKey.length>0){
+        print(apiKey.first.key);
+        setState((){
+          _key=apiKey.first.key;
+        });
+      }
+      _setLoading(false);
+      
+    });    
+  }
+
+  _setKey(String apiKey){
+    setState((){
+      _key=apiKey;
+    });
+    insertKey(ApiKey(id: 1, key: apiKey));
+    
+  }
+  
+
   @override
   Widget build(BuildContext context) {
+    //_getKey();
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    
-    switch (_key) {
-      case "":
-        return Introduction(onApiKeyChange: _setKey,);
-      default:
-        return DefaultTabController(
-          length:3, 
-          child: Scaffold(
-            appBar: MyAppBar(
-              title: widget.title,
-              onApiKeyChange: _setKey,
-              selectedModel: _selectedModel,
-              onSelection: _select,
-              choices: choices
-            ),
-            body: TabBarView(
-              children:[
-                Text("Hello world"),
-                Icon(Icons.directions_transit),
-                Icon(Icons.directions_bike),
-              ]
-            
-            ),
-            floatingActionButton: FloatingActionButton(
-                onPressed: (){},//_incrementCounter,
-                tooltip: 'Increment',
-                child: Icon(Icons.add),
-            ), // This trailing comma makes auto-formatting nicer for build methods.;
-          )
-        );
+    if(_isFirstLoad){
+      print("got to first load");
+      _getKey();
+      setState((){
+        _isFirstLoad=false;
+      });
+    }
+    if(_isLoading){
+      return CircularProgressIndicator(value:null);
+    }
+    else{
+      switch(_key){
+        case "":
+          return Introduction(onApiKeyChange: _setKey,);
+        default:
+          return DefaultTabController(
+            length:3, 
+            child: Scaffold(
+              appBar: MyAppBar(
+                title: widget.title,
+                onApiKeyChange: _setKey,
+                selectedModel: _selectedModel,
+                onSelection: _select,
+                choices: choices
+              ),
+              body: TabBarView(
+                children:[
+                  Text("Hello world"),
+                  Icon(Icons.directions_transit),
+                  Icon(Icons.directions_bike),
+                ]
+              
+              ),
+              floatingActionButton: FloatingActionButton(
+                  onPressed: (){},//_incrementCounter,
+                  tooltip: 'Increment',
+                  child: Icon(Icons.add),
+              ), // This trailing comma makes auto-formatting nicer for build methods.;
+            )
+          );
       }
+      
+    }
       //return null;//never gets here
   }
 }
