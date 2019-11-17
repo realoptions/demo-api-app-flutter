@@ -17,12 +17,12 @@ class MyAppBar extends StatefulWidget with PreferredSizeWidget{
   @override
   _MyAppBar createState() => _MyAppBar();
   @override
-  Size get preferredSize => Size.fromHeight(100); //how to make this dynamic??
+  Size get preferredSize => Size.fromHeight(kToolbarHeight);
 }
 
 class _MyAppBar extends State<MyAppBar> {
   
-  String _apiKey="";
+  String _apiKey=""; 
 
   void _onTextFieldChange(String text){
     setState((){
@@ -36,13 +36,6 @@ class _MyAppBar extends State<MyAppBar> {
       // Here we take the value from the MyHomePage object that was created by
       // the App.build method, and use it to set our appbar title.
       title: Text(widget.title+": "+widget.selectedModel),
-      bottom: TabBar(
-        tabs: [
-          Tab(icon: Icon(Icons.directions_car)),
-          Tab(icon: Icon(Icons.directions_transit)),
-          Tab(icon: Icon(Icons.directions_bike)),
-        ],
-      ),
       actions: <Widget>[
         IconButton(
           icon: Icon(Icons.lock),
@@ -71,9 +64,10 @@ class _MyAppBar extends State<MyAppBar> {
                       }),
                   new FlatButton(
                       child: const Text('SAVE'),
-                      onPressed: () async {
-                        await widget.onApiKeyChange(_apiKey);
+                      onPressed: () {
                         Navigator.pop(context);
+                        widget.onApiKeyChange(_apiKey);
+                        
                       })
                 ],
               );

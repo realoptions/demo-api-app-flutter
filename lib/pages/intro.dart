@@ -38,9 +38,8 @@ class _Introduction extends State<Introduction> {
 
             new RaisedButton(
               child: const Text('SAVE'),
-              onPressed: () async {
-                await widget.onApiKeyChange(_apiKey);
-                Navigator.pop(context);
+              onPressed: () {
+                widget.onApiKeyChange(_apiKey);
               })
           ]
         )

@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:demo_api_app_flutter/storage/api_key.dart';
 import 'package:demo_api_app_flutter/app_bar.dart';
 import 'package:demo_api_app_flutter/pages/intro.dart';
+import 'package:demo_api_app_flutter/pages/form.dart';
+import 'package:demo_api_app_flutter/storage/convert_constraint.dart';
+
+import 'dart:async';
 
 void main() => runApp(MyApp());
-
+enum HomeViewState { Busy, DataRetrieved, NoData }
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -53,49 +57,73 @@ const List<String> choices = const <String>[
   "Merton"
 ];
 
+
+
 class _MyHomePageState extends State<MyHomePage> {
-  
+  final StreamController<HomeViewState> stateController = StreamController<HomeViewState>();
   String _selectedModel=choices[0];
   String _key="";
-  bool _isLoading=true;
+  int _index=0;
   void _select(String choice) {
     setState((){
       _selectedModel=choice;
     });
   }
-  void _setLoading(bool isLoading){
+  void _setPage(int index){
     setState((){
-      _isLoading=isLoading;
+      _index=index;
     });
   }
-
-  _getKey(){
-    _setLoading(true);
-    retrieveKey().then((apiKey){
-      if(apiKey.length>0){
-        print(apiKey.first.key);
-        setState((){
-          _key=apiKey.first.key;
-        });
+  _getKey(bool hasError){
+    stateController.add(HomeViewState.Busy);
+    if (hasError) {
+      return stateController.addError(
+          'An error occurred while fetching the data. Please try again later.');
+    }
+    retrieveKey().then((apiKeyList){
+      if(apiKeyList.length>0 && apiKeyList.first.key!=""){
+        print(apiKeyList.first.key);
+        _key=apiKeyList.first.key;
+        stateController.add(HomeViewState.DataRetrieved);
       }
-      _setLoading(false);
-      
+      else{
+        stateController.add(HomeViewState.NoData);
+      }      
     });    
   }
 
   _setKey(String apiKey){
-    setState((){
-      _key=apiKey;
+    _key=apiKey;
+    if(_key==""){
+      stateController.add(HomeViewState.NoData);
+    }
+    else{
+      stateController.add(HomeViewState.DataRetrieved);
+    }
+    return insertKey(ApiKey(id: 1, key: apiKey)).catchError((err){
+      return stateController.addError(
+          'An error occurred while fetching the data. Please try again later.');
     });
-    insertKey(ApiKey(id: 1, key: apiKey));
-    
   }
   @override
   void initState() {
-    _getKey();
+    _getKey(false);
     super.initState();
   }
-  
+  List<Widget> pages = <Widget>[
+    SpecToForm(
+      constraints:InputConstraints.fromJson(
+        {"somename":{"upper":3, "lower":2, "types":"float"}}
+      )
+    ), //have to request inputs via API, so wrap this in a future component
+    Text(
+      'Index 1: Business',
+      
+    ),
+    Text(
+      'Index 2: School',
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -106,42 +134,48 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    if(_isLoading){
-      return CircularProgressIndicator(value:null);
-    }
-    else{
-      if(_key==""){
+    return StreamBuilder(
+      stream: stateController.stream,
+      builder: (buildContext, snapshot) {
+
+        if(snapshot.hasError) {
+          Scaffold.of(context).showSnackBar(SnackBar(content: Text(snapshot.error)));
           return Introduction(onApiKeyChange: _setKey,);
+        }
+
+        // Use busy indicator if there's no state yet, and when it's busy
+        if (!snapshot.hasData || snapshot.data ==HomeViewState.Busy) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        // use explicit state instead of checking the lenght
+        if(snapshot.data ==HomeViewState.NoData) {
+          return Introduction(onApiKeyChange: _setKey,);
+        }
+
+        return Scaffold(
+          appBar: MyAppBar(
+            title: widget.title,
+            onApiKeyChange: _setKey,
+            selectedModel: _selectedModel,
+            onSelection: _select,
+            choices: choices
+          ),
+          body: pages[_index],
+          bottomNavigationBar: BottomNavigationBar(
+            items:const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(icon: Icon(Icons.input), title:Text("Entry")),
+              BottomNavigationBarItem(icon: Icon(Icons.show_chart), title:Text("Density")),
+              BottomNavigationBarItem(icon: Icon(Icons.scatter_plot), title:Text("Prices")),
+            ],
+            currentIndex: _index,
+            //selectedItemColor: Colors.amber[800],
+            onTap: _setPage,
+
+          )
+        );
       }
-      else {
-          return DefaultTabController(
-            length:3, 
-            child: Scaffold(
-              appBar: MyAppBar(
-                title: widget.title,
-                onApiKeyChange: _setKey,
-                selectedModel: _selectedModel,
-                onSelection: _select,
-                choices: choices
-              ),
-              body: TabBarView(
-                children:[
-                  Text("Hello world"),
-                  Icon(Icons.directions_transit),
-                  Icon(Icons.directions_bike),
-                ]
-              
-              ),
-              floatingActionButton: FloatingActionButton(
-                  onPressed: (){},//_incrementCounter,
-                  tooltip: 'Increment',
-                  child: Icon(Icons.add),
-              ), // This trailing comma makes auto-formatting nicer for build methods.;
-            )
-          );
-      }
-      
-    }
+    );
       //return null;//never gets here
   }
 }
