@@ -58,7 +58,6 @@ class _MyHomePageState extends State<MyHomePage> {
   String _selectedModel=choices[0];
   String _key="";
   bool _isLoading=true;
-  bool _isFirstLoad=true; //there has to be a better way than this...
   void _select(String choice) {
     setState((){
       _selectedModel=choice;
@@ -91,6 +90,11 @@ class _MyHomePageState extends State<MyHomePage> {
     insertKey(ApiKey(id: 1, key: apiKey));
     
   }
+  @override
+  void initState() {
+    _getKey();
+    super.initState();
+  }
   
 
   @override
@@ -102,21 +106,14 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    if(_isFirstLoad){
-      print("got to first load");
-      _getKey();
-      setState((){
-        _isFirstLoad=false;
-      });
-    }
     if(_isLoading){
       return CircularProgressIndicator(value:null);
     }
     else{
-      switch(_key){
-        case "":
+      if(_key==""){
           return Introduction(onApiKeyChange: _setKey,);
-        default:
+      }
+      else {
           return DefaultTabController(
             length:3, 
             child: Scaffold(
