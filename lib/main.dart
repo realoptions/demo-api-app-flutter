@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:demo_api_app_flutter/storage/api_key.dart';
+import 'package:demo_api_app_flutter/services/api_key.dart';
 import 'package:demo_api_app_flutter/app_bar.dart';
 import 'package:demo_api_app_flutter/pages/intro.dart';
 import 'package:demo_api_app_flutter/pages/form.dart';
-import 'package:demo_api_app_flutter/storage/convert_constraint.dart';
-
 import 'dart:async';
 
 void main() => runApp(MyApp());
@@ -110,23 +108,21 @@ class _MyHomePageState extends State<MyHomePage> {
     _getKey(false);
     super.initState();
   }
-  List<Widget> pages = <Widget>[
-    SpecToForm(
-      constraints:InputConstraints.fromJson(
-        {"somename":{"upper":3, "lower":2, "types":"float"}}
-      )
-    ), //have to request inputs via API, so wrap this in a future component
-    Text(
-      'Index 1: Business',
-      
-    ),
-    Text(
-      'Index 2: School',
-    ),
-  ];
+  
 
   @override
   Widget build(BuildContext context) {
+    print(_key);
+    List<Widget> pages = <Widget>[
+      InputForm(model:_selectedModel, apiKey: _key,),
+      Text(
+        'Index 1: Business',
+        
+      ),
+      Text(
+        'Index 2: School',
+      ),
+    ];
     //_getKey();
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.

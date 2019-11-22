@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:demo_api_app_flutter/components/CustomPadding.dart';
 import 'package:demo_api_app_flutter/components/CustomTextFields.dart';
-import 'package:demo_api_app_flutter/storage/convert_constraint.dart';
+import 'package:demo_api_app_flutter/services/data_models.dart';
+import 'package:demo_api_app_flutter/services/api_consume.dart';
 
 Widget getField(InputConstraint constraint){
   switch(constraint.types){
@@ -16,6 +17,40 @@ Widget getField(InputConstraint constraint){
       break;
   }
 }
+
+class InputForm extends StatelessWidget {
+  const InputForm({
+    Key key,
+    this.model,
+    this.apiKey
+  }) : super(key: key);
+  final String model;
+  final String apiKey;
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<InputConstraints>(
+      future: fetchConstraints(this.model, this.apiKey),
+      builder: (BuildContext context, AsyncSnapshot<InputConstraints> snapshot){
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+          case ConnectionState.active:
+          case ConnectionState.waiting:
+            return Center(child: CircularProgressIndicator());
+          case ConnectionState.done:
+            if (snapshot.hasError)
+              return Text('Error: ${snapshot.error}');
+            return SpecToForm(
+              constraints:snapshot.data
+            );
+          default:
+            return Center(child: CircularProgressIndicator()); 
+        }
+
+      }
+    );
+  }
+}
+
 
 class SpecToForm extends StatefulWidget {
   SpecToForm({
@@ -36,12 +71,9 @@ class SpecToFormState extends State<SpecToForm> {
   // Note: This is a `GlobalKey<FormState>`,
   // not a GlobalKey<MyCustomFormState>.
   final _formKey = GlobalKey<FormState>();
-  
 
   @override
   Widget build(BuildContext context) {
-    //List<Widget> formFields=widget.constraints.inputConstraints.map(getField).toList();
-    // Build a Form widget using the _formKey created above.
     List<Widget> formFields=widget.constraints.inputConstraints.map(getField).toList();
     formFields.add(
       FlatButton(

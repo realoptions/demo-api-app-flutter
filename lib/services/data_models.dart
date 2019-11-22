@@ -35,3 +35,12 @@ class InputConstraints{
   }
 }
 
+class ErrorMessage{
+  String message;
+  ErrorMessage({
+    this.message
+  });
+  factory ErrorMessage.fromJson(Map<String, dynamic> parsedJson){
+    return ErrorMessage(message:parsedJson['message']);
+  }
+}
