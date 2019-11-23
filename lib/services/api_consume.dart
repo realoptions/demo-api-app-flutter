@@ -1,8 +1,12 @@
 import 'dart:convert';
+import 'package:path/path.dart' as p;
 import 'package:demo_api_app_flutter/services/data_models.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-const String BASE_ENDPOINT="https://api.finside.org/realoptions/v1";
+
+const String API_VERSION="v1";
+const String BASE_ENDPOINT=kReleaseMode?"https://api.finside.org/realoptions":"http://10.0.2.2:8000";
 
 Map<String, String> getHeaders(String apikey){
   return {
@@ -12,10 +16,20 @@ Map<String, String> getHeaders(String apikey){
   };
 }
 
+String constructUrl(String base, String version, String model, String endpoint){
+  return p.join(base, version, adjustModelForUrl(model), endpoint);
+}
+
+String adjustModelForUrl(String model){
+  return model.toLowerCase();
+}
+
 Future<InputConstraints> fetchConstraints(String model, String apiKey)  {
   print(model);
+  print(BASE_ENDPOINT);
+  print(constructUrl(BASE_ENDPOINT, API_VERSION, model, "parameters/parameter_ranges"));
   return http.get(
-    BASE_ENDPOINT+"/"+model.toLowerCase()+"/parameters/parameter_ranges", 
+    constructUrl(BASE_ENDPOINT, API_VERSION, model, "parameters/parameter_ranges"), 
     headers:getHeaders(apiKey)
   ).then((response){
     //print(json.decode(response.body));
