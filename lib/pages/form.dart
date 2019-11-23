@@ -7,10 +7,20 @@ import 'package:demo_api_app_flutter/services/api_consume.dart';
 Widget getField(InputConstraint constraint){
   switch(constraint.types){
     case FieldType.Integer:
-      return PaddingForm(child:IntegerTextField(labelText: constraint.name));
+      return PaddingForm(
+        child:IntegerTextField(
+          labelText: constraint.name, 
+          defaultValue: constraint.defaultValue.toString(),
+        )
+      );
       break;
     case FieldType.Float:
-      return PaddingForm(child:FloatTextField(labelText: constraint.name));
+      return PaddingForm(
+        child:FloatTextField(
+          labelText: constraint.name, 
+          defaultValue: constraint.defaultValue.toString(),
+        )
+      );
       break;
     default:
       return Text("something went wrong");//should never get here
@@ -76,26 +86,31 @@ class SpecToFormState extends State<SpecToForm> {
   Widget build(BuildContext context) {
     List<Widget> formFields=widget.constraints.inputConstraints.map(getField).toList();
     formFields.add(
-      FlatButton(
-        onPressed: () {
-          // Validate returns true if the form is valid, or false
-          // otherwise.
-          print(_formKey.currentState.toString());
-          if (_formKey.currentState.validate()) {
-            // If the form is valid, display a Snackbar.
-            Scaffold.of(context)
-                .showSnackBar(SnackBar(content: Text('Processing Data')));
-                _formKey.currentState.save();
-          }
-        },
-        child: Text('Submit'),
-    ));
-    return Form(
-      autovalidate: true,
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: formFields
+      PaddingForm(
+        child: RaisedButton(
+          onPressed: () {
+            // Validate returns true if the form is valid, or false
+            // otherwise.
+            print(_formKey.currentState.toString());
+            if (_formKey.currentState.validate()) {
+              // If the form is valid, display a Snackbar.
+              Scaffold.of(context)
+                  .showSnackBar(SnackBar(content: Text('Processing Data')));
+                  _formKey.currentState.save();
+            }
+          },
+          child: Text('Submit'),
+        )
+      )
+    );
+    return SingleChildScrollView(
+      child:Form(
+        autovalidate: true,
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: formFields
+        )
       )
     );
   }

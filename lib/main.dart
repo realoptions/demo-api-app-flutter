@@ -24,6 +24,10 @@ class MyApp extends StatelessWidget {
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
         primarySwatch: Colors.teal,
+        accentColor: Colors.orange,
+        buttonTheme: ButtonThemeData(
+           buttonColor: Colors.orange,
+        )
       ),
       home: MyHomePage(title: 'Options'),
     );

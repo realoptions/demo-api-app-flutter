@@ -3,6 +3,7 @@ enum FieldType{Float, Integer}
 class InputConstraint{
   final num lower;
   final num upper;
+  final num defaultValue;
   final FieldType types;
   final String name;
 
@@ -10,7 +11,8 @@ class InputConstraint{
     this.lower,
     this.upper,
     this.types,
-    this.name
+    this.name,
+    this.defaultValue
   });  
 }
 
@@ -22,12 +24,16 @@ class InputConstraints{
   factory InputConstraints.fromJson(Map<String, Map<String, dynamic> > parsedJson){
     List<InputConstraint> inputConstraints=[];
     parsedJson.forEach((key, value){
+      num lower=value['lower'];
+      num upper=value['upper'];
+      num defaultValue=(lower+upper)/2.0;
       inputConstraints.add(
         InputConstraint(
           name:key, 
           lower: value['lower'], 
           upper:value['upper'],
-          types: value['types']=='float'?FieldType.Float:FieldType.Integer
+          types: value['types']=='float'?FieldType.Float:FieldType.Integer,
+          defaultValue:defaultValue
         )
       );
     });

@@ -7,12 +7,15 @@ class IntegerTextField extends StatelessWidget{
     Key key,
     this.hintText,
     this.labelText,
+    this.defaultValue
   }) : super(key: key);
   final String hintText;
   final String labelText;
+  final String defaultValue;
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      initialValue: this.defaultValue,
       decoration: InputDecoration(
         hintText: this.hintText,
         labelText: this.labelText,
@@ -39,12 +42,15 @@ class FloatTextField extends StatelessWidget{
     Key key,
     this.hintText,
     this.labelText,
+    this.defaultValue,
   }) : super(key: key);
   final String hintText;
   final String labelText;
+  final String defaultValue;
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      initialValue: this.defaultValue,
       decoration: InputDecoration(
         hintText: this.hintText,
         labelText: this.labelText,
