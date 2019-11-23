@@ -10,15 +10,18 @@ const Map<String, String> defaultValueMap={
   "maturity":"1.0",
 };
 
-Widget getField(InputConstraint constraint){
-  String defaultValue=defaultValueMap[constraint.name]!=null?defaultValueMap[constraint.name]:constraint.defaultValue.toString();
-  return PaddingForm(
-    child:NumberTextField(
-      labelText: constraint.name, 
-      defaultValue: defaultValue,
-      type: constraint.types
-    )
-  );
+Function getField(Function onSubmit){
+  return (InputConstraint constraint){
+    String defaultValue=defaultValueMap[constraint.name]!=null?defaultValueMap[constraint.name]:constraint.defaultValue.toString();
+    return PaddingForm(
+      child:NumberTextField(
+        labelText: constraint.name, 
+        defaultValue: defaultValue,
+        type: constraint.types,
+        onSubmit: onSubmit,
+      )
+    );
+  };
 }
 
 
@@ -76,10 +79,20 @@ class SpecToFormState extends State<SpecToForm> {
   // Note: This is a `GlobalKey<FormState>`,
   // not a GlobalKey<MyCustomFormState>.
   final _formKey = GlobalKey<FormState>();
+  Map<String, num>_mapOfValues={};
+
+  onSubmit(String name, num value){
+    setState((){
+      _mapOfValues[name]=value;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> formFields=widget.constraints.inputConstraints.map(getField).toList();
+    //wow this works!
+    //TODO! hoist this up to main app
+    print(_mapOfValues);
+    List<Widget> formFields=widget.constraints.inputConstraints.map<Widget>(getField(onSubmit)).toList();
     formFields.add(
       PaddingForm(
         child: RaisedButton(
