@@ -4,29 +4,24 @@ import 'package:demo_api_app_flutter/components/CustomTextFields.dart';
 import 'package:demo_api_app_flutter/services/data_models.dart';
 import 'package:demo_api_app_flutter/services/api_consume.dart';
 
+const Map<String, String> defaultValueMap={
+  "num_u":"8",
+  "asset":"50.0",
+  "maturity":"1.0",
+};
+
 Widget getField(InputConstraint constraint){
-  switch(constraint.types){
-    case FieldType.Integer:
-      return PaddingForm(
-        child:IntegerTextField(
-          labelText: constraint.name, 
-          defaultValue: constraint.defaultValue.toString(),
-        )
-      );
-      break;
-    case FieldType.Float:
-      return PaddingForm(
-        child:FloatTextField(
-          labelText: constraint.name, 
-          defaultValue: constraint.defaultValue.toString(),
-        )
-      );
-      break;
-    default:
-      return Text("something went wrong");//should never get here
-      break;
-  }
+  String defaultValue=defaultValueMap[constraint.name]!=null?defaultValueMap[constraint.name]:constraint.defaultValue.toString();
+  return PaddingForm(
+    child:NumberTextField(
+      labelText: constraint.name, 
+      defaultValue: defaultValue,
+      type: constraint.types
+    )
+  );
 }
+
+
 
 class InputForm extends StatelessWidget {
   const InputForm({
@@ -93,6 +88,7 @@ class SpecToFormState extends State<SpecToForm> {
             // otherwise.
             print(_formKey.currentState.toString());
             if (_formKey.currentState.validate()) {
+              _formKey.currentState.save();//what does this do???
               // If the form is valid, display a Snackbar.
               Scaffold.of(context)
                   .showSnackBar(SnackBar(content: Text('Processing Data')));

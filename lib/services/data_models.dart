@@ -1,4 +1,4 @@
-enum FieldType{Float, Integer}
+import 'package:demo_api_app_flutter/components/CustomTextFields.dart';
 
 class InputConstraint{
   final num lower;
@@ -21,12 +21,14 @@ class InputConstraints{
   InputConstraints({
     this.inputConstraints
   });
+
   factory InputConstraints.fromJson(Map<String, Map<String, dynamic> > parsedJson){
     List<InputConstraint> inputConstraints=[];
     parsedJson.forEach((key, value){
       num lower=value['lower'];
       num upper=value['upper'];
       num defaultValue=(lower+upper)/2.0;
+      print(value['types']);
       inputConstraints.add(
         InputConstraint(
           name:key, 

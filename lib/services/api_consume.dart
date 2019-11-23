@@ -24,24 +24,27 @@ String adjustModelForUrl(String model){
   return model.toLowerCase();
 }
 
+Map<String, Map<String, dynamic> > parseResult(http.Response response){
+  if(response.statusCode==200){
+    return new Map<String, Map<String, dynamic> >.from(json.decode(response.body));
+  }
+  else{
+    throw Exception(ErrorMessage.fromJson(json.decode(response.body)).message);
+  }
+}
+
 Future<InputConstraints> fetchConstraints(String model, String apiKey)  {
-  print(model);
-  print(BASE_ENDPOINT);
-  print(constructUrl(BASE_ENDPOINT, API_VERSION, model, "parameters/parameter_ranges"));
-  return http.get(
-    constructUrl(BASE_ENDPOINT, API_VERSION, model, "parameters/parameter_ranges"), 
-    headers:getHeaders(apiKey)
-  ).then((response){
-    //print(json.decode(response.body));
-    print(response.statusCode);
-    Map<String, Map<String, dynamic> > jsonMap=new Map<String, Map<String, dynamic> >.from(json.decode(response.body));
-    print(jsonMap);
-    if(response.statusCode==200){
-      return InputConstraints.fromJson(jsonMap);
-    }
-    else{
-      throw Exception(ErrorMessage.fromJson(json.decode(response.body)).message);
-    }
-    
+  return Future.wait([
+     http.get(
+      constructUrl(BASE_ENDPOINT, API_VERSION, "market", "parameters/parameter_ranges"), 
+      headers:getHeaders(apiKey)
+    ).then(parseResult),
+    http.get(
+      constructUrl(BASE_ENDPOINT, API_VERSION, model, "parameters/parameter_ranges"), 
+      headers:getHeaders(apiKey)
+    ).then(parseResult),
+  ]).then((results){
+    return InputConstraints.fromJson(results.reduce( (map1, map2) => map1..addAll(map2) ));
   });
+
 }
