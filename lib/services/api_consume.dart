@@ -13,14 +13,17 @@ Map<String, String> getHeaders(String apikey){
 }
 
 Future<InputConstraints> fetchConstraints(String model, String apiKey)  {
+  print(model);
   return http.get(
-    BASE_ENDPOINT+"/"+model+"/parameters/parameter_ranges", 
+    BASE_ENDPOINT+"/"+model.toLowerCase()+"/parameters/parameter_ranges", 
     headers:getHeaders(apiKey)
   ).then((response){
-    print(response.body);
+    //print(json.decode(response.body));
     print(response.statusCode);
+    Map<String, Map<String, dynamic> > jsonMap=new Map<String, Map<String, dynamic> >.from(json.decode(response.body));
+    print(jsonMap);
     if(response.statusCode==200){
-      return InputConstraints.fromJson(json.decode(response.body));
+      return InputConstraints.fromJson(jsonMap);
     }
     else{
       throw Exception(ErrorMessage.fromJson(json.decode(response.body)).message);
