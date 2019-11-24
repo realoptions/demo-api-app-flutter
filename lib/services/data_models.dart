@@ -93,7 +93,7 @@ class ModelResult{
   factory ModelResult.fromJson(Map<String, dynamic> parsedJson){
     return ModelResult(
       value: parsedJson['value'],
-      atPoint: parsedJson['atPoint'],
+      atPoint: parsedJson['at_point'],
       iv: parsedJson['iv'],
     );
   }

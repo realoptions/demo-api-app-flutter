@@ -5,6 +5,7 @@ import 'package:demo_api_app_flutter/pages/intro.dart' as intro;
 import 'package:demo_api_app_flutter/pages/form.dart' as form;
 import 'package:demo_api_app_flutter/services/data_models.dart' as data_models;
 import 'dart:async';
+import 'package:demo_api_app_flutter/pages/options.dart' as options;
 
 void main() => runApp(MyApp());
 enum HomeViewState { Busy, DataRetrieved, NoData }
@@ -127,17 +128,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    print(_key);
-    print(_callPrices.results);
     List<Widget> pages = <Widget>[
       form.InputForm(model:_selectedModel, apiKey: _key, onSubmit: _setData),
       Text(
         'Index 1: Business',
         
       ),
-      Text(
-        'Index 2: School',
-      ),
+      options.ShowOptionPrices(
+        callOption: _callPrices,
+        putOption: _putPrices,
+      )
     ];
 
     return StreamBuilder(

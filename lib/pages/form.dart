@@ -61,7 +61,8 @@ class InputForm extends StatelessWidget {
             return SpecToForm(
               constraints:snapshot.data,
               model:this.model,
-              onSubmit:this.onSubmit
+              onSubmit:this.onSubmit,
+              apiKey:this.apiKey
             );
           default:
             return Center(child: CircularProgressIndicator()); 
@@ -77,11 +78,13 @@ class SpecToForm extends StatefulWidget {
   SpecToForm({
     @required this.constraints,
     @required this.model,
-    @required this.onSubmit
+    @required this.onSubmit,
+    @required this.apiKey
   });
   final InputConstraints constraints;
   final String model;
   final Function onSubmit;
+  final String apiKey;
   @override
   SpecToFormState createState()=>SpecToFormState();
 }
@@ -117,15 +120,11 @@ class SpecToFormState extends State<SpecToForm> {
           onPressed: () {
             // Validate returns true if the form is valid, or false
             // otherwise.
-            print(_formKey.currentState.toString());
             if (_formKey.currentState.validate()) {
               _formKey.currentState.save();//this calls "onSubmit", which may not be that useful
               // If the form is valid, display a Snackbar.
-              print(_mapOfValues);
-              fetchOptionPricesAndDensity(widget.model, "key", _mapOfValues).then(widget.onSubmit);
-              /*Scaffold.of(context)
-                  .showSnackBar(SnackBar(content: Text('Processing Data')));
-                  _formKey.currentState.save();*/
+
+              fetchOptionPricesAndDensity(widget.model, widget.apiKey, _mapOfValues).then(widget.onSubmit);
             }
           },
           child: Text('Submit'),
