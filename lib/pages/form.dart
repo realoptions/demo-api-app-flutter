@@ -10,6 +10,15 @@ const Map<String, String> defaultValueMap={
   "maturity":"1.0",
 };
 
+class SubmitItems{
+  final num value;
+  final InputType inputType;
+  const SubmitItems({
+    this.value,
+    this.inputType
+  });
+}
+
 Function getField(Function onSubmit){
   return (InputConstraint constraint){
     String defaultValue=defaultValueMap[constraint.name]!=null?defaultValueMap[constraint.name]:constraint.defaultValue.toString();
@@ -18,7 +27,7 @@ Function getField(Function onSubmit){
         labelText: constraint.name, 
         defaultValue: defaultValue,
         type: constraint.types,
-        onSubmit: onSubmit,
+        onSubmit: onSubmit(constraint.inputType),
       )
     );
   };
@@ -79,19 +88,23 @@ class SpecToFormState extends State<SpecToForm> {
   // Note: This is a `GlobalKey<FormState>`,
   // not a GlobalKey<MyCustomFormState>.
   final _formKey = GlobalKey<FormState>();
-  Map<String, num>_mapOfValues={};
+  Map<String, SubmitItems>_mapOfValues={};
 
-  onSubmit(String name, num value){
-    setState((){
-      _mapOfValues[name]=value;
-    });
+  onSubmit(inputType){
+    return (String name, num value){
+      _mapOfValues[name]=SubmitItems(
+        inputType:inputType, 
+        value:value
+      );
+    };//);
+   // };
   }
 
   @override
   Widget build(BuildContext context) {
     //wow this works!
     //TODO! hoist this up to main app
-    print(_mapOfValues);
+    //print(_mapOfValues);
     List<Widget> formFields=widget.constraints.inputConstraints.map<Widget>(getField(onSubmit)).toList();
     formFields.add(
       PaddingForm(
@@ -101,8 +114,12 @@ class SpecToFormState extends State<SpecToForm> {
             // otherwise.
             print(_formKey.currentState.toString());
             if (_formKey.currentState.validate()) {
-              _formKey.currentState.save();//what does this do???
+              _formKey.currentState.save();//this calls "onSubmit", which may not be that useful
               // If the form is valid, display a Snackbar.
+              print(_mapOfValues);
+              fetchModelCalculator("heston", "call", "price", "key", _mapOfValues).then((result){
+                print("finshed successfuly");
+              });
               Scaffold.of(context)
                   .showSnackBar(SnackBar(content: Text('Processing Data')));
                   _formKey.currentState.save();
