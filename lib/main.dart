@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:demo_api_app_flutter/services/api_key.dart';
-import 'package:demo_api_app_flutter/app_bar.dart';
-import 'package:demo_api_app_flutter/pages/intro.dart';
-import 'package:demo_api_app_flutter/pages/form.dart';
+import 'package:demo_api_app_flutter/services/api_key.dart' as auth;
+import 'package:demo_api_app_flutter/app_bar.dart' as app_bar;
+import 'package:demo_api_app_flutter/pages/intro.dart' as intro;
+import 'package:demo_api_app_flutter/pages/form.dart' as form;
+import 'package:demo_api_app_flutter/services/data_models.dart' as data_models;
 import 'dart:async';
 
 void main() => runApp(MyApp());
@@ -66,6 +67,9 @@ class _MyHomePageState extends State<MyHomePage> {
   String _selectedModel=choices[0];
   String _key="";
   int _index=0;
+  data_models.ModelResults _density;
+  data_models.ModelResults _callPrices;
+  data_models.ModelResults _putPrices;
   void _select(String choice) {
     setState((){
       _selectedModel=choice;
@@ -82,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
       return stateController.addError(
           'An error occurred while fetching the data. Please try again later.');
     }
-    retrieveKey().then((apiKeyList){
+    auth.retrieveKey().then((apiKeyList){
       if(apiKeyList.length>0 && apiKeyList.first.key!=""){
         print(apiKeyList.first.key);
         _key=apiKeyList.first.key;
@@ -93,6 +97,13 @@ class _MyHomePageState extends State<MyHomePage> {
       }      
     });    
   }
+  _setData(List<data_models.ModelResults> values){
+    setState(() {
+      _callPrices=values[0];
+      _putPrices=values[1];
+      _density=values[2];
+    });
+  }
 
   _setKey(String apiKey){
     _key=apiKey;
@@ -102,7 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
     else{
       stateController.add(HomeViewState.DataRetrieved);
     }
-    return insertKey(ApiKey(id: 1, key: apiKey)).catchError((err){
+    return auth.insertKey(auth.ApiKey(id: 1, key: apiKey)).catchError((err){
       return stateController.addError(
           'An error occurred while fetching the data. Please try again later.');
     });
@@ -117,8 +128,9 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     print(_key);
+    print(_callPrices.results);
     List<Widget> pages = <Widget>[
-      InputForm(model:_selectedModel, apiKey: _key,),
+      form.InputForm(model:_selectedModel, apiKey: _key, onSubmit: _setData),
       Text(
         'Index 1: Business',
         
@@ -127,20 +139,14 @@ class _MyHomePageState extends State<MyHomePage> {
         'Index 2: School',
       ),
     ];
-    //_getKey();
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+
     return StreamBuilder(
       stream: stateController.stream,
       builder: (buildContext, snapshot) {
 
         if(snapshot.hasError) {
           Scaffold.of(context).showSnackBar(SnackBar(content: Text(snapshot.error)));
-          return Introduction(onApiKeyChange: _setKey,);
+          return intro.Introduction(onApiKeyChange: _setKey,);
         }
 
         // Use busy indicator if there's no state yet, and when it's busy
@@ -150,11 +156,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
         // use explicit state instead of checking the lenght
         if(snapshot.data ==HomeViewState.NoData) {
-          return Introduction(onApiKeyChange: _setKey,);
+          return intro.Introduction(onApiKeyChange: _setKey,);
         }
 
         return Scaffold(
-          appBar: MyAppBar(
+          appBar: app_bar.MyAppBar(
             title: widget.title,
             onApiKeyChange: _setKey,
             selectedModel: _selectedModel,
@@ -169,13 +175,11 @@ class _MyHomePageState extends State<MyHomePage> {
               BottomNavigationBarItem(icon: Icon(Icons.scatter_plot), title:Text("Prices")),
             ],
             currentIndex: _index,
-            //selectedItemColor: Colors.amber[800],
             onTap: _setPage,
 
           )
         );
       }
     );
-      //return null;//never gets here
   }
 }

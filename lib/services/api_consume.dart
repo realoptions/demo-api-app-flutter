@@ -67,7 +67,7 @@ ModelResults parseResult(http.Response response){
   }
 }
 
-Map convertSubmission(Map<String, SubmitItems> submittedJson){
+Map convertSubmission(Map<String, SubmitItems> submittedJson, Function generateStrikes){
   Map<String, dynamic> convertedMap={};
   submittedJson.forEach((key, value){
     switch(value.inputType){
@@ -82,6 +82,9 @@ Map convertSubmission(Map<String, SubmitItems> submittedJson){
         break;
     }
   });
+  convertedMap["strikes"]=generateStrikes(
+    convertedMap["asset"], NUM_STRIKES, PERCENT_RANGE
+  );
   return convertedMap;
 }
 
@@ -89,12 +92,32 @@ Future<ModelResults> fetchModelCalculator(
   String model, 
   String optionType, 
   String sensitivity, 
+  bool includeIV,
   String apiKey, 
   Map<String, SubmitItems>  body
 ){
   return http.post(
-    constructUrl(BASE_ENDPOINT, API_VERSION, model, p.join("calculator", optionType, sensitivity)),
+    constructUrl(BASE_ENDPOINT, API_VERSION, model, p.join("calculator", optionType, sensitivity))+"?includeImpliedVolatility=$includeIV",
     headers:getHeaders(apiKey),
-    body:jsonEncode(convertSubmission(body)),
+    body:jsonEncode(convertSubmission(body, generateStrikes)),
   ).then(parseResult);
+}
+Future<ModelResults> fetchModelDensity(
+  String model, 
+  String apiKey, 
+  Map<String, SubmitItems>  body
+){
+  return http.post(
+    constructUrl(BASE_ENDPOINT, API_VERSION, model, "density"),
+    headers:getHeaders(apiKey),
+    body:jsonEncode(convertSubmission(body, generateStrikes)),
+  ).then(parseResult);
+}
+
+Future<List<ModelResults>> fetchOptionPricesAndDensity(String model, String apiKey, Map<String, SubmitItems> body){
+  return Future.wait([
+    fetchModelCalculator(model, "call", "price", true, apiKey, body),
+    fetchModelCalculator(model, "put", "price", false, apiKey, body),
+    fetchModelDensity(model, apiKey, body),
+  ]);
 }

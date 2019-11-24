@@ -19,6 +19,19 @@ class InputConstraint{
   });  
 }
 
+const NUM_STRIKES = 10;
+const PERCENT_RANGE = 0.5;
+List<double> generateStrikes(double asset, int numStrikes, double percentRange){
+  List<double> strikes=[];
+  double minStrike=percentRange*asset;
+  double maxStrike=(1.0+percentRange)*asset;
+  double dx=(maxStrike-minStrike)/(numStrikes-1.0);
+  for(int i=0; i<numStrikes;++i){
+    strikes.add(minStrike+i*dx);
+  }
+  return strikes;
+}
+
 class InputConstraints{
   List<InputConstraint> inputConstraints;
   InputConstraints({

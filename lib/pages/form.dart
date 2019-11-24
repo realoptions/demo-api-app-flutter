@@ -39,10 +39,12 @@ class InputForm extends StatelessWidget {
   const InputForm({
     Key key,
     this.model,
-    this.apiKey
+    this.apiKey,
+    this.onSubmit,
   }) : super(key: key);
   final String model;
   final String apiKey;
+  final Function onSubmit;
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<InputConstraints>(
@@ -57,7 +59,9 @@ class InputForm extends StatelessWidget {
             if (snapshot.hasError)
               return Text('Error: ${snapshot.error}');
             return SpecToForm(
-              constraints:snapshot.data
+              constraints:snapshot.data,
+              model:this.model,
+              onSubmit:this.onSubmit
             );
           default:
             return Center(child: CircularProgressIndicator()); 
@@ -71,9 +75,13 @@ class InputForm extends StatelessWidget {
 
 class SpecToForm extends StatefulWidget {
   SpecToForm({
-    @required this.constraints
+    @required this.constraints,
+    @required this.model,
+    @required this.onSubmit
   });
   final InputConstraints constraints;
+  final String model;
+  final Function onSubmit;
   @override
   SpecToFormState createState()=>SpecToFormState();
 }
@@ -90,7 +98,7 @@ class SpecToFormState extends State<SpecToForm> {
   final _formKey = GlobalKey<FormState>();
   Map<String, SubmitItems>_mapOfValues={};
 
-  onSubmit(inputType){
+  onSave(inputType){
     return (String name, num value){
       _mapOfValues[name]=SubmitItems(
         inputType:inputType, 
@@ -102,10 +110,7 @@ class SpecToFormState extends State<SpecToForm> {
 
   @override
   Widget build(BuildContext context) {
-    //wow this works!
-    //TODO! hoist this up to main app
-    //print(_mapOfValues);
-    List<Widget> formFields=widget.constraints.inputConstraints.map<Widget>(getField(onSubmit)).toList();
+    List<Widget> formFields=widget.constraints.inputConstraints.map<Widget>(getField(onSave)).toList();
     formFields.add(
       PaddingForm(
         child: RaisedButton(
@@ -117,12 +122,10 @@ class SpecToFormState extends State<SpecToForm> {
               _formKey.currentState.save();//this calls "onSubmit", which may not be that useful
               // If the form is valid, display a Snackbar.
               print(_mapOfValues);
-              fetchModelCalculator("heston", "call", "price", "key", _mapOfValues).then((result){
-                print("finshed successfuly");
-              });
-              Scaffold.of(context)
+              fetchOptionPricesAndDensity(widget.model, "key", _mapOfValues).then(widget.onSubmit);
+              /*Scaffold.of(context)
                   .showSnackBar(SnackBar(content: Text('Processing Data')));
-                  _formKey.currentState.save();
+                  _formKey.currentState.save();*/
             }
           },
           child: Text('Submit'),
