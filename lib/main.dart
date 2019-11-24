@@ -63,7 +63,8 @@ const List<String> choices = const <String>[
 ];
 
 
-
+//TODO!  Make the movement between inputs NOT require a reload of the form
+// ONLY make HTTP call if model type has changed.
 class _MyHomePageState extends State<MyHomePage> {
   final StreamController<HomeViewState> stateController = StreamController<HomeViewState>();
   String _selectedModel=choices[0];
