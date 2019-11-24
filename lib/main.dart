@@ -6,6 +6,7 @@ import 'package:demo_api_app_flutter/pages/form.dart' as form;
 import 'package:demo_api_app_flutter/services/data_models.dart' as data_models;
 import 'dart:async';
 import 'package:demo_api_app_flutter/pages/options.dart' as options;
+import 'package:demo_api_app_flutter/pages/density.dart' as density;
 
 void main() => runApp(MyApp());
 enum HomeViewState { Busy, DataRetrieved, NoData }
@@ -130,10 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     List<Widget> pages = <Widget>[
       form.InputForm(model:_selectedModel, apiKey: _key, onSubmit: _setData),
-      Text(
-        'Index 1: Business',
-        
-      ),
+      density.ShowDensity(density:_density),
       options.ShowOptionPrices(
         callOption: _callPrices,
         putOption: _putPrices,

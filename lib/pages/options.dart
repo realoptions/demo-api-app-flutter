@@ -2,15 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:demo_api_app_flutter/services/data_models.dart' as data_model;
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:demo_api_app_flutter/utils/chart_utils.dart' as utils;
 import 'package:demo_api_app_flutter/components/CustomPadding.dart' as padding;
-charts.Color convertColor(Color color){
-  return charts.Color(
-    r: color.red, g: color.green, b: color.blue, a: color.alpha
-  );
-}
-var blue=convertColor(Colors.blue);
-var orange=convertColor(Colors.orange);
 
+var blue=utils.convertColor(Colors.blue);
+var orange=utils.convertColor(Colors.orange);
 
 class ShowOptionPrices extends StatelessWidget {
   const ShowOptionPrices({

@@ -122,9 +122,11 @@ class SpecToFormState extends State<SpecToForm> {
             // otherwise.
             if (_formKey.currentState.validate()) {
               _formKey.currentState.save();//this calls "onSubmit", which may not be that useful
-              // If the form is valid, display a Snackbar.
-
-              fetchOptionPricesAndDensity(widget.model, widget.apiKey, _mapOfValues).then(widget.onSubmit);
+              fetchOptionPricesAndDensity(
+                widget.model, 
+                widget.apiKey, 
+                _mapOfValues
+              ).then(widget.onSubmit);
             }
           },
           child: Text('Submit'),
