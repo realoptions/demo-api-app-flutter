@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:demo_api_app_flutter/components/CustomPadding.dart';
 import 'package:demo_api_app_flutter/components/CustomTextFields.dart';
-import 'package:demo_api_app_flutter/services/data_models.dart';
+import 'package:demo_api_app_flutter/services/data_models.dart' as data_models;
 import 'package:demo_api_app_flutter/services/api_consume.dart';
 
+typedef SubmitType = void Function(Map<String, data_models.ModelResults> values);
+typedef FormSave = Function(String a, num b) Function(data_models.InputType inputType);
 const Map<String, String> defaultValueMap={
   "num_u":"8",
   "asset":"50.0",
@@ -12,7 +14,7 @@ const Map<String, String> defaultValueMap={
 
 class SubmitItems{
   final num value;
-  final InputType inputType;
+  final data_models.InputType inputType;
   const SubmitItems({
     this.value,
     this.inputType
@@ -29,7 +31,7 @@ String valueOtherwiseNull(String value, String defaultValue){
 String getDefaultFormValue(
   Map<String, String> defaultValueMap,
   Map<String, SubmitItems> formValues,
-  InputConstraint constraint,
+  data_models.InputConstraint constraint,
 ){
   //formValues take precedence
   SubmitItems formValue=formValues[constraint.name];
@@ -40,7 +42,7 @@ String getDefaultFormValue(
 }
 
 Function getField(Function onSubmit, Map<String, SubmitItems> formValues){
-  return (InputConstraint constraint){
+  return (data_models.InputConstraint constraint){
     String defaultValue=getDefaultFormValue(
       defaultValueMap, formValues, constraint
     );
@@ -69,10 +71,10 @@ class InputForm extends StatelessWidget {
   }) : super(key: key);
   final String model;
   final String apiKey;
-  final Function onSubmit;
+  final SubmitType onSubmit;
   final AsyncSnapshot snapshot;
   final Map<String, SubmitItems> formValues;
-  final Function onSave;
+  final FormSave onSave;
   @override
   Widget build(BuildContext context) {
     switch (snapshot.connectionState) {
@@ -97,29 +99,7 @@ class InputForm extends StatelessWidget {
   }
 }
 
-/*
-class SpecToForm extends StatefulWidget {
-  SpecToForm({
-    @required this.constraints,
-    @required this.model,
-    @required this.onSubmit,
-    @required this.apiKey,
-    @required this.onSave,
-    @required this.formValues
-  });
-  final InputConstraints constraints;
-  final String model;
-  final Function onSubmit;
-  final String apiKey;
-  final Function onSave;
-  final Map formValues;
-  @override
-  SpecToFormState createState()=>SpecToFormState();
-}*/
 
-
-// Define a corresponding State class.
-// This class holds data related to the form.
 class SpecToForm extends StatelessWidget {
   const SpecToForm({
     Key key,
@@ -130,11 +110,11 @@ class SpecToForm extends StatelessWidget {
     @required this.formValues,
     @required this.onSave,
   }) : super(key: key);
-  final InputConstraints constraints;
+  final data_models.InputConstraints constraints;
   final String model;
-  final Function onSubmit;
+  final SubmitType onSubmit;
   final String apiKey;
-  final Function onSave;
+  final FormSave onSave;
   final Map<String, SubmitItems> formValues;
   static final _formKey = GlobalKey<FormState>();
  

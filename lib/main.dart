@@ -135,7 +135,7 @@ class _HoldDataState extends State<HoldDataState>{
   data_models.ModelResults _callPrices;
   data_models.ModelResults _putPrices;
   Map<String, form.SubmitItems>_mapOfValues={};
-  _onFormSave(inputType){
+  Function(String a, num b) _onFormSave(data_models.InputType inputType){
     return (String name, num value){
       _mapOfValues[name]=form.SubmitItems(
         inputType:inputType, 
@@ -144,6 +144,7 @@ class _HoldDataState extends State<HoldDataState>{
     };
   }
   void _setData(Map<String, data_models.ModelResults> values){
+    print(values);
     setState(() {
       _callPrices=values["call"];
       _putPrices=values["put"];

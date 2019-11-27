@@ -56,7 +56,6 @@ Future<data_models.InputConstraints> fetchConstraints(String model, String apiKe
 
 data_models.ModelResults parseResult(http.Response response){
   if(response.statusCode==200){
-    print(response.body);
     return data_models.ModelResults.fromJson(
       List<Map<String, dynamic> >.from(json.decode(response.body))
     );
@@ -113,10 +112,16 @@ Future<data_models.ModelResults> fetchModelDensity(
   ).then(parseResult);
 }
 
-Future<List<data_models.ModelResults>> fetchOptionPricesAndDensity(String model, String apiKey, Map<String, SubmitItems> body){
+Future<Map<String, data_models.ModelResults>> fetchOptionPricesAndDensity(String model, String apiKey, Map<String, SubmitItems> body){
   return Future.wait([
     fetchModelCalculator(model, "call", "price", true, apiKey, body),
     fetchModelCalculator(model, "put", "price", false, apiKey, body),
     fetchModelDensity(model, apiKey, body),
-  ]);
+  ]).then((results){
+    return {
+      "call":results[0],
+      "put": results[1],
+      "density": results[2],
+    };
+  });
 }
