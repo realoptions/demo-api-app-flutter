@@ -190,7 +190,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _selectedModel=choice;
     });
   }
-  _getKey(bool hasError){
+  void _getKey(bool hasError){
     stateController.add(HomeViewState.Busy);
     if (hasError) {
       return stateController.addError(
@@ -207,7 +207,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }      
     });    
   }
-  _setKey(String apiKey){
+  Future<void> _setKey(String apiKey){
     _key=apiKey;
     if(_key==""){
       stateController.add(HomeViewState.NoData);

@@ -12,7 +12,6 @@ class ShowDensity extends StatelessWidget {
   const ShowDensity({
     Key key,
     this.density,
-    //this.,
   });
   final data_model.ModelResults density;
   @override
