@@ -97,7 +97,7 @@ class InputForm extends StatelessWidget {
   }
 }
 
-
+/*
 class SpecToForm extends StatefulWidget {
   SpecToForm({
     @required this.constraints,
@@ -115,34 +115,33 @@ class SpecToForm extends StatefulWidget {
   final Map formValues;
   @override
   SpecToFormState createState()=>SpecToFormState();
-}
+}*/
 
 
 // Define a corresponding State class.
 // This class holds data related to the form.
-class SpecToFormState extends State<SpecToForm> {
-  // Create a global key that uniquely identifies the Form widget
-  // and allows validation of the form.
-  //
-  // Note: This is a `GlobalKey<FormState>`,
-  // not a GlobalKey<MyCustomFormState>.
-  final _formKey = GlobalKey<FormState>();
-  //Map<String, SubmitItems>_mapOfValues={};
-
-  /*onSave(inputType){
-    return (String name, num value){
-      _mapOfValues[name]=SubmitItems(
-        inputType:inputType, 
-        value:value
-      );
-    };//);
-   // };
-  }*/
-
+class SpecToForm extends StatelessWidget {
+  const SpecToForm({
+    Key key,
+    @required this.constraints,
+    @required this.model,
+    @required this.apiKey,
+    @required this.onSubmit,
+    @required this.formValues,
+    @required this.onSave,
+  }) : super(key: key);
+  final InputConstraints constraints;
+  final String model;
+  final Function onSubmit;
+  final String apiKey;
+  final Function onSave;
+  final Map formValues;
+  static final _formKey = GlobalKey<FormState>();
+ 
   @override
   Widget build(BuildContext context) {
-    List<Widget> formFields=widget.constraints.inputConstraints.map<Widget>(
-      getField(widget.onSave, widget.formValues)
+    List<Widget> formFields=this.constraints.inputConstraints.map<Widget>(
+      getField(this.onSave, this.formValues)
     ).toList();
     formFields.add(
       PaddingForm(
@@ -153,10 +152,10 @@ class SpecToFormState extends State<SpecToForm> {
             if (_formKey.currentState.validate()) {
               _formKey.currentState.save();
               fetchOptionPricesAndDensity(
-                widget.model, 
-                widget.apiKey, 
-                widget.formValues
-              ).then(widget.onSubmit);
+                this.model, 
+                this.apiKey, 
+                this.formValues
+              ).then(this.onSubmit);
             }
           },
           child: Text('Submit'),
