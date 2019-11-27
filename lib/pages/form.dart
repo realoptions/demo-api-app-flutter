@@ -18,10 +18,32 @@ class SubmitItems{
     this.inputType
   });
 }
+String valueOtherwiseNull(String value, String defaultValue){
+  if(value==null){
+    return defaultValue;
+  }
+  else{
+    return value;
+  }
+}
+String getDefaultFormValue(
+  Map<String, String> defaultValueMap,
+  Map<String, SubmitItems> formValues,
+  InputConstraint constraint,
+){
+  //formValues take precedence
+  SubmitItems formValue=formValues[constraint.name];
+  if(formValue!=null){
+    return formValue.value.toString();
+  }
+  return valueOtherwiseNull(defaultValueMap[constraint.name], constraint.defaultValue.toString());
+}
 
-Function getField(Function onSubmit){
+Function getField(Function onSubmit, Map<String, SubmitItems> formValues){
   return (InputConstraint constraint){
-    String defaultValue=defaultValueMap[constraint.name]!=null?defaultValueMap[constraint.name]:constraint.defaultValue.toString();
+    String defaultValue=getDefaultFormValue(
+      defaultValueMap, formValues, constraint
+    );
     return PaddingForm(
       child:NumberTextField(
         labelText: constraint.name, 
@@ -38,38 +60,40 @@ Function getField(Function onSubmit){
 class InputForm extends StatelessWidget {
   const InputForm({
     Key key,
-    this.model,
-    this.apiKey,
-    this.onSubmit,
+    @required this.model,
+    @required this.apiKey,
+    @required this.onSubmit,
+    @required this.snapshot,
+    @required this.formValues,
+    @required this.onSave,
   }) : super(key: key);
   final String model;
   final String apiKey;
   final Function onSubmit;
+  final AsyncSnapshot snapshot;
+  final Map<String, SubmitItems> formValues;
+  final Function onSave;
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<InputConstraints>(
-      future: fetchConstraints(this.model, this.apiKey),
-      builder: (BuildContext context, AsyncSnapshot<InputConstraints> snapshot){
-        switch (snapshot.connectionState) {
-          case ConnectionState.none:
-          case ConnectionState.active:
-          case ConnectionState.waiting:
-            return Center(child: CircularProgressIndicator());
-          case ConnectionState.done:
-            if (snapshot.hasError)
-              return Text('Error: ${snapshot.error}');
-            return SpecToForm(
-              constraints:snapshot.data,
-              model:this.model,
-              onSubmit:this.onSubmit,
-              apiKey:this.apiKey
-            );
-          default:
-            return Center(child: CircularProgressIndicator()); 
-        }
-
-      }
-    );
+    switch (snapshot.connectionState) {
+      case ConnectionState.none:
+      case ConnectionState.active:
+      case ConnectionState.waiting:
+        return Center(child: CircularProgressIndicator());
+      case ConnectionState.done:
+        if (snapshot.hasError)
+          return Text('Error: ${snapshot.error}');
+        return SpecToForm(
+          constraints:snapshot.data,
+          model:this.model,
+          onSubmit:this.onSubmit,
+          apiKey:this.apiKey,
+          formValues: this.formValues,
+          onSave: this.onSave
+        );
+      default:
+        return Center(child: CircularProgressIndicator()); 
+    }
   }
 }
 
@@ -79,12 +103,16 @@ class SpecToForm extends StatefulWidget {
     @required this.constraints,
     @required this.model,
     @required this.onSubmit,
-    @required this.apiKey
+    @required this.apiKey,
+    @required this.onSave,
+    @required this.formValues
   });
   final InputConstraints constraints;
   final String model;
   final Function onSubmit;
   final String apiKey;
+  final Function onSave;
+  final Map formValues;
   @override
   SpecToFormState createState()=>SpecToFormState();
 }
@@ -99,9 +127,9 @@ class SpecToFormState extends State<SpecToForm> {
   // Note: This is a `GlobalKey<FormState>`,
   // not a GlobalKey<MyCustomFormState>.
   final _formKey = GlobalKey<FormState>();
-  Map<String, SubmitItems>_mapOfValues={};
+  //Map<String, SubmitItems>_mapOfValues={};
 
-  onSave(inputType){
+  /*onSave(inputType){
     return (String name, num value){
       _mapOfValues[name]=SubmitItems(
         inputType:inputType, 
@@ -109,11 +137,13 @@ class SpecToFormState extends State<SpecToForm> {
       );
     };//);
    // };
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> formFields=widget.constraints.inputConstraints.map<Widget>(getField(onSave)).toList();
+    List<Widget> formFields=widget.constraints.inputConstraints.map<Widget>(
+      getField(widget.onSave, widget.formValues)
+    ).toList();
     formFields.add(
       PaddingForm(
         child: RaisedButton(
@@ -121,11 +151,11 @@ class SpecToFormState extends State<SpecToForm> {
             // Validate returns true if the form is valid, or false
             // otherwise.
             if (_formKey.currentState.validate()) {
-              _formKey.currentState.save();//this calls "onSubmit", which may not be that useful
+              _formKey.currentState.save();
               fetchOptionPricesAndDensity(
                 widget.model, 
                 widget.apiKey, 
-                _mapOfValues
+                widget.formValues
               ).then(widget.onSubmit);
             }
           },

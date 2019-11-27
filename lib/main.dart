@@ -7,7 +7,7 @@ import 'package:demo_api_app_flutter/services/data_models.dart' as data_models;
 import 'dart:async';
 import 'package:demo_api_app_flutter/pages/options.dart' as options;
 import 'package:demo_api_app_flutter/pages/density.dart' as density;
-
+import 'package:demo_api_app_flutter/services/api_consume.dart' as api;
 void main() => runApp(MyApp());
 enum HomeViewState { Busy, DataRetrieved, NoData }
 class MyApp extends StatelessWidget {
@@ -62,25 +62,132 @@ const List<String> choices = const <String>[
   "Merton"
 ];
 
+class MyScaffold extends StatefulWidget {
+  MyScaffold({
+    Key key, 
+    this.model, 
+    this.title,
+    this.onSelect,
+    this.onApiChange,
+    this.pages
+  });
+  final String model;
+  final String title;
+  final Function onSelect;
+  final Function onApiChange;
+  final List<Widget> pages;
+  @override
+  _MyScaffold createState() => _MyScaffold();
+}
 
-//TODO!  Make the movement between inputs NOT require a reload of the form
-// ONLY make HTTP call if model type has changed.
+class _MyScaffold extends State<MyScaffold>{
+  int _index=0;
+  void _setPage(int index){
+    setState((){
+      _index=index;
+    });
+  }
+  @override
+  Widget build(BuildContext context){
+    return Scaffold(
+      appBar: app_bar.MyAppBar(
+        title: widget.title,
+        onApiKeyChange: widget.onApiChange,
+        selectedModel: widget.model,
+        onSelection: widget.onSelect,
+        choices: choices
+      ),
+      body: widget.pages[_index],
+      bottomNavigationBar: BottomNavigationBar(
+        items:const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.input), title:Text("Entry")),
+          BottomNavigationBarItem(icon: Icon(Icons.show_chart), title:Text("Density")),
+          BottomNavigationBarItem(icon: Icon(Icons.scatter_plot), title:Text("Prices")),
+        ],
+        currentIndex: _index,
+        onTap: _setPage,
+      )
+    );
+  }
+}
+
+class HoldDataState extends StatefulWidget{
+  HoldDataState({
+    Key key,
+    @required this.model,
+    @required this.apiKey,
+    @required this.title,
+    @required this.snapshot,
+    @required this.onSelect,
+    @required this.onApiChange,
+  });
+  final String model;
+  final String apiKey;
+  final String title;
+  final AsyncSnapshot snapshot;
+  final Function onSelect;
+  final Function onApiChange;
+  @override
+  _HoldDataState createState() => _HoldDataState();
+}
+class _HoldDataState extends State<HoldDataState>{
+  data_models.ModelResults _density;
+  data_models.ModelResults _callPrices;
+  data_models.ModelResults _putPrices;
+  Map<String, form.SubmitItems>_mapOfValues={};
+  _onFormSave(inputType){
+    return (String name, num value){
+      _mapOfValues[name]=form.SubmitItems(
+        inputType:inputType, 
+        value:value
+      );
+    };
+  }
+  void _setData(List<data_models.ModelResults> values){
+    setState(() {
+      _callPrices=values[0];
+      _putPrices=values[1];
+      _density=values[2];
+    });
+  }
+  List<Widget> _getPages(AsyncSnapshot snapshot){
+    return [
+      form.InputForm(
+        model:widget.model, 
+        apiKey: widget.apiKey, 
+        onSubmit: _setData, 
+        snapshot: snapshot,
+        formValues: _mapOfValues,
+        onSave: _onFormSave
+      ),
+      density.ShowDensity(density:_density),
+      options.ShowOptionPrices(
+        callOption: _callPrices,
+        putOption: _putPrices,
+      )
+    ];
+  }
+  @override
+  Widget build(BuildContext context) {
+    List<Widget> pages=_getPages(widget.snapshot);
+    return MyScaffold(
+      model: widget.model,
+      title: widget.title,
+      onSelect: widget.onSelect,
+      onApiChange: widget.onApiChange,
+      pages:pages
+    );
+  }
+}
+
 class _MyHomePageState extends State<MyHomePage> {
   final StreamController<HomeViewState> stateController = StreamController<HomeViewState>();
   String _selectedModel=choices[0];
   String _key="";
   int _index=0;
-  data_models.ModelResults _density;
-  data_models.ModelResults _callPrices;
-  data_models.ModelResults _putPrices;
   void _select(String choice) {
     setState((){
       _selectedModel=choice;
-    });
-  }
-  void _setPage(int index){
-    setState((){
-      _index=index;
     });
   }
   _getKey(bool hasError){
@@ -100,14 +207,6 @@ class _MyHomePageState extends State<MyHomePage> {
       }      
     });    
   }
-  _setData(List<data_models.ModelResults> values){
-    setState(() {
-      _callPrices=values[0];
-      _putPrices=values[1];
-      _density=values[2];
-    });
-  }
-
   _setKey(String apiKey){
     _key=apiKey;
     if(_key==""){
@@ -126,19 +225,8 @@ class _MyHomePageState extends State<MyHomePage> {
     _getKey(false);
     super.initState();
   }
-  
-
   @override
   Widget build(BuildContext context) {
-    List<Widget> pages = <Widget>[
-      form.InputForm(model:_selectedModel, apiKey: _key, onSubmit: _setData),
-      density.ShowDensity(density:_density),
-      options.ShowOptionPrices(
-        callOption: _callPrices,
-        putOption: _putPrices,
-      )
-    ];
-
     return StreamBuilder(
       stream: stateController.stream,
       builder: (buildContext, snapshot) {
@@ -158,25 +246,18 @@ class _MyHomePageState extends State<MyHomePage> {
           return intro.Introduction(onApiKeyChange: _setKey,);
         }
 
-        return Scaffold(
-          appBar: app_bar.MyAppBar(
-            title: widget.title,
-            onApiKeyChange: _setKey,
-            selectedModel: _selectedModel,
-            onSelection: _select,
-            choices: choices
-          ),
-          body: pages[_index],
-          bottomNavigationBar: BottomNavigationBar(
-            items:const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(icon: Icon(Icons.input), title:Text("Entry")),
-              BottomNavigationBarItem(icon: Icon(Icons.show_chart), title:Text("Density")),
-              BottomNavigationBarItem(icon: Icon(Icons.scatter_plot), title:Text("Prices")),
-            ],
-            currentIndex: _index,
-            onTap: _setPage,
-
-          )
+        return FutureBuilder<data_models.InputConstraints>(
+          future: api.fetchConstraints(_selectedModel, _key),
+          builder: (BuildContext context, AsyncSnapshot<data_models.InputConstraints> snapshot){
+            return HoldDataState(
+              apiKey: _key,
+              snapshot: snapshot,
+              model: _selectedModel,
+              title: widget.title,
+              onSelect: _select,
+              onApiChange: _setKey,
+            );
+          }
         );
       }
     );
