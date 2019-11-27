@@ -100,12 +100,12 @@ class _MyHomePageState extends State<MyHomePage> {
         }
 
         // Use busy indicator if there's no state yet, and when it's busy
-        if (!snapshot.hasData || snapshot.data ==HomeViewState.Busy) {
+        if (!snapshot.hasData || snapshot.data == HomeViewState.Busy) {
           return Center(child: CircularProgressIndicator());
         }
 
         // use explicit state instead of checking the lenght
-        if(snapshot.data ==HomeViewState.NoData) {
+        if(snapshot.data == HomeViewState.NoData) {
           return intro.Introduction(onApiKeyChange: _setKey,);
         }
 

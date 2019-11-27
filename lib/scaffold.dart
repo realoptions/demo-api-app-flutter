@@ -5,11 +5,22 @@ import 'package:demo_api_app_flutter/pages/options.dart' as options;
 import 'package:demo_api_app_flutter/pages/density.dart' as density;
 import 'package:demo_api_app_flutter/components/ShowBadge.dart' as badge;
 import 'package:demo_api_app_flutter/services/data_models.dart' as data_models;
+import 'package:demo_api_app_flutter/components/ShowProgressOrChild.dart' as progressOrChild;
 const List<String> choices = const <String>[
   "Heston",
   "CGMY",
   "Merton"
 ];
+class PageEntry{
+  PageEntry({
+    @required this.widget, 
+    @required this.icon, 
+    @required this.text, 
+  });
+  final Widget widget;
+  final Widget icon;
+  final String text;
+}
 class MyScaffold extends StatelessWidget{
   const MyScaffold({
     Key key, 
@@ -52,30 +63,6 @@ class MyScaffold extends StatelessWidget{
       )
     );
   }
-}
-class ShowProgressOrChild extends StatelessWidget{
-  ShowProgressOrChild({
-    Key key,
-    @required this.child,
-    @required this.isInProgress
-  });
-  final Widget child;
-  final bool isInProgress;
-  @override
-  Widget build(BuildContext context){
-    return isInProgress?Center(child:CircularProgressIndicator()):child;
-  }
-}
-
-class PageEntry{
-  PageEntry({
-    @required this.widget, 
-    @required this.icon, 
-    @required this.text, 
-  });
-  final Widget widget;
-  final Widget icon;
-  final String text;
 }
 
 class HoldDataState extends StatefulWidget{
@@ -151,7 +138,7 @@ class _HoldDataState extends State<HoldDataState>{
     return [
       PageEntry(
         widget: PageStorage(
-          child: ShowProgressOrChild(
+          child: progressOrChild.ShowProgressOrChild(
             child: form.InputForm(
               model:widget.model, 
               apiKey: widget.apiKey, 
@@ -169,7 +156,7 @@ class _HoldDataState extends State<HoldDataState>{
       ),
       PageEntry(
         widget:PageStorage(
-          child: ShowProgressOrChild(
+          child: progressOrChild.ShowProgressOrChild(
             child: density.ShowDensity(density: _density),
             isInProgress: _isFetchingData,
           ),
@@ -183,13 +170,12 @@ class _HoldDataState extends State<HoldDataState>{
       ),
       PageEntry(
         widget:PageStorage(
-          child: ShowProgressOrChild(
+          child: progressOrChild.ShowProgressOrChild(
             child: options.ShowOptionPrices(
               callOption: _callPrices,
               putOption: _putPrices,
             ),
             isInProgress: _isFetchingData,
-          //key: PageStorageKey("Page 3")
           ),
           bucket: _bucket
         ),
