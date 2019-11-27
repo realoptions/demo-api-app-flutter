@@ -108,8 +108,8 @@ class ShowProgressOrChild extends StatelessWidget{
     @required this.child,
     @required this.isInProgress
   });
-  Widget child;
-  bool isInProgress;
+  final Widget child;
+  final bool isInProgress;
   @override
   Widget build(BuildContext context){
     return isInProgress?Center(child:CircularProgressIndicator()):child;
@@ -139,6 +139,7 @@ class _HoldDataState extends State<HoldDataState>{
   data_models.ModelResults _callPrices;
   data_models.ModelResults _putPrices;
   bool _isFetchingData=false;
+  bool _hasNewData=false;
   Map<String, form.SubmitItems>_mapOfValues={};
   Function(String a, num b) _onFormSave(data_models.InputType inputType){
     return (String name, num value){
@@ -166,6 +167,7 @@ class _HoldDataState extends State<HoldDataState>{
         _putPrices=values["put"];
         _density=values["density"];
         _isFetchingData=false;
+        _hasNewData=true;
       });
     });
   }
