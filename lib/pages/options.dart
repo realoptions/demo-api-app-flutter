@@ -5,7 +5,7 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:demo_api_app_flutter/utils/chart_utils.dart' as utils;
 import 'package:demo_api_app_flutter/components/CustomPadding.dart' as padding;
 
-var blue=utils.convertColor(Colors.blue);
+var teal=utils.convertColor(Colors.teal);
 var orange=utils.convertColor(Colors.orange);
 
 class ShowOptionPrices extends StatelessWidget {
@@ -23,7 +23,7 @@ class ShowOptionPrices extends StatelessWidget {
         id: 'Call Prices',
         domainFn: (data_model.ModelResult optionData, _) => optionData.atPoint,
         measureFn: (data_model.ModelResult optionData, _) => optionData.value,
-        colorFn: (data_model.ModelResult optionData, _) => blue,
+        colorFn: (data_model.ModelResult optionData, _) => teal,
         data: this.callOption.results,
       ),
       charts.Series(

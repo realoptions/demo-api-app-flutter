@@ -6,8 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:demo_api_app_flutter/pages/form.dart';
 
 const String API_VERSION="v1";
-//const String BASE_ENDPOINT=kReleaseMode?"https://api.finside.org/realoptions":"http://10.0.2.2:8000";
-const String BASE_ENDPOINT="https://api.finside.org/realoptions";
+const String BASE_ENDPOINT=kReleaseMode?"https://api.finside.org/realoptions":"http://10.0.2.2:8000";
+//const String BASE_ENDPOINT="https://api.finside.org/realoptions";
 
 Map<String, String> getHeaders(String apikey){
   return {

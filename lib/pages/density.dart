@@ -5,7 +5,6 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:demo_api_app_flutter/utils/chart_utils.dart' as utils;
 import 'package:demo_api_app_flutter/components/CustomPadding.dart' as padding;
 
-var blue=utils.convertColor(Colors.blue);
 var orange=utils.convertColor(Colors.orange);
 
 class ShowDensity extends StatelessWidget {
