@@ -4,7 +4,6 @@ import 'package:demo_api_app_flutter/services/data_models.dart' as data_model;
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:demo_api_app_flutter/utils/chart_utils.dart' as utils;
 import 'package:demo_api_app_flutter/components/CustomPadding.dart' as padding;
-import 'package:demo_api_app_flutter/components/ShowWarningIfNull.dart' as showWarning;
 
 var blue=utils.convertColor(Colors.blue);
 var orange=utils.convertColor(Colors.orange);
@@ -49,27 +48,24 @@ class ShowOptionPrices extends StatelessWidget {
       )
     ];
     var ivChart=charts.LineChart(ivSeries, animate:true);
-    return showWarning.ShowWarningIfNull(
-      child: SingleChildScrollView(
-        child: Column(
-          children:[
-            padding.PaddingForm(
-              child: SizedBox(
-                height: 300.0,
-                child: optionChart,
-              ),
+    return SingleChildScrollView(
+      child: Column(
+        children:[
+          padding.PaddingForm(
+            child: SizedBox(
+              height: 300.0,
+              child: optionChart,
             ),
-            padding.PaddingForm(
-              child: SizedBox(
-                height: 300.0,
-                child: ivChart,
-              ),
+          ),
+          padding.PaddingForm(
+            child: SizedBox(
+              height: 300.0,
+              child: ivChart,
             ),
-          ]
-        ),
-        key: PageStorageKey("Options")
+          ),
+        ]
       ),
-      data:this.callOption
+      key: PageStorageKey("Options")
     );
   }
 }

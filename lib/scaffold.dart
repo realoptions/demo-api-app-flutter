@@ -6,6 +6,8 @@ import 'package:demo_api_app_flutter/pages/density.dart' as density;
 import 'package:demo_api_app_flutter/components/ShowBadge.dart' as badge;
 import 'package:demo_api_app_flutter/services/data_models.dart' as data_models;
 import 'package:demo_api_app_flutter/components/ShowProgressOrChild.dart' as progressOrChild;
+import 'package:demo_api_app_flutter/components/ShowWarningIfNull.dart' as showWarning;
+
 const List<String> choices = const <String>[
   "Heston",
   "CGMY",
@@ -157,7 +159,10 @@ class _HoldDataState extends State<HoldDataState>{
       PageEntry(
         widget:PageStorage(
           child: progressOrChild.ShowProgressOrChild(
-            child: density.ShowDensity(density: _density),
+            child: showWarning.ShowWarningIfNull(
+              child:density.ShowDensity(density: _density),
+              data: _density,
+            ),
             isInProgress: _isFetchingData,
           ),
           bucket: _bucket
@@ -171,9 +176,12 @@ class _HoldDataState extends State<HoldDataState>{
       PageEntry(
         widget:PageStorage(
           child: progressOrChild.ShowProgressOrChild(
-            child: options.ShowOptionPrices(
-              callOption: _callPrices,
-              putOption: _putPrices,
+            child: showWarning.ShowWarningIfNull(
+              child: options.ShowOptionPrices(
+                callOption: _callPrices,
+                putOption: _putPrices,
+              ),
+              data: _callPrices,
             ),
             isInProgress: _isFetchingData,
           ),
