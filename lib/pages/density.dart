@@ -4,6 +4,7 @@ import 'package:demo_api_app_flutter/services/data_models.dart' as data_model;
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:demo_api_app_flutter/utils/chart_utils.dart' as utils;
 import 'package:demo_api_app_flutter/components/CustomPadding.dart' as padding;
+import 'package:demo_api_app_flutter/components/ShowWarningIfNull.dart' as showWarning;
 
 var blue=utils.convertColor(Colors.blue);
 var orange=utils.convertColor(Colors.orange);
@@ -29,19 +30,22 @@ class ShowDensity extends StatelessWidget {
       densitySeries,
       animate: true,
     );
-    return SingleChildScrollView(
-      child: Column(
-        children:[
-          padding.PaddingForm(
-            child: SizedBox(
-              height: 300.0,
-              child: densityChart,
+    return showWarning.ShowWarningIfNull(
+      child: SingleChildScrollView(
+        child:Column(
+          children:[
+            padding.PaddingForm(
+              child: SizedBox(
+                height: 300.0,
+                child: densityChart,
+              ),
             ),
-          ),
-          
-        ]
+            
+          ]
+        ),
+        key: PageStorageKey("density")
       ),
-      key: PageStorageKey("density")
+      data:this.density
     );
   }
 }
