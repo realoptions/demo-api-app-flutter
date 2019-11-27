@@ -143,11 +143,11 @@ class _HoldDataState extends State<HoldDataState>{
       );
     };
   }
-  void _setData(List<data_models.ModelResults> values){
+  void _setData(Map<String, data_models.ModelResults> values){
     setState(() {
-      _callPrices=values[0];
-      _putPrices=values[1];
-      _density=values[2];
+      _callPrices=values["call"];
+      _putPrices=values["put"];
+      _density=values["density"];
     });
   }
   List<Widget> _getPages(AsyncSnapshot snapshot){
@@ -184,7 +184,6 @@ class _MyHomePageState extends State<MyHomePage> {
   final StreamController<HomeViewState> stateController = StreamController<HomeViewState>();
   String _selectedModel=choices[0];
   String _key="";
-  int _index=0;
   void _select(String choice) {
     setState((){
       _selectedModel=choice;
@@ -248,7 +247,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
         return FutureBuilder<data_models.InputConstraints>(
           future: api.fetchConstraints(_selectedModel, _key),
-          builder: (BuildContext context, AsyncSnapshot<data_models.InputConstraints> snapshot){
+          builder: (
+            BuildContext context, 
+            AsyncSnapshot<data_models.InputConstraints> snapshot
+          ){
             return HoldDataState(
               apiKey: _key,
               snapshot: snapshot,
