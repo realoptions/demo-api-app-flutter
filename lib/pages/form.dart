@@ -150,7 +150,8 @@ class SpecToForm extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: formFields
         )
-      )
+      ),
+      key: PageStorageKey("Form")
     );
   }
 }

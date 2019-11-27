@@ -29,17 +29,19 @@ class ShowDensity extends StatelessWidget {
       densitySeries,
       animate: true,
     );
-    return Column(
-      children:[
-        padding.PaddingForm(
-          child: SizedBox(
-            height: 300.0,
-            child: densityChart,
+    return SingleChildScrollView(
+      child: Column(
+        children:[
+          padding.PaddingForm(
+            child: SizedBox(
+              height: 300.0,
+              child: densityChart,
+            ),
           ),
-        ),
-        
-      ]
+          
+        ]
+      ),
+      key: PageStorageKey("density")
     );
-
   }
 }

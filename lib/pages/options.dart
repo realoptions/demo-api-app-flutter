@@ -48,22 +48,24 @@ class ShowOptionPrices extends StatelessWidget {
       )
     ];
     var ivChart=charts.LineChart(ivSeries, animate:true);
-    return Column(
-      children:[
-        padding.PaddingForm(
-          child: SizedBox(
-            height: 300.0,
-            child: optionChart,
+    return SingleChildScrollView(
+      child: Column(
+        children:[
+          padding.PaddingForm(
+            child: SizedBox(
+              height: 300.0,
+              child: optionChart,
+            ),
           ),
-        ),
-        padding.PaddingForm(
-          child: SizedBox(
-            height: 300.0,
-            child: ivChart,
+          padding.PaddingForm(
+            child: SizedBox(
+              height: 300.0,
+              child: ivChart,
+            ),
           ),
-        ),
-      ]
+        ]
+      ),
+      key: PageStorageKey("Options")
     );
-
   }
 }
