@@ -135,7 +135,7 @@ class SpecToForm extends StatelessWidget {
   final Function onSubmit;
   final String apiKey;
   final Function onSave;
-  final Map formValues;
+  final Map<String, SubmitItems> formValues;
   static final _formKey = GlobalKey<FormState>();
  
   @override
