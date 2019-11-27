@@ -4,7 +4,7 @@ import 'package:demo_api_app_flutter/components/CustomTextFields.dart';
 import 'package:demo_api_app_flutter/services/data_models.dart' as data_models;
 import 'package:demo_api_app_flutter/services/api_consume.dart';
 
-typedef SubmitType = void Function(Map<String, data_models.ModelResults> values);
+typedef SubmitType = void Function(Future<Map<String, data_models.ModelResults>> values);
 typedef FormSave = Function(String a, num b) Function(data_models.InputType inputType);
 const Map<String, String> defaultValueMap={
   "num_u":"8",
@@ -131,11 +131,11 @@ class SpecToForm extends StatelessWidget {
             // otherwise.
             if (_formKey.currentState.validate()) {
               _formKey.currentState.save();
-              fetchOptionPricesAndDensity(
+              this.onSubmit(fetchOptionPricesAndDensity(
                 this.model, 
                 this.apiKey, 
                 this.formValues
-              ).then(this.onSubmit);
+              ));
             }
           },
           child: Text('Submit'),

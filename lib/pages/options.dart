@@ -11,8 +11,8 @@ var orange=utils.convertColor(Colors.orange);
 class ShowOptionPrices extends StatelessWidget {
   const ShowOptionPrices({
     Key key,
-    this.callOption,
-    this.putOption,
+    @required this.callOption,
+    @required this.putOption,
   });
   final data_model.ModelResults callOption;
   final data_model.ModelResults putOption;

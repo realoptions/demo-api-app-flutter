@@ -11,7 +11,7 @@ var orange=utils.convertColor(Colors.orange);
 class ShowDensity extends StatelessWidget {
   const ShowDensity({
     Key key,
-    this.density,
+    @required this.density,
   });
   final data_model.ModelResults density;
   @override

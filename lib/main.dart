@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:demo_api_app_flutter/services/api_key.dart' as auth;
 import 'package:demo_api_app_flutter/app_bar.dart' as app_bar;
@@ -39,16 +41,6 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -65,11 +57,11 @@ const List<String> choices = const <String>[
 class MyScaffold extends StatefulWidget {
   MyScaffold({
     Key key, 
-    this.model, 
-    this.title,
-    this.onSelect,
-    this.onApiChange,
-    this.pages
+    @required this.model, 
+    @required this.title,
+    @required this.onSelect,
+    @required this.onApiChange,
+    @required this.pages
   });
   final String model;
   final String title;
@@ -110,7 +102,19 @@ class _MyScaffold extends State<MyScaffold>{
     );
   }
 }
-
+class ShowProgressOrChild extends StatelessWidget{
+  ShowProgressOrChild({
+    Key key,
+    @required this.child,
+    @required this.isInProgress
+  });
+  Widget child;
+  bool isInProgress;
+  @override
+  Widget build(BuildContext context){
+    return isInProgress?Center(child:CircularProgressIndicator()):child;
+  }
+}
 class HoldDataState extends StatefulWidget{
   HoldDataState({
     Key key,
@@ -134,6 +138,7 @@ class _HoldDataState extends State<HoldDataState>{
   data_models.ModelResults _density;
   data_models.ModelResults _callPrices;
   data_models.ModelResults _putPrices;
+  bool _isFetchingData=false;
   Map<String, form.SubmitItems>_mapOfValues={};
   Function(String a, num b) _onFormSave(data_models.InputType inputType){
     return (String name, num value){
@@ -143,29 +148,51 @@ class _HoldDataState extends State<HoldDataState>{
       );
     };
   }
-  void _setData(Map<String, data_models.ModelResults> values){
+  /*void _setData(Map<String, data_models.ModelResults> values){
     print(values);
     setState(() {
       _callPrices=values["call"];
       _putPrices=values["put"];
       _density=values["density"];
     });
+  }*/
+  void _setData(Future<Map<String, data_models.ModelResults>> getData){
+    setState((){
+      _isFetchingData=true;
+    });
+    getData.then((values){
+      setState(() {
+        _callPrices=values["call"];
+        _putPrices=values["put"];
+        _density=values["density"];
+        _isFetchingData=false;
+      });
+    });
   }
   List<Widget> _getPages(AsyncSnapshot snapshot){
     return [
-      form.InputForm(
-        model:widget.model, 
-        apiKey: widget.apiKey, 
-        onSubmit: _setData, 
-        snapshot: snapshot,
-        formValues: _mapOfValues,
-        onSave: _onFormSave
+      ShowProgressOrChild(
+        child: form.InputForm(
+          model:widget.model, 
+          apiKey: widget.apiKey, 
+          onSubmit: _setData, 
+          snapshot: snapshot,
+          formValues: _mapOfValues,
+          onSave: _onFormSave
+        ),
+        isInProgress: _isFetchingData,
       ),
-      density.ShowDensity(density:_density),
-      options.ShowOptionPrices(
-        callOption: _callPrices,
-        putOption: _putPrices,
-      )
+      ShowProgressOrChild(
+        child: density.ShowDensity(density:_density),
+        isInProgress: _isFetchingData,
+      ),
+      ShowProgressOrChild(
+        child: options.ShowOptionPrices(
+          callOption: _callPrices,
+          putOption: _putPrices,
+        ),
+        isInProgress: _isFetchingData,
+      ),
     ];
   }
   @override
