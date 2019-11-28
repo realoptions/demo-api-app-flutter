@@ -78,3 +78,4 @@ apisprout
 *.yaml
 nohup.out
 coverage
+key.properties
