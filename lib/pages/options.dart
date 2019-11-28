@@ -51,25 +51,27 @@ class ShowOptionPrices extends StatelessWidget {
         colorFn: (data_model.ModelResult optionData, _) => orange,
       )
     ];
+    var range=utils.getIVRange(callOption);
     var ivChart=charts.LineChart(
       ivSeries, 
       animate:true, 
       domainAxis: charts.NumericAxisSpec(
         tickProviderSpec: domain
       ),
+      primaryMeasureAxis: charts.NumericAxisSpec(tickProviderSpec: range),
     );
     return SingleChildScrollView(
       child: Column(
         children:[
           padding.PaddingForm(
-            child: SizedBox(
-              height: 300.0,
+            child: AspectRatio(
+              aspectRatio: 1.2,
               child: optionChart,
             ),
           ),
           padding.PaddingForm(
-            child: SizedBox(
-              height: 300.0,
+            child: AspectRatio(
+              aspectRatio: 1.2,
               child: ivChart,
             ),
           ),

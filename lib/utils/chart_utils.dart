@@ -8,14 +8,25 @@ charts.Color convertColor(Color color){
   );
 }
 const int NUM_TICKS=5;
+charts.StaticNumericTickProviderSpec getAxis(
+  num firstPoint, num lastPoint
+){
+  List<charts.TickSpec<num>> domain=[];
+  double dx=(lastPoint-firstPoint)/(NUM_TICKS-1);
+  for(int i=0; i<NUM_TICKS; ++i){
+    domain.add(charts.TickSpec<num>(firstPoint+dx*i));
+  }
+  return charts.StaticNumericTickProviderSpec(domain);
+}
 charts.StaticNumericTickProviderSpec getDomain(data_model.ModelResults modelResults){
   var results=modelResults.results;
   var firstDomain=results.first.atPoint;
   var lastDomain=results.last.atPoint;
-  double dx=(lastDomain-firstDomain)/(NUM_TICKS-1);
-  List<charts.TickSpec<num>> domain=[];
-  for(int i=0; i<NUM_TICKS; ++i){
-    domain.add(charts.TickSpec<num>(firstDomain+dx*i));
-  }
-  return charts.StaticNumericTickProviderSpec(domain);
+  return getAxis(firstDomain, lastDomain);
+}
+charts.StaticNumericTickProviderSpec getIVRange(data_model.ModelResults modelResults){
+  var results=modelResults.results;
+  var firstIV=results.first.iv*0.85;
+  var lastIV=results.last.iv*1.15;
+  return getAxis(firstIV, lastIV);
 }

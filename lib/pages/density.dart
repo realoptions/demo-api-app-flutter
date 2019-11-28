@@ -36,8 +36,8 @@ class ShowDensity extends StatelessWidget {
       child:Column(
         children:[
           padding.PaddingForm(
-            child: SizedBox(
-              height: 300.0,
+            child: AspectRatio(
+              aspectRatio: 1.2,
               child: densityChart,
             ),
           ),
