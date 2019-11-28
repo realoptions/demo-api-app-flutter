@@ -24,9 +24,13 @@ class ShowDensity extends StatelessWidget {
         data: this.density.results,
       ),
     ];
+    var domain=utils.getDomain(density);
     var densityChart = charts.LineChart(
       densitySeries,
       animate: true,
+      domainAxis: charts.NumericAxisSpec(
+        tickProviderSpec: domain
+      )
     );
     return SingleChildScrollView(
       child:Column(

@@ -34,9 +34,13 @@ class ShowOptionPrices extends StatelessWidget {
         data: this.putOption.results,
       )
     ];
+    var domain=utils.getDomain(callOption);
     var optionChart = charts.LineChart(
       optionSeries,
       animate: true,
+      domainAxis: charts.NumericAxisSpec(
+        tickProviderSpec: domain
+      ),
     );
     var ivSeries=[
       charts.Series(
@@ -47,7 +51,13 @@ class ShowOptionPrices extends StatelessWidget {
         colorFn: (data_model.ModelResult optionData, _) => orange,
       )
     ];
-    var ivChart=charts.LineChart(ivSeries, animate:true);
+    var ivChart=charts.LineChart(
+      ivSeries, 
+      animate:true, 
+      domainAxis: charts.NumericAxisSpec(
+        tickProviderSpec: domain
+      ),
+    );
     return SingleChildScrollView(
       child: Column(
         children:[

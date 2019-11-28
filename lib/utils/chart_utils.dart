@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:demo_api_app_flutter/services/data_models.dart' as data_model;
 charts.Color convertColor(Color color){
   return charts.Color(
     r: color.red, g: color.green, b: color.blue, a: color.alpha
   );
+}
+const int NUM_TICKS=5;
+charts.StaticNumericTickProviderSpec getDomain(data_model.ModelResults modelResults){
+  var results=modelResults.results;
+  var firstDomain=results.first.atPoint;
+  var lastDomain=results.last.atPoint;
+  double dx=(lastDomain-firstDomain)/(NUM_TICKS-1);
+  List<charts.TickSpec<num>> domain=[];
+  for(int i=0; i<NUM_TICKS; ++i){
+    domain.add(charts.TickSpec<num>(firstDomain+dx*i));
+  }
+  return charts.StaticNumericTickProviderSpec(domain);
 }
