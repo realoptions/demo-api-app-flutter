@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'dart:math';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:demo_api_app_flutter/services/data_models.dart' as data_model;
 charts.Color convertColor(Color color){
@@ -25,8 +26,15 @@ charts.StaticNumericTickProviderSpec getDomain(data_model.ModelResults modelResu
   return getAxis(firstDomain, lastDomain);
 }
 charts.StaticNumericTickProviderSpec getIVRange(data_model.ModelResults modelResults){
+  var resultsIter=modelResults.results.map((val)=>val.iv);
+  var minIV=resultsIter.reduce(min)*0.85;
+  var maxIV=resultsIter.reduce(max)*1.15;
+  return getAxis(minIV, maxIV);
+}
+
+charts.StaticNumericTickProviderSpec getDensityRange(data_model.ModelResults modelResults){
   var results=modelResults.results;
-  var firstIV=results.first.iv*0.85;
-  var lastIV=results.last.iv*1.15;
-  return getAxis(firstIV, lastIV);
+  var minVal=0.0;
+  var maxIV=results.map((val)=>val.value).reduce(max)*1.15;
+  return getAxis(minVal, maxIV);
 }

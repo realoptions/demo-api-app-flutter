@@ -41,10 +41,11 @@ class ShowOptionPrices extends StatelessWidget {
       domainAxis: charts.NumericAxisSpec(
         tickProviderSpec: domain
       ),
+      behaviors: [charts.SeriesLegend()],
     );
     var ivSeries=[
       charts.Series(
-        id:'implied volatility',
+        id:'Implied Volatility',
         data: this.callOption.results,
         domainFn: (data_model.ModelResult optionData, _) => optionData.atPoint,
         measureFn: (data_model.ModelResult optionData, _) => optionData.iv,
@@ -59,6 +60,7 @@ class ShowOptionPrices extends StatelessWidget {
         tickProviderSpec: domain
       ),
       primaryMeasureAxis: charts.NumericAxisSpec(tickProviderSpec: range),
+      behaviors: [charts.SeriesLegend()],
     );
     return SingleChildScrollView(
       child: Column(
