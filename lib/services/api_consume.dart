@@ -21,12 +21,12 @@ Map<String, String> getHeaders(String apikey) {
 
 String constructUrl(
     String base, String version, String model, String endpoint) {
-  return p.join(base, version, adjustModelForUrl(model), endpoint);
+  return p.join(base, version, model, endpoint);
 }
 
-String adjustModelForUrl(String model) {
+/*String adjustModelForUrl(String model) {
   return model.toLowerCase();
-}
+}*/
 
 Function parseConstraint(String model) {
   return (http.Response response) {

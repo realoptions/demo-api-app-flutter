@@ -4,12 +4,11 @@ import 'package:demo_api_app_flutter/services/api_consume.dart';
 import 'package:demo_api_app_flutter/models/response.dart';
 import 'package:demo_api_app_flutter/models/forms.dart';
 import 'package:demo_api_app_flutter/utils/services.dart';
+import 'package:rxdart/rxdart.dart';
 
 class OptionsBloc implements bloc_provider.BlocBase {
-  StreamController<List<ModelResult>> _callController =
-      StreamController<List<ModelResult>>.broadcast();
-  StreamController<List<ModelResult>> _putController =
-      StreamController<List<ModelResult>>.broadcast();
+  StreamController<List<ModelResult>> _callController = BehaviorSubject();
+  StreamController<List<ModelResult>> _putController = BehaviorSubject();
 
   Stream<List<ModelResult>> get outCallResults => _callController.stream;
   Stream<List<ModelResult>> get outPutResults => _putController.stream;

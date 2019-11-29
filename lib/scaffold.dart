@@ -35,7 +35,7 @@ class AppScaffold extends StatelessWidget {
         ],
         initialData: [
           modelChoices[0],
-          ""
+          ApiKey(id: 1, key: "")
         ],
         builder: (buildContext, snapshots) {
           return BlocProvider<SelectPageBloc>(
@@ -96,6 +96,7 @@ class _Scaffold extends StatelessWidget {
         builder: (buildContext, snapshots) {
           int selectedIndex = snapshots[0].data;
           List<bool> showBadges = snapshots[1].data;
+          print(selectedIndex);
           var pages = _getPages(this.model.value, apiKey.key, showBadges);
           return Scaffold(
               appBar: OptionPriceAppBar(

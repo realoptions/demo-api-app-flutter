@@ -17,10 +17,11 @@ class OptionPriceAppBar extends StatelessWidget with PreferredSizeWidget {
     final ApiBloc apiBloc = BlocProvider.of<ApiBloc>(context);
     return StreamBuilder(
         stream: selectBloc.outSelectedModel,
+        initialData: this.choices[0],
         builder: (buildContext, snapshot) {
           var selectedModel = snapshot.data;
           return AppBar(
-            title: Text(this.title + ": " + selectedModel),
+            title: Text(this.title + ": " + selectedModel.label),
             actions: <Widget>[
               IconButton(
                 icon: Icon(Icons.lock),
@@ -73,7 +74,7 @@ class OptionPriceAppBar extends StatelessWidget with PreferredSizeWidget {
                                 .map((choice) => RadioListTile<String>(
                                     title: Text(choice.label),
                                     value: choice.value,
-                                    groupValue: selectedModel,
+                                    groupValue: selectedModel.value,
                                     onChanged: (choice) {
                                       selectBloc.setModel(choice);
                                       Navigator.pop(context);

@@ -4,10 +4,10 @@ import 'package:demo_api_app_flutter/services/api_consume.dart';
 import 'package:demo_api_app_flutter/models/response.dart';
 import 'package:demo_api_app_flutter/models/forms.dart';
 import 'package:demo_api_app_flutter/utils/services.dart';
+import 'package:rxdart/rxdart.dart';
 
 class DensityBloc implements bloc_provider.BlocBase {
-  StreamController<List<ModelResult>> _densityController =
-      StreamController<List<ModelResult>>.broadcast();
+  StreamController<List<ModelResult>> _densityController = BehaviorSubject();
 
   Stream<List<ModelResult>> get outDensityResults => _densityController.stream;
 

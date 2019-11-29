@@ -1,6 +1,7 @@
 import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
 import 'dart:async';
 import 'package:demo_api_app_flutter/models/forms.dart';
+import 'package:rxdart/rxdart.dart';
 
 const Map<String, String> defaultValueMap = {
   "num_u": "8",
@@ -40,14 +41,11 @@ class FormBloc implements BlocBase {
   Map<String, SubmitItems> _formValues;
 
   StreamController<Map<String, SubmitItems>> _formController =
-      StreamController<Map<String, SubmitItems>>.broadcast();
+      BehaviorSubject();
   Stream<Map<String, SubmitItems>> get outFormController =>
       _formController.stream;
 
   StreamSink get _inFormController => _formController.sink;
-
-  //StreamController _actionController = StreamController.broadcast();
-  //StreamSink get submitForm => _actionController.sink;
 
   FormBloc(InputConstraints constraints) {
     onSubmit(constraints);
@@ -69,6 +67,5 @@ class FormBloc implements BlocBase {
 
   void dispose() {
     _formController.close();
-    //_actionController.close();
   }
 }

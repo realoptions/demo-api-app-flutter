@@ -34,11 +34,13 @@ class InputForm extends StatelessWidget {
     return StreamBuilder(
         stream: bloc.outConstraintsController,
         builder: (buildContext, snapshot) {
+          print("in stream builder for form");
+          print(snapshot.connectionState);
           switch (snapshot.connectionState) {
             case ConnectionState.none:
-            case ConnectionState.active:
             case ConnectionState.waiting:
               return Center(child: CircularProgressIndicator());
+            case ConnectionState.active:
             case ConnectionState.done:
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               return BlocProvider<FormBloc>(
