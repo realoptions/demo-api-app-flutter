@@ -6,16 +6,17 @@ Widget helperStreamBuild(
     List<dynamic> initialDatum,
     List<AsyncSnapshot> snapshots,
     int index,
+    int maxLength,
     Function build) {
   return StreamBuilder(
       stream: streams[index],
       initialData: initialDatum[index],
       builder: (buildContext, snapshot) {
         snapshots.add(snapshot);
-        return index > 1
+        return index < maxLength
             ? helperStreamBuild(buildContext, streams, initialDatum, snapshots,
-                index - 1, build)
-            : build(buildContext, snapshots.reversed.toList());
+                index + 1, maxLength, build)
+            : build(buildContext, snapshots.toList());
       });
 }
 
@@ -31,6 +32,6 @@ class StreamsBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return helperStreamBuild(context, streams, initialData, <AsyncSnapshot>[],
-        streams.length, builder);
+        0, streams.length - 1, builder);
   }
 }

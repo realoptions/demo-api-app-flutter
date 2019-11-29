@@ -110,7 +110,7 @@ class _Scaffold extends StatelessWidget {
                       icon: entry.icon, title: Text(entry.text));
                 }).toList(),
                 currentIndex: selectedIndex,
-                onTap: pageBloc.setPageIndex.add,
+                onTap: pageBloc.setPage,
               ));
         });
   }

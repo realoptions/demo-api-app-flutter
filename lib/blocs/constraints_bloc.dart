@@ -5,7 +5,7 @@ import 'package:demo_api_app_flutter/services/api_consume.dart';
 
 class ConstraintsBloc implements BlocBase {
   StreamController<InputConstraints> _constraintsController =
-      StreamController<InputConstraints>();
+      StreamController<InputConstraints>.broadcast();
   Stream<InputConstraints> get outConstraintsController =>
       _constraintsController.stream;
   StreamSink get _inConstraintsController => _constraintsController.sink;

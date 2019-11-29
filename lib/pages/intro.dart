@@ -12,7 +12,7 @@ class Introduction extends StatelessWidget {
       PaddingForm(
           child: new TextField(
               decoration: new InputDecoration(labelText: 'API Key'),
-              onChanged: bloc.setApiKey.add)),
+              onChanged: bloc.setApiKey)),
       PaddingForm(
           child: RaisedButton(
               child: const Text('Save'), onPressed: bloc.saveApiKey))

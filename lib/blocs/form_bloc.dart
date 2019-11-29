@@ -40,14 +40,14 @@ class FormBloc implements BlocBase {
   Map<String, SubmitItems> _formValues;
 
   StreamController<Map<String, SubmitItems>> _formController =
-      StreamController<Map<String, SubmitItems>>();
+      StreamController<Map<String, SubmitItems>>.broadcast();
   Stream<Map<String, SubmitItems>> get outFormController =>
       _formController.stream;
 
   StreamSink get _inFormController => _formController.sink;
 
-  StreamController _actionController = StreamController();
-  StreamSink get submitForm => _actionController.sink;
+  //StreamController _actionController = StreamController.broadcast();
+  //StreamSink get submitForm => _actionController.sink;
 
   FormBloc(InputConstraints constraints) {
     onSubmit(constraints);
@@ -69,6 +69,6 @@ class FormBloc implements BlocBase {
 
   void dispose() {
     _formController.close();
-    _actionController.close();
+    //_actionController.close();
   }
 }

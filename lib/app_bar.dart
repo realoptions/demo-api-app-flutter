@@ -4,7 +4,7 @@ import 'package:demo_api_app_flutter/blocs/select_model_bloc.dart';
 import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
 import 'package:demo_api_app_flutter/models/models.dart';
 
-class OptionPriceAppBar extends StatelessWidget with PreferredSizeWidget{
+class OptionPriceAppBar extends StatelessWidget with PreferredSizeWidget {
   OptionPriceAppBar({@required this.title, @required this.choices});
   final String title;
   final List<Model> choices;
@@ -12,11 +12,11 @@ class OptionPriceAppBar extends StatelessWidget with PreferredSizeWidget{
   Size get preferredSize => Size.fromHeight(kToolbarHeight);
   @override
   Widget build(BuildContext context) {
-    final SelectModelBloc selectModelBloc =
+    final SelectModelBloc selectBloc =
         BlocProvider.of<SelectModelBloc>(context);
     final ApiBloc apiBloc = BlocProvider.of<ApiBloc>(context);
     return StreamBuilder(
-        stream: selectModelBloc.outSelectedModel,
+        stream: selectBloc.outSelectedModel,
         builder: (buildContext, snapshot) {
           var selectedModel = snapshot.data;
           return AppBar(
@@ -35,7 +35,7 @@ class OptionPriceAppBar extends StatelessWidget with PreferredSizeWidget{
                               new Expanded(
                                 child: new TextField(
                                   autofocus: true,
-                                  onChanged: apiBloc.setApiKey.add,
+                                  onChanged: apiBloc.setApiKey,
                                   decoration:
                                       new InputDecoration(labelText: 'API Key'),
                                 ),
@@ -75,7 +75,7 @@ class OptionPriceAppBar extends StatelessWidget with PreferredSizeWidget{
                                     value: choice.value,
                                     groupValue: selectedModel,
                                     onChanged: (choice) {
-                                      selectModelBloc.setModel.add(choice);
+                                      selectBloc.setModel(choice);
                                       Navigator.pop(context);
                                     }))
                                 .toList());

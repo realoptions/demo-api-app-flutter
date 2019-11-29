@@ -9,23 +9,25 @@ const List<Model> modelChoices = const <Model>[
 ];
 
 class SelectModelBloc implements BlocBase {
-  StreamController<Model> _modelController = StreamController<Model>();
+  StreamController<Model> _modelController =
+      StreamController<Model>.broadcast();
   Stream<Model> get outSelectedModel => _modelController.stream;
   StreamSink get _getSelectedModel => _modelController.sink;
 
-  StreamController _actionController = StreamController();
-  StreamSink get setModel => _actionController.sink;
+  //StreamController _actionController = StreamController();
+  //StreamSink get setModel => _actionController.sink;
 
   SelectModelBloc() {
-    _actionController.stream.listen(_setModel);
+    //_actionController.stream.listen(_setModel);
     _getSelectedModel.add(modelChoices[0]);
   }
-  void _setModel(Model model) {
-    _getSelectedModel.add(model);
+  void setModel(String modelValue) {
+    _getSelectedModel
+        .add(modelChoices.firstWhere((model) => model.value == modelValue));
   }
 
   void dispose() {
     _modelController.close();
-    _actionController.close();
+    //_actionController.close();
   }
 }

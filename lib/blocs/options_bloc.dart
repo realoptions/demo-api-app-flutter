@@ -7,9 +7,9 @@ import 'package:demo_api_app_flutter/utils/services.dart';
 
 class OptionsBloc implements bloc_provider.BlocBase {
   StreamController<List<ModelResult>> _callController =
-      StreamController<List<ModelResult>>();
+      StreamController<List<ModelResult>>.broadcast();
   StreamController<List<ModelResult>> _putController =
-      StreamController<List<ModelResult>>();
+      StreamController<List<ModelResult>>.broadcast();
 
   Stream<List<ModelResult>> get outCallResults => _callController.stream;
   Stream<List<ModelResult>> get outPutResults => _putController.stream;

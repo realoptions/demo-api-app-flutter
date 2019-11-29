@@ -7,9 +7,10 @@ import 'package:demo_api_app_flutter/services/api_key.dart' as auth;
 enum HomeViewState { Busy, DataRetrieved, NoData }
 
 class ApiBloc implements bloc_provider.BlocBase {
-  StreamController<ApiKey> _keyController = StreamController<ApiKey>();
+  StreamController<ApiKey> _keyController =
+      StreamController<ApiKey>.broadcast();
   StreamController<HomeViewState> _stateController =
-      StreamController<HomeViewState>();
+      StreamController<HomeViewState>.broadcast();
   Stream<ApiKey> get outApiKey => _keyController.stream;
   Stream<HomeViewState> get outHomeState => _stateController.stream;
   //do I even need this??  I don't think I'll call it
@@ -17,12 +18,12 @@ class ApiBloc implements bloc_provider.BlocBase {
   //do I even need this??  I don't think I'll call it
   StreamSink get getHomeState => _stateController.sink;
 
-  StreamController _actionController = StreamController();
-  StreamSink get setApiKey => _actionController.sink;
+  //StreamController _actionController = StreamController();
+  //StreamSink get setApiKey => _actionController.sink;
   String _apiKey;
   ApiBloc() {
     _stateController.sink.add(HomeViewState.Busy);
-    _actionController.stream.listen(_setApiKey);
+    //_actionController.stream.listen(_setApiKey);
     auth.retrieveKey().then((apiKeyList) {
       if (apiKeyList.length > 0 && apiKeyList.first.key != "") {
         _keyController.sink.add(apiKeyList.first);
@@ -32,9 +33,9 @@ class ApiBloc implements bloc_provider.BlocBase {
       }
     });
   }
-  void _setApiKey(String apiKey) {
+  void setApiKey(String apiKey) {
     _apiKey = apiKey;
-    setApiKey.add(apiKey);
+    //setApiKey.add(apiKey);
   }
 
   void saveApiKey() {
@@ -50,6 +51,6 @@ class ApiBloc implements bloc_provider.BlocBase {
   void dispose() {
     _keyController.close();
     _stateController.close();
-    _actionController.close();
+    //_actionController.close();
   }
 }

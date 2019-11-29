@@ -3,26 +3,22 @@ import 'dart:async';
 
 class SelectPageBloc implements BlocBase {
   List<bool> _whichClicked = [false, false, false];
-  StreamController<int> _pageController = StreamController<int>();
+  StreamController<int> _pageController = StreamController<int>.broadcast();
   Stream<int> get outPageController => _pageController.stream;
   StreamSink get _inPageController => _pageController.sink;
 
   StreamController<List<bool>> _pageClickedController =
-      StreamController<List<bool>>();
+      StreamController<List<bool>>.broadcast();
   Stream<List<bool>> get outPageClickedController =>
       _pageClickedController.stream;
   StreamSink get _inPageClickedController => _pageClickedController.sink;
 
-  StreamController _actionController = StreamController();
-  StreamSink get setPageIndex => _actionController.sink;
-
   SelectPageBloc() {
-    _actionController.stream.listen(_setPage);
     _inPageController.add(0);
     _inPageClickedController.add(_whichClicked);
   }
 
-  void _setPage(int pageIndex) {
+  void setPage(int pageIndex) {
     _whichClicked[pageIndex] = false;
     _inPageController.add(pageIndex);
     _inPageClickedController.add(_whichClicked);
@@ -35,7 +31,6 @@ class SelectPageBloc implements BlocBase {
 
   void dispose() {
     _pageController.close();
-    _actionController.close();
     _pageClickedController.close();
   }
 }

@@ -7,7 +7,7 @@ import 'package:demo_api_app_flutter/utils/services.dart';
 
 class DensityBloc implements bloc_provider.BlocBase {
   StreamController<List<ModelResult>> _densityController =
-      StreamController<List<ModelResult>>();
+      StreamController<List<ModelResult>>.broadcast();
 
   Stream<List<ModelResult>> get outDensityResults => _densityController.stream;
 
