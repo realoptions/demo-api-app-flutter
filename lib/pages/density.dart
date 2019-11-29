@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:demo_api_app_flutter/services/data_models.dart' as data_model;
+import 'package:demo_api_app_flutter/models/response.dart' as response_model;
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:demo_api_app_flutter/utils/chart_utils.dart' as utils;
 import 'package:demo_api_app_flutter/components/CustomPadding.dart' as padding;
@@ -12,15 +12,15 @@ class ShowDensity extends StatelessWidget {
     Key key,
     @required this.density,
   });
-  final data_model.ModelResults density;
+  final response_model.ModelResults density;
   @override
   Widget build(BuildContext context){
     var densitySeries=[
       charts.Series(
         id: 'Density',
-        domainFn: (data_model.ModelResult optionData, _) => optionData.atPoint,
-        measureFn: (data_model.ModelResult optionData, _) => optionData.value,
-        colorFn: (data_model.ModelResult optionData, _) => orange,
+        domainFn: (response_model.ModelResult optionData, _) => optionData.atPoint,
+        measureFn: (response_model.ModelResult optionData, _) => optionData.value,
+        colorFn: (response_model.ModelResult optionData, _) => orange,
         data: this.density.results,
       ),
     ];

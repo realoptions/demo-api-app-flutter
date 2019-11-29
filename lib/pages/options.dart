@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:demo_api_app_flutter/services/data_models.dart' as data_model;
+import 'package:demo_api_app_flutter/models/response.dart' as response_model;
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:demo_api_app_flutter/utils/chart_utils.dart' as utils;
 import 'package:demo_api_app_flutter/components/CustomPadding.dart' as padding;
@@ -14,23 +14,23 @@ class ShowOptionPrices extends StatelessWidget {
     @required this.callOption,
     @required this.putOption,
   });
-  final data_model.ModelResults callOption;
-  final data_model.ModelResults putOption;
+  final response_model.ModelResults callOption;
+  final response_model.ModelResults putOption;
   @override
   Widget build(BuildContext context){
     var optionSeries=[
       charts.Series(
         id: 'Call Prices',
-        domainFn: (data_model.ModelResult optionData, _) => optionData.atPoint,
-        measureFn: (data_model.ModelResult optionData, _) => optionData.value,
-        colorFn: (data_model.ModelResult optionData, _) => teal,
+        domainFn: (response_model.ModelResult optionData, _) => optionData.atPoint,
+        measureFn: (response_model.ModelResult optionData, _) => optionData.value,
+        colorFn: (response_model.ModelResult optionData, _) => teal,
         data: this.callOption.results,
       ),
       charts.Series(
         id: 'Put Prices',
-        domainFn: (data_model.ModelResult optionData, _) => optionData.atPoint,
-        measureFn: (data_model.ModelResult optionData, _) => optionData.value,
-        colorFn: (data_model.ModelResult optionData, _) => orange,
+        domainFn: (response_model.ModelResult optionData, _) => optionData.atPoint,
+        measureFn: (response_model.ModelResult optionData, _) => optionData.value,
+        colorFn: (response_model.ModelResult optionData, _) => orange,
         data: this.putOption.results,
       )
     ];
@@ -47,9 +47,9 @@ class ShowOptionPrices extends StatelessWidget {
       charts.Series(
         id:'Implied Volatility',
         data: this.callOption.results,
-        domainFn: (data_model.ModelResult optionData, _) => optionData.atPoint,
-        measureFn: (data_model.ModelResult optionData, _) => optionData.iv,
-        colorFn: (data_model.ModelResult optionData, _) => orange,
+        domainFn: (response_model.ModelResult optionData, _) => optionData.atPoint,
+        measureFn: (response_model.ModelResult optionData, _) => optionData.iv,
+        colorFn: (response_model.ModelResult optionData, _) => orange,
       )
     ];
     var range=utils.getIVRange(callOption);

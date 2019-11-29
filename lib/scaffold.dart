@@ -4,7 +4,8 @@ import 'package:demo_api_app_flutter/pages/form.dart' as form;
 import 'package:demo_api_app_flutter/pages/options.dart' as options;
 import 'package:demo_api_app_flutter/pages/density.dart' as density;
 import 'package:demo_api_app_flutter/components/ShowBadge.dart' as badge;
-import 'package:demo_api_app_flutter/services/data_models.dart' as data_models;
+import 'package:demo_api_app_flutter/models/response.dart' as response_model;
+import 'package:demo_api_app_flutter/models/forms.dart' as form_model;
 import 'package:demo_api_app_flutter/components/ShowProgressOrChild.dart' as progressOrChild;
 import 'package:demo_api_app_flutter/components/ShowWarningIfNull.dart' as showWarning;
 
@@ -87,9 +88,9 @@ class HoldDataState extends StatefulWidget{
   _HoldDataState createState() => _HoldDataState();
 }
 class _HoldDataState extends State<HoldDataState>{
-  data_models.ModelResults _density;
-  data_models.ModelResults _callPrices;
-  data_models.ModelResults _putPrices;
+  response_model.ModelResults _density;
+  response_model.ModelResults _callPrices;
+  response_model.ModelResults _putPrices;
   int _index=0;
   bool _isFetchingData=false;
   Map<String, form.SubmitItems>_mapOfValues={};
@@ -99,7 +100,7 @@ class _HoldDataState extends State<HoldDataState>{
     1:false,
     2:false
   };
-  Function(String a, num b) _onFormSave(data_models.InputType inputType){
+  Function(String a, num b) _onFormSave(form_model.InputType inputType){
     return (String name, num value){
       _mapOfValues[name]=form.SubmitItems(
         inputType:inputType, 
@@ -107,7 +108,7 @@ class _HoldDataState extends State<HoldDataState>{
       );
     };
   }
-  void _setData(Future<Map<String, data_models.ModelResults>> getData){
+  void _setData(Future<Map<String, response_model.ModelResults>> getData){
     setState((){
       _isFetchingData=true;
     });

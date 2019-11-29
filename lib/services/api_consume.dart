@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'package:path/path.dart' as p;
-import 'package:demo_api_app_flutter/services/data_models.dart' as data_models;
+import 'package:demo_api_app_flutter/models/forms.dart' as form_model;
+import 'package:demo_api_app_flutter/models/response.dart' as response_model;
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:demo_api_app_flutter/pages/form.dart';
 
 const String API_VERSION="v1";
 const String BASE_ENDPOINT=kReleaseMode?"https://api.finside.org/realoptions":"http://10.0.2.2:8000";
-//const String BASE_ENDPOINT="https://api.finside.org/realoptions";
 
 Map<String, String> getHeaders(String apikey){
   return {
@@ -28,41 +28,41 @@ String adjustModelForUrl(String model){
 Function parseConstraint(String model){
   return (http.Response response){
     if(response.statusCode==200){
-      return data_models.InputConstraints.fromJson(
+      return form_model.InputConstraints.fromJson(
         Map<String, Map<String, dynamic> >.from(json.decode(response.body)),
         model
       );
     }
     else{
-      throw Exception(data_models.ErrorMessage.fromJson(json.decode(response.body)).message);
+      throw Exception(response_model.ErrorMessage.fromJson(json.decode(response.body)).message);
     }
   };
 }
 
-Future<data_models.InputConstraints> fetchConstraints(String model, String apiKey)  {
+Future<form_model.InputConstraints> fetchConstraints(String model, String apiKey)  {
   return Future.wait([
      http.get(
-      constructUrl(BASE_ENDPOINT, API_VERSION, data_models.MARKET_NAME, "parameters/parameter_ranges"), 
+      constructUrl(BASE_ENDPOINT, API_VERSION, form_model.MARKET_NAME, "parameters/parameter_ranges"), 
       headers:getHeaders(apiKey)
-    ).then(parseConstraint(data_models.MARKET_NAME)),
+    ).then(parseConstraint(form_model.MARKET_NAME)),
     http.get(
       constructUrl(BASE_ENDPOINT, API_VERSION, model, "parameters/parameter_ranges"), 
       headers:getHeaders(apiKey)
     ).then(parseConstraint(model)),
   ]).then((results){ //wish I could desctructure this
-    return data_models.InputConstraints.append(results[0], results[1]);
+    return form_model.InputConstraints.append(results[0], results[1]);
   });
 }
 
 
-data_models.ModelResults parseResult(http.Response response){
+response_model.ModelResults parseResult(http.Response response){
   if(response.statusCode==200){
-    return data_models.ModelResults.fromJson(
+    return response_model.ModelResults.fromJson(
       List<Map<String, dynamic> >.from(json.decode(response.body))
     );
   }
   else{
-    throw Exception(data_models.ErrorMessage.fromJson(json.decode(response.body)).message);
+    throw Exception(response_model.ErrorMessage.fromJson(json.decode(response.body)).message);
   }
 }
 
@@ -70,10 +70,10 @@ Map convertSubmission(Map<String, SubmitItems> submittedJson, Function generateS
   Map<String, dynamic> convertedMap={};
   submittedJson.forEach((key, value){
     switch(value.inputType){
-      case data_models.InputType.Market:
+      case form_model.InputType.Market:
         convertedMap[key]=value.value;
         break;
-      case data_models.InputType.Model:
+      case form_model.InputType.Model:
         if(!convertedMap.containsKey("cf_parameters")){
           convertedMap["cf_parameters"]={};
         }
@@ -82,12 +82,12 @@ Map convertSubmission(Map<String, SubmitItems> submittedJson, Function generateS
     }
   });
   convertedMap["strikes"]=generateStrikes(
-    convertedMap["asset"], data_models.NUM_STRIKES, data_models.PERCENT_RANGE
+    convertedMap["asset"], form_model.NUM_STRIKES, form_model.PERCENT_RANGE
   );
   return convertedMap;
 }
 
-Future<data_models.ModelResults> fetchModelCalculator(
+Future<response_model.ModelResults> fetchModelCalculator(
   String model, 
   String optionType, 
   String sensitivity, 
@@ -98,10 +98,10 @@ Future<data_models.ModelResults> fetchModelCalculator(
   return http.post(
     constructUrl(BASE_ENDPOINT, API_VERSION, model, p.join("calculator", optionType, sensitivity))+"?includeImpliedVolatility=$includeIV",
     headers:getHeaders(apiKey),
-    body:jsonEncode(convertSubmission(body, data_models.generateStrikes)),
+    body:jsonEncode(convertSubmission(body, form_model.generateStrikes)),
   ).then(parseResult);
 }
-Future<data_models.ModelResults> fetchModelDensity(
+Future<response_model.ModelResults> fetchModelDensity(
   String model, 
   String apiKey, 
   Map<String, SubmitItems>  body
@@ -109,11 +109,11 @@ Future<data_models.ModelResults> fetchModelDensity(
   return http.post(
     constructUrl(BASE_ENDPOINT, API_VERSION, model, "density"),
     headers:getHeaders(apiKey),
-    body:jsonEncode(convertSubmission(body, data_models.generateStrikes)),
+    body:jsonEncode(convertSubmission(body, form_model.generateStrikes)),
   ).then(parseResult);
 }
 
-Future<Map<String, data_models.ModelResults>> fetchOptionPricesAndDensity(String model, String apiKey, Map<String, SubmitItems> body){
+Future<Map<String, response_model.ModelResults>> fetchOptionPricesAndDensity(String model, String apiKey, Map<String, SubmitItems> body){
   return Future.wait([
     fetchModelCalculator(model, "call", "price", true, apiKey, body),
     fetchModelCalculator(model, "put", "price", false, apiKey, body),

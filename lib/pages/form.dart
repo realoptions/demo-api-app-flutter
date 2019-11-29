@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:demo_api_app_flutter/components/CustomPadding.dart';
 import 'package:demo_api_app_flutter/components/CustomTextFields.dart';
-import 'package:demo_api_app_flutter/services/data_models.dart' as data_models;
+import 'package:demo_api_app_flutter/models/response.dart' as response_model;
+import 'package:demo_api_app_flutter/models/forms.dart' as form_model;
 import 'package:demo_api_app_flutter/services/api_consume.dart';
 
-typedef SubmitType = void Function(Future<Map<String, data_models.ModelResults>> values);
-typedef FormSave = Function(String a, num b) Function(data_models.InputType inputType);
+typedef SubmitType = void Function(Future<Map<String, response_model.ModelResults>> values);
+typedef FormSave = Function(String a, num b) Function(form_model.InputType inputType);
 const Map<String, String> defaultValueMap={
   "num_u":"8",
   "asset":"50.0",
@@ -14,7 +15,7 @@ const Map<String, String> defaultValueMap={
 
 class SubmitItems{
   final num value;
-  final data_models.InputType inputType;
+  final form_model.InputType inputType;
   const SubmitItems({
     this.value,
     this.inputType
@@ -31,7 +32,7 @@ String valueOtherwiseNull(String value, String defaultValue){
 String getDefaultFormValue(
   Map<String, String> defaultValueMap,
   Map<String, SubmitItems> formValues,
-  data_models.InputConstraint constraint,
+  form_model.InputConstraint constraint,
 ){
   //formValues take precedence
   SubmitItems formValue=formValues[constraint.name];
@@ -42,7 +43,7 @@ String getDefaultFormValue(
 }
 
 Function getField(Function onSubmit, Map<String, SubmitItems> formValues){
-  return (data_models.InputConstraint constraint){
+  return (form_model.InputConstraint constraint){
     String defaultValue=getDefaultFormValue(
       defaultValueMap, formValues, constraint
     );
@@ -110,7 +111,7 @@ class SpecToForm extends StatelessWidget {
     @required this.formValues,
     @required this.onSave,
   }) : super(key: key);
-  final data_models.InputConstraints constraints;
+  final form_model.InputConstraints constraints;
   final String model;
   final SubmitType onSubmit;
   final String apiKey;
