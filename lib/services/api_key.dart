@@ -1,20 +1,7 @@
 import 'dart:async';
-
-//import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-class ApiKey {
-  final int id;
-  final String key;
-  ApiKey({this.id, this.key});
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'key': key
-    };
-  }
-}
+import 'package:demo_api_app_flutter/models/api_key.dart' as key_model;
 
-//var dbPath = await getDatabasesPath();
 final Future<Database> database = openDatabase(
   // Set the path to the database.
   'api_key_store.db',
@@ -30,7 +17,7 @@ final Future<Database> database = openDatabase(
   version: 1,
 );
 
-Future<void> insertKey(ApiKey key) async {
+Future<void> insertKey(key_model.ApiKey key) async {
   // Get a reference to the database.
   final Database db = await database;
 
@@ -45,7 +32,7 @@ Future<void> insertKey(ApiKey key) async {
   );
 }
 
-Future<List<ApiKey>>retrieveKey() async {
+Future<List<key_model.ApiKey>>retrieveKey() async {
   // Get a reference to the database.
   final Database db = await database;
 
@@ -54,7 +41,7 @@ Future<List<ApiKey>>retrieveKey() async {
   print(maps.length);
   // Convert the List<Map<String, dynamic> into a List<Dog>.
   return List.generate(maps.length, (i) {
-    return ApiKey(
+    return key_model.ApiKey(
       id: maps[i]['id'],
       key: maps[i]['key'],
     );

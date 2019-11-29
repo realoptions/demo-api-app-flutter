@@ -1,101 +1,89 @@
 import 'package:flutter/material.dart';
+import 'package:demo_api_app_flutter/blocs/api_bloc.dart';
+import 'package:demo_api_app_flutter/blocs/select_model_bloc.dart';
+import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
+import 'package:demo_api_app_flutter/models/models.dart';
 
-class MyAppBar extends StatefulWidget with PreferredSizeWidget{
-  MyAppBar({
-    @required this.title, 
-    @required this.onApiKeyChange, 
-    @required this.selectedModel, 
-    @required this.onSelection,
-    @required this.choices
-  });
-
+class OptionPriceAppBar extends StatelessWidget with PreferredSizeWidget{
+  OptionPriceAppBar({@required this.title, @required this.choices});
   final String title;
-  final Function onApiKeyChange;  //takes string, returns void (sets state)
-  final String selectedModel;
-  final Function onSelection;
-  final List<String> choices;
-  @override
-  _MyAppBar createState() => _MyAppBar();
+  final List<Model> choices;
   @override
   Size get preferredSize => Size.fromHeight(kToolbarHeight);
-}
-
-class _MyAppBar extends State<MyAppBar> {
-  
-  String _apiKey=""; 
-
-  void _onTextFieldChange(String text){
-    setState((){
-      _apiKey=text;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      // Here we take the value from the MyHomePage object that was created by
-      // the App.build method, and use it to set our appbar title.
-      title: Text(widget.title+": "+widget.selectedModel),
-      actions: <Widget>[
-        IconButton(
-          icon: Icon(Icons.lock),
-          onPressed: () {
-            showDialog<void>(context: context, builder: (BuildContext context) {
-              return new AlertDialog(
-                contentPadding: const EdgeInsets.all(16.0),
-                content: new Row(
-                  children: <Widget>[
-                    new Expanded(
-                      child: new TextField(
-                        autofocus: true,
-                        onChanged: _onTextFieldChange,
-                        decoration: new InputDecoration(
-                            labelText: 'API Key'
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-                actions: <Widget>[
-                  new FlatButton(
-                      child: const Text('CANCEL'),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      }),
-                  new FlatButton(
-                      child: const Text('SAVE'),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        widget.onApiKeyChange(_apiKey);
-                        
-                      })
-                ],
-              );
-            });
-          },
-        ),
-        IconButton(
-          icon: Icon(Icons.more_vert),
-          onPressed: () {
-            showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-              return ListView(
-                shrinkWrap: true,
-                children: widget.choices.map((choice)=> RadioListTile<String>(
-                    title: Text(choice),
-                    value: choice,
-                    groupValue: widget.selectedModel,
-                    onChanged: (choice){
-                      widget.onSelection(choice);
-                      Navigator.pop(context);
-                    }
-                  )
-                ).toList()
-              );
-            });
-          },
-        ),
-      ],
-    );
+    final SelectModelBloc selectModelBloc =
+        BlocProvider.of<SelectModelBloc>(context);
+    final ApiBloc apiBloc = BlocProvider.of<ApiBloc>(context);
+    return StreamBuilder(
+        stream: selectModelBloc.outSelectedModel,
+        builder: (buildContext, snapshot) {
+          var selectedModel = snapshot.data;
+          return AppBar(
+            title: Text(this.title + ": " + selectedModel),
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(Icons.lock),
+                onPressed: () {
+                  showDialog<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return new AlertDialog(
+                          //contentPadding: const EdgeInsets.all(16.0),
+                          content: new Row(
+                            children: <Widget>[
+                              new Expanded(
+                                child: new TextField(
+                                  autofocus: true,
+                                  onChanged: apiBloc.setApiKey.add,
+                                  decoration:
+                                      new InputDecoration(labelText: 'API Key'),
+                                ),
+                              )
+                            ],
+                          ),
+                          actions: <Widget>[
+                            new FlatButton(
+                                child: const Text('CANCEL'),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                }),
+                            new FlatButton(
+                                child: const Text('SAVE'),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  apiBloc.saveApiKey();
+                                  //widget.onApiKeyChange(_apiKey);
+                                })
+                          ],
+                        );
+                      });
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.more_vert),
+                onPressed: () {
+                  showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return ListView(
+                            shrinkWrap: true,
+                            children: this
+                                .choices
+                                .map((choice) => RadioListTile<String>(
+                                    title: Text(choice.label),
+                                    value: choice.value,
+                                    groupValue: selectedModel,
+                                    onChanged: (choice) {
+                                      selectModelBloc.setModel.add(choice);
+                                      Navigator.pop(context);
+                                    }))
+                                .toList());
+                      });
+                },
+              ),
+            ],
+          );
+        });
   }
 }
-

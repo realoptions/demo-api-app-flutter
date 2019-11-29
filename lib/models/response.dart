@@ -1,15 +1,12 @@
-
-class ErrorMessage{
+class ErrorMessage {
   String message;
-  ErrorMessage({
-    this.message
-  });
-  factory ErrorMessage.fromJson(Map<String, dynamic> parsedJson){
-    return ErrorMessage(message:parsedJson['message']);
+  ErrorMessage({this.message});
+  factory ErrorMessage.fromJson(Map<String, dynamic> parsedJson) {
+    return ErrorMessage(message: parsedJson['message']);
   }
 }
 
-class ModelResult{
+class ModelResult {
   num value;
   num atPoint;
   num iv;
@@ -18,7 +15,7 @@ class ModelResult{
     this.atPoint,
     this.iv,
   });
-  factory ModelResult.fromJson(Map<String, dynamic> parsedJson){
+  factory ModelResult.fromJson(Map<String, dynamic> parsedJson) {
     return ModelResult(
       value: parsedJson['value'],
       atPoint: parsedJson['at_point'],
@@ -27,13 +24,12 @@ class ModelResult{
   }
 }
 
-class ModelResults{
+class ModelResults {
   List<ModelResult> results;
-  ModelResults({
-    this.results
-  });
-  factory ModelResults.fromJson(List<Map<String, dynamic>> parsedJson){
-    return ModelResults(results:parsedJson.map((item){
+  ModelResults({this.results});
+  factory ModelResults.fromJson(List<Map<String, dynamic>> parsedJson) {
+    return ModelResults(
+        results: parsedJson.map((item) {
       return ModelResult.fromJson(item);
     }).toList());
   }
