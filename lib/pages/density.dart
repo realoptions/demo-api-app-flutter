@@ -48,6 +48,9 @@ class _Density extends StatelessWidget {
     return StreamBuilder<ModelResults>(
         stream: bloc.outDensityResults,
         builder: (buildContext, snapshot) {
+          if (snapshot.data == null) {
+            return Center(child: CircularProgressIndicator());
+          }
           var density = snapshot.data;
           var densitySeries = [
             charts.Series(

@@ -46,6 +46,9 @@ class _OptionPrices extends StatelessWidget {
     return StreamBuilder<Map<String, ModelResults>>(
         stream: bloc.outOptionResults,
         builder: (buildContext, snapshot) {
+          if (snapshot.data == null) {
+            return Center(child: CircularProgressIndicator());
+          }
           var callPrices = snapshot.data["call"];
           var putPrices = snapshot.data["put"];
           var optionSeries = [

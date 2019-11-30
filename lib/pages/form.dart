@@ -81,7 +81,6 @@ class SpecToForm extends StatelessWidget {
               bloc.onSubmit();
               //is this the optimal way??
               var submittedBody = bloc.getCurrentForm();
-              print(submittedBody);
               densityBloc.getDensity(model, apiKey, submittedBody);
               optionsBloc.getOptionPrices(model, apiKey, submittedBody);
             }
