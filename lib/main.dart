@@ -33,7 +33,6 @@ class StartupPage extends StatelessWidget {
         stream: bloc.outHomeState,
         initialData: StreamProgress.Busy,
         builder: (buildContext, snapshot) {
-          print("at main");
           switch (snapshot.data) {
             case StreamProgress.Busy:
               return Center(child: CircularProgressIndicator());

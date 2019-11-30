@@ -16,3 +16,6 @@ class PageState {
   int index;
   final List<bool> showBadges;
 }
+
+const int DENSITY_PAGE = 1;
+const int OPTIONS_PAGE = 2;

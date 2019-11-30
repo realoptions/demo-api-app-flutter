@@ -1,8 +1,7 @@
 import 'package:demo_api_app_flutter/blocs/constraints_bloc.dart';
 import 'package:demo_api_app_flutter/blocs/options_bloc.dart';
 import 'package:demo_api_app_flutter/blocs/select_page_bloc.dart';
-import 'package:demo_api_app_flutter/models/api_key.dart';
-import 'package:demo_api_app_flutter/models/models.dart';
+import 'package:demo_api_app_flutter/models/pages.dart';
 import 'package:flutter/material.dart';
 import 'package:demo_api_app_flutter/components/CustomPadding.dart';
 import 'package:demo_api_app_flutter/components/CustomTextFields.dart';
@@ -84,10 +83,12 @@ class SpecToForm extends StatelessWidget {
               //is this the optimal way??
               var submittedBody = bloc.getCurrentForm();
               densityBloc.getDensity(model, apiKey, submittedBody).then((_) {
-                pageBloc.setBadge(1);
+                pageBloc.setBadge(DENSITY_PAGE);
               });
-              optionsBloc.getOptionPrices(model, apiKey, submittedBody).then((_) {
-                pageBloc.setBadge(2);
+              optionsBloc
+                  .getOptionPrices(model, apiKey, submittedBody)
+                  .then((_) {
+                pageBloc.setBadge(OPTIONS_PAGE);
               });
             }
           },

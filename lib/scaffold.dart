@@ -35,33 +35,24 @@ class AppScaffold extends StatelessWidget {
           return StreamBuilder<ApiKey>(
               stream: apiBloc.outApiKey,
               builder: (buildContext, snapshot) {
-                print(
-                    "should be called ohnly on load, when model changes, or when API changes");
-                switch (snapshot.connectionState) {
-                  case ConnectionState.waiting:
-                  case ConnectionState.none:
-                    return Center(child: CircularProgressIndicator());
-                  case ConnectionState.active:
-                  case ConnectionState.done:
-                    final ApiKey apiKey = snapshot.data;
-                    return BlocProvider<ConstraintsBloc>(
-                        bloc: ConstraintsBloc(model.value, apiKey.key),
-                        child: BlocProvider<DensityBloc>(
-                            bloc:
-                                DensityBloc(), //needed so we can get the functions "getDensity" and "getOptionPrices" in the submit function
-                            child: BlocProvider<OptionsBloc>(
-                                bloc: OptionsBloc(),
-                                child: BlocProvider<SelectPageBloc>(
-                                  bloc: SelectPageBloc(),
-                                  child: _Scaffold(
-                                      model: model,
-                                      apiKey: apiKey,
-                                      title: this.title),
-                                ))));
-
-                  default:
-                    return Center(child: CircularProgressIndicator());
+                final ApiKey apiKey = snapshot.data;
+                if (apiKey == null) {
+                  return Center(child: CircularProgressIndicator());
                 }
+                return BlocProvider<ConstraintsBloc>(
+                    bloc: ConstraintsBloc(model.value, apiKey.key),
+                    child: BlocProvider<DensityBloc>(
+                        bloc:
+                            DensityBloc(), //needed so we can get the functions "getDensity" and "getOptionPrices" in the submit function
+                        child: BlocProvider<OptionsBloc>(
+                            bloc: OptionsBloc(),
+                            child: BlocProvider<SelectPageBloc>(
+                              bloc: SelectPageBloc(),
+                              child: _Scaffold(
+                                  model: model,
+                                  apiKey: apiKey,
+                                  title: this.title),
+                            ))));
               });
         });
   }
@@ -85,12 +76,13 @@ class _Scaffold extends StatelessWidget {
       PageEntry(
           widget: ShowDensity(),
           icon: badge.ShowBadge(
-              icon: Icon(Icons.show_chart), showBadge: showBadge[1]),
+              icon: Icon(Icons.show_chart), showBadge: showBadge[DENSITY_PAGE]),
           text: "Density"),
       PageEntry(
           widget: ShowOptionPrices(),
           icon: badge.ShowBadge(
-              icon: Icon(Icons.scatter_plot), showBadge: showBadge[2]),
+              icon: Icon(Icons.scatter_plot),
+              showBadge: showBadge[OPTIONS_PAGE]),
           text: "Prices"),
     ];
   }

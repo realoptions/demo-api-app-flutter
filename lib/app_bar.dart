@@ -26,39 +26,7 @@ class OptionPriceAppBar extends StatelessWidget with PreferredSizeWidget {
               IconButton(
                 icon: Icon(Icons.lock),
                 onPressed: () {
-                  showDialog<void>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return new AlertDialog(
-                          //contentPadding: const EdgeInsets.all(16.0),
-                          content: new Row(
-                            children: <Widget>[
-                              new Expanded(
-                                child: new TextField(
-                                  autofocus: true,
-                                  onChanged: apiBloc.setApiKey,
-                                  decoration:
-                                      new InputDecoration(labelText: 'API Key'),
-                                ),
-                              )
-                            ],
-                          ),
-                          actions: <Widget>[
-                            new FlatButton(
-                                child: const Text('CANCEL'),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                }),
-                            new FlatButton(
-                                child: const Text('SAVE'),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  apiBloc.saveApiKey();
-                                  //widget.onApiKeyChange(_apiKey);
-                                })
-                          ],
-                        );
-                      });
+                  _showDialog(context, apiBloc);
                 },
               ),
               IconButton(
@@ -87,4 +55,38 @@ class OptionPriceAppBar extends StatelessWidget with PreferredSizeWidget {
           );
         });
   }
+}
+
+Future<void> _showDialog(BuildContext context, ApiBloc apiBloc) {
+  return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return new AlertDialog(
+          //contentPadding: const EdgeInsets.all(16.0),
+          content: new Row(
+            children: <Widget>[
+              new Expanded(
+                child: new TextField(
+                  autofocus: true,
+                  onChanged: apiBloc.setApiKey,
+                  decoration: new InputDecoration(labelText: 'API Key'),
+                ),
+              )
+            ],
+          ),
+          actions: <Widget>[
+            new FlatButton(
+                child: const Text('CANCEL'),
+                onPressed: () {
+                  Navigator.pop(context);
+                }),
+            new FlatButton(
+                child: const Text('SAVE'),
+                onPressed: () {
+                  Navigator.pop(context);
+                  apiBloc.saveApiKey();
+                })
+          ],
+        );
+      });
 }
