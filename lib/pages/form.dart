@@ -2,14 +2,9 @@ import 'package:demo_api_app_flutter/blocs/constraints_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:demo_api_app_flutter/components/CustomPadding.dart';
 import 'package:demo_api_app_flutter/components/CustomTextFields.dart';
-//import 'package:demo_api_app_flutter/models/response.dart' as response_model;
 import 'package:demo_api_app_flutter/models/forms.dart';
 import 'package:demo_api_app_flutter/blocs/form_bloc.dart';
 import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
-
-//typedef SubmitType = void Function(
-//    Future<Map<String, response_model.ModelResults>> values);
-//typedef FormSave = Function(String a, num b) Function(InputType inputType);
 
 Widget getField(
     Function onSubmit, String defaultValue, InputConstraint constraint) {
@@ -31,10 +26,9 @@ class InputForm extends StatelessWidget {
   Widget build(BuildContext context) {
     ConstraintsBloc bloc = BlocProvider.of<ConstraintsBloc>(context);
 
-    return StreamBuilder(
+    return StreamBuilder<InputConstraints>(
         stream: bloc.outConstraintsController,
         builder: (buildContext, snapshot) {
-          print("in stream builder for form");
           print(snapshot.connectionState);
           switch (snapshot.connectionState) {
             case ConnectionState.none:
@@ -43,6 +37,10 @@ class InputForm extends StatelessWidget {
             case ConnectionState.active:
             case ConnectionState.done:
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+              if (snapshot.data == null) {
+                return Center(child: CircularProgressIndicator());
+              }
+              print(snapshot.data);
               return BlocProvider<FormBloc>(
                   bloc: FormBloc(snapshot.data), child: SpecToForm());
             default: //can never get here
@@ -60,13 +58,15 @@ class SpecToForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     FormBloc bloc = BlocProvider.of<FormBloc>(context);
-    return StreamBuilder(
+    return StreamBuilder<Iterable<FormItem>>(
       stream: bloc.outFormController,
+      initialData: [],
       builder: (buildContext, snapshot) {
-        List<Widget> formFields = snapshot.data.map((formItem) {
+        List<Widget> formFields =
+            snapshot.data.map<Widget>((FormItem formItem) {
           return getField(
               bloc.onSave, formItem.defaultValue, formItem.constraint);
-        });
+        }).toList();
         formFields.add(PaddingForm(
             child: RaisedButton(
           onPressed: () {
@@ -74,7 +74,7 @@ class SpecToForm extends StatelessWidget {
             // otherwise.
             if (_formKey.currentState.validate()) {
               _formKey.currentState.save();
-              bloc.onSubmit(snapshot.data);
+              bloc.onSubmit();
               //this.onSubmit(fetchOptionPricesAndDensity(
               //   this.model, this.apiKey, this.formValues));
             }
