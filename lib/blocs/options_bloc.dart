@@ -22,11 +22,11 @@ class OptionsBloc implements bloc_provider.BlocBase {
     inOptionsProgress.add(StreamProgress.NoData);
   }
 
-  void getOptionPrices(
+  Future<void> getOptionPrices(
       String model, String apiKey, Map<String, SubmitItems> submittedBody) {
     var body = convertSubmission(submittedBody, generateStrikes);
     inOptionsProgress.add(StreamProgress.Busy);
-    fetchOptionPrices(model, apiKey, body).then((result) {
+    return fetchOptionPrices(model, apiKey, body).then((result) {
       _optionController.sink.add(result);
       inOptionsProgress.add(StreamProgress.DataRetrieved);
     }).catchError(_optionController.addError);

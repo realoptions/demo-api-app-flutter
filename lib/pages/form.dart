@@ -1,5 +1,6 @@
 import 'package:demo_api_app_flutter/blocs/constraints_bloc.dart';
 import 'package:demo_api_app_flutter/blocs/options_bloc.dart';
+import 'package:demo_api_app_flutter/blocs/select_page_bloc.dart';
 import 'package:demo_api_app_flutter/models/api_key.dart';
 import 'package:demo_api_app_flutter/models/models.dart';
 import 'package:flutter/material.dart';
@@ -62,6 +63,7 @@ class SpecToForm extends StatelessWidget {
     FormBloc bloc = BlocProvider.of<FormBloc>(context);
     DensityBloc densityBloc = BlocProvider.of<DensityBloc>(context);
     OptionsBloc optionsBloc = BlocProvider.of<OptionsBloc>(context);
+    SelectPageBloc pageBloc = BlocProvider.of<SelectPageBloc>(context);
     return StreamBuilder<Iterable<FormItem>>(
       stream: bloc.outFormController,
       initialData: [],
@@ -81,8 +83,12 @@ class SpecToForm extends StatelessWidget {
               bloc.onSubmit();
               //is this the optimal way??
               var submittedBody = bloc.getCurrentForm();
-              densityBloc.getDensity(model, apiKey, submittedBody);
-              optionsBloc.getOptionPrices(model, apiKey, submittedBody);
+              densityBloc.getDensity(model, apiKey, submittedBody).then((_) {
+                pageBloc.setBadge(1);
+              });
+              optionsBloc.getOptionPrices(model, apiKey, submittedBody).then((_) {
+                pageBloc.setBadge(2);
+              });
             }
           },
           child: Text('Submit'),

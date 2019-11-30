@@ -18,11 +18,11 @@ class DensityBloc implements bloc_provider.BlocBase {
     inDensityProgress.add(StreamProgress.NoData);
   }
 
-  void getDensity(
+  Future<void> getDensity(
       String model, String apiKey, Map<String, SubmitItems> submittedBody) {
     var body = convertSubmission(submittedBody, generateStrikes);
     inDensityProgress.add(StreamProgress.Busy);
-    fetchModelDensity(model, apiKey, body).then((result) {
+    return fetchModelDensity(model, apiKey, body).then((result) {
       _densityController.sink.add(result);
       inDensityProgress.add(StreamProgress.DataRetrieved);
     }).catchError(_densityController.addError);
