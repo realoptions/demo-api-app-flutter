@@ -8,10 +8,10 @@ import 'package:rxdart/rxdart.dart';
 import 'package:demo_api_app_flutter/models/progress.dart';
 
 class DensityBloc implements bloc_provider.BlocBase {
-  StreamController<ModelResults> _densityController = BehaviorSubject();
+  StreamController<List<ModelResult>> _densityController = BehaviorSubject();
   StreamController<StreamProgress> _connectionController = BehaviorSubject();
 
-  Stream<ModelResults> get outDensityResults => _densityController.stream;
+  Stream<List<ModelResult>> get outDensityResults => _densityController.stream;
   Stream<StreamProgress> get outDensityProgress => _connectionController.stream;
   StreamSink get inDensityProgress => _connectionController.sink;
   DensityBloc() {

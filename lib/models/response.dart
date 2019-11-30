@@ -23,14 +23,3 @@ class ModelResult {
     );
   }
 }
-
-class ModelResults {
-  List<ModelResult> results;
-  ModelResults({this.results});
-  factory ModelResults.fromJson(List<Map<String, dynamic>> parsedJson) {
-    return ModelResults(
-        results: parsedJson.map((item) {
-      return ModelResult.fromJson(item);
-    }).toList());
-  }
-}

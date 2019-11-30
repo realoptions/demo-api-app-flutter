@@ -35,37 +35,22 @@ List<double> generateStrikes(
   return strikes;
 }
 
-class InputConstraints {
-  List<InputConstraint> inputConstraints;
-  InputConstraints({this.inputConstraints});
-
-  factory InputConstraints.append(InputConstraints firstInputConstraints,
-      InputConstraints secondInputConstraints) {
-    return InputConstraints(inputConstraints: [
-      ...firstInputConstraints.inputConstraints,
-      ...secondInputConstraints.inputConstraints
-    ]);
-  }
-
-  factory InputConstraints.fromJson(
-      Map<String, Map<String, dynamic>> parsedJson, String model) {
-    List<InputConstraint> inputConstraints = [];
-    parsedJson.forEach((key, value) {
-      num lower = value['lower'];
-      num upper = value['upper'];
-      num defaultValue = (lower + upper) / 2.0;
-      inputConstraints.add(InputConstraint(
-          name: key,
-          lower: value['lower'],
-          upper: value['upper'],
-          types:
-              value['types'] == 'float' ? FieldType.Float : FieldType.Integer,
-          defaultValue: defaultValue,
-          inputType:
-              model == MARKET_NAME ? InputType.Market : InputType.Model));
-    });
-    return InputConstraints(inputConstraints: inputConstraints);
-  }
+List<InputConstraint> parseJson(
+    Map<String, Map<String, dynamic>> response, String model) {
+  List<InputConstraint> inputConstraints = [];
+  response.forEach((key, value) {
+    num lower = value['lower'];
+    num upper = value['upper'];
+    num defaultValue = (lower + upper) / 2.0;
+    inputConstraints.add(InputConstraint(
+        name: key,
+        lower: value['lower'],
+        upper: value['upper'],
+        types: value['types'] == 'float' ? FieldType.Float : FieldType.Integer,
+        defaultValue: defaultValue,
+        inputType: model == MARKET_NAME ? InputType.Market : InputType.Model));
+  });
+  return inputConstraints;
 }
 
 class SubmitItems {

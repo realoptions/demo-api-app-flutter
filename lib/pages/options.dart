@@ -43,7 +43,7 @@ class _OptionPrices extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final OptionsBloc bloc = BlocProvider.of<OptionsBloc>(context);
-    return StreamBuilder<Map<String, ModelResults>>(
+    return StreamBuilder<Map<String, List<ModelResult>>>(
         stream: bloc.outOptionResults,
         builder: (buildContext, snapshot) {
           if (snapshot.data == null) {
@@ -57,14 +57,14 @@ class _OptionPrices extends StatelessWidget {
               domainFn: (ModelResult optionData, _) => optionData.atPoint,
               measureFn: (ModelResult optionData, _) => optionData.value,
               colorFn: (ModelResult optionData, _) => teal,
-              data: callPrices.results,
+              data: callPrices,
             ),
             charts.Series(
               id: 'Put Prices',
               domainFn: (ModelResult optionData, _) => optionData.atPoint,
               measureFn: (ModelResult optionData, _) => optionData.value,
               colorFn: (ModelResult optionData, _) => orange,
-              data: putPrices.results,
+              data: putPrices,
             )
           ];
           var domain = utils.getDomain(callPrices);
@@ -77,7 +77,7 @@ class _OptionPrices extends StatelessWidget {
           var ivSeries = [
             charts.Series(
               id: 'Implied Volatility',
-              data: callPrices.results,
+              data: callPrices,
               domainFn: (ModelResult optionData, _) => optionData.atPoint,
               measureFn: (ModelResult optionData, _) => optionData.iv,
               colorFn: (ModelResult optionData, _) => orange,

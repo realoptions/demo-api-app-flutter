@@ -32,13 +32,12 @@ Future<void> insertKey(key_model.ApiKey key) async {
   );
 }
 
-Future<List<key_model.ApiKey>>retrieveKey() async {
+Future<List<key_model.ApiKey>> retrieveKey() async {
   // Get a reference to the database.
   final Database db = await database;
 
   // Query the table for all The Dogs.
   final List<Map<String, dynamic>> maps = await db.query('api_key_store');
-  print(maps.length);
   // Convert the List<Map<String, dynamic> into a List<Dog>.
   return List.generate(maps.length, (i) {
     return key_model.ApiKey(

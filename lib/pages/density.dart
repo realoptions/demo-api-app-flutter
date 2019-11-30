@@ -13,9 +13,7 @@ var orange = utils.convertColor(Colors.orange);
 class ShowDensity extends StatelessWidget {
   const ShowDensity({
     Key key,
-    //@required this.density,
   });
-  //final response_model.ModelResults density;
   @override
   Widget build(BuildContext context) {
     final DensityBloc bloc = BlocProvider.of<DensityBloc>(context);
@@ -41,11 +39,10 @@ class ShowDensity extends StatelessWidget {
 }
 
 class _Density extends StatelessWidget {
-  _Density();
   @override
   Widget build(BuildContext context) {
     final DensityBloc bloc = BlocProvider.of<DensityBloc>(context);
-    return StreamBuilder<ModelResults>(
+    return StreamBuilder<List<ModelResult>>(
         stream: bloc.outDensityResults,
         builder: (buildContext, snapshot) {
           if (snapshot.data == null) {
@@ -58,7 +55,7 @@ class _Density extends StatelessWidget {
               domainFn: (ModelResult optionData, _) => optionData.atPoint,
               measureFn: (ModelResult optionData, _) => optionData.value,
               colorFn: (ModelResult optionData, _) => orange,
-              data: density.results,
+              data: density,
             ),
           ];
           var domain = utils.getDomain(density);

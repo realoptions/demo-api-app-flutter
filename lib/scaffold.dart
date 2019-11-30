@@ -3,7 +3,7 @@ import 'package:demo_api_app_flutter/blocs/api_bloc.dart';
 import 'package:demo_api_app_flutter/blocs/select_model_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:demo_api_app_flutter/models/pages.dart';
-import 'package:demo_api_app_flutter/app_bar.dart';
+import 'package:demo_api_app_flutter/components/app_bar.dart';
 import 'package:demo_api_app_flutter/pages/form.dart';
 import 'package:demo_api_app_flutter/pages/options.dart';
 import 'package:demo_api_app_flutter/pages/density.dart';

@@ -39,13 +39,13 @@ class FormItem {
 
 class FormBloc implements BlocBase {
   Map<String, SubmitItems> _formValues = {};
-  InputConstraints _inputConstraints;
+  List<InputConstraint> _inputConstraints;
   StreamController<Iterable<FormItem>> _formController = BehaviorSubject();
   Stream<Iterable<FormItem>> get outFormController => _formController.stream;
 
   StreamSink get _inFormController => _formController.sink;
 
-  FormBloc(InputConstraints constraints) {
+  FormBloc(List<InputConstraint> constraints) {
     _inputConstraints = constraints;
     onSubmit();
   }
@@ -55,8 +55,7 @@ class FormBloc implements BlocBase {
   }
 
   void onSubmit() {
-    var formItems =
-        _inputConstraints.inputConstraints.map<FormItem>((constraint) {
+    var formItems = _inputConstraints.map<FormItem>((constraint) {
       return FormItem(
           defaultValue:
               getDefaultFormValue(defaultValueMap, _formValues, constraint),

@@ -29,7 +29,7 @@ class InputForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ConstraintsBloc bloc = BlocProvider.of<ConstraintsBloc>(context);
-    return StreamBuilder<InputConstraints>(
+    return StreamBuilder<List<InputConstraint>>(
         stream: bloc.outConstraintsController,
         builder: (buildContext, snapshot) {
           switch (snapshot.connectionState) {
