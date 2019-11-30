@@ -65,6 +65,10 @@ class FormBloc implements BlocBase {
     _inFormController.add(formItems);
   }
 
+  Map<String, SubmitItems> getCurrentForm() {
+    return _formValues;
+  }
+
   void dispose() {
     _formController.close();
   }

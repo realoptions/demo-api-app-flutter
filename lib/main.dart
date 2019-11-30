@@ -1,3 +1,4 @@
+import 'package:demo_api_app_flutter/models/progress.dart';
 import 'package:flutter/material.dart';
 import 'package:demo_api_app_flutter/scaffold.dart';
 import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
@@ -28,21 +29,19 @@ class StartupPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ApiBloc bloc = BlocProvider.of<ApiBloc>(context);
-    return StreamBuilder(
+    return StreamBuilder<StreamProgress>(
         stream: bloc.outHomeState,
-        initialData: HomeViewState.Busy,
+        initialData: StreamProgress.Busy,
         builder: (buildContext, snapshot) {
           print("at main");
           switch (snapshot.data) {
-            case HomeViewState.Busy:
+            case StreamProgress.Busy:
               return Center(child: CircularProgressIndicator());
-            case HomeViewState.DataRetrieved:
+            case StreamProgress.DataRetrieved:
               return BlocProvider<SelectModelBloc>(
-                  //even though AppScaffold doesn't need this, its children will
-                  bloc: SelectModelBloc(),
-                  child: AppScaffold(title: title));
-            case HomeViewState.NoData:
-              return Introduction(); //should automatically get the "ApiBloc" since the parent has it
+                  bloc: SelectModelBloc(), child: AppScaffold(title: title));
+            case StreamProgress.NoData:
+              return Introduction();
             default:
               return Center(
                   child: CircularProgressIndicator()); //will never get here

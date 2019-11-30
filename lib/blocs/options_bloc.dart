@@ -5,28 +5,34 @@ import 'package:demo_api_app_flutter/models/response.dart';
 import 'package:demo_api_app_flutter/models/forms.dart';
 import 'package:demo_api_app_flutter/utils/services.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:demo_api_app_flutter/models/progress.dart';
 
 class OptionsBloc implements bloc_provider.BlocBase {
-  StreamController<List<ModelResult>> _callController = BehaviorSubject();
-  StreamController<List<ModelResult>> _putController = BehaviorSubject();
+  StreamController<Map<String, ModelResults>> _optionController =
+      BehaviorSubject();
 
-  Stream<List<ModelResult>> get outCallResults => _callController.stream;
-  Stream<List<ModelResult>> get outPutResults => _putController.stream;
+  StreamController<StreamProgress> _connectionController = BehaviorSubject();
 
-  OptionsBloc();
+  Stream<Map<String, ModelResults>> get outOptionResults =>
+      _optionController.stream;
+  Stream<StreamProgress> get outOptionsProgress => _connectionController.stream;
+  StreamSink get inOptionsProgress => _connectionController.sink;
+
+  OptionsBloc() {
+    inOptionsProgress.add(StreamProgress.NoData);
+  }
 
   void getOptionPrices(
       String model, String apiKey, Map<String, SubmitItems> submittedBody) {
     var body = convertSubmission(submittedBody, generateStrikes);
-
-    fetchOptionPrices(model, apiKey, body).then((results) {
-      _callController.sink.add(results["call"].results);
-      _putController.sink.add(results["put"].results);
-    });
+    inOptionsProgress.add(StreamProgress.Busy);
+    fetchOptionPrices(model, apiKey, body).then((result) {
+      _optionController.sink.add(result);
+      inOptionsProgress.add(StreamProgress.DataRetrieved);
+    }).catchError(_optionController.addError);
   }
 
   void dispose() {
-    _callController.close();
-    _putController.close();
+    _optionController.close();
   }
 }

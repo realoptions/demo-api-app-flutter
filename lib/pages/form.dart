@@ -1,10 +1,14 @@
 import 'package:demo_api_app_flutter/blocs/constraints_bloc.dart';
+import 'package:demo_api_app_flutter/blocs/options_bloc.dart';
+import 'package:demo_api_app_flutter/models/api_key.dart';
+import 'package:demo_api_app_flutter/models/models.dart';
 import 'package:flutter/material.dart';
 import 'package:demo_api_app_flutter/components/CustomPadding.dart';
 import 'package:demo_api_app_flutter/components/CustomTextFields.dart';
 import 'package:demo_api_app_flutter/models/forms.dart';
 import 'package:demo_api_app_flutter/blocs/form_bloc.dart';
 import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
+import 'package:demo_api_app_flutter/blocs/density_bloc.dart';
 
 Widget getField(
     Function onSubmit, String defaultValue, InputConstraint constraint) {
@@ -19,17 +23,15 @@ Widget getField(
 }
 
 class InputForm extends StatelessWidget {
-  const InputForm({
-    Key key,
-  }) : super(key: key);
+  const InputForm({Key key, this.model, this.apiKey}) : super(key: key);
+  final String model;
+  final String apiKey;
   @override
   Widget build(BuildContext context) {
     ConstraintsBloc bloc = BlocProvider.of<ConstraintsBloc>(context);
-
     return StreamBuilder<InputConstraints>(
         stream: bloc.outConstraintsController,
         builder: (buildContext, snapshot) {
-          print(snapshot.connectionState);
           switch (snapshot.connectionState) {
             case ConnectionState.none:
             case ConnectionState.waiting:
@@ -40,9 +42,9 @@ class InputForm extends StatelessWidget {
               if (snapshot.data == null) {
                 return Center(child: CircularProgressIndicator());
               }
-              print(snapshot.data);
               return BlocProvider<FormBloc>(
-                  bloc: FormBloc(snapshot.data), child: SpecToForm());
+                  bloc: FormBloc(snapshot.data),
+                  child: SpecToForm(model: model, apiKey: apiKey));
             default: //can never get here
               return Center(child: CircularProgressIndicator());
           }
@@ -51,13 +53,15 @@ class InputForm extends StatelessWidget {
 }
 
 class SpecToForm extends StatelessWidget {
-  const SpecToForm({
-    Key key,
-  }) : super(key: key);
+  const SpecToForm({Key key, this.model, this.apiKey}) : super(key: key);
+  final String model;
+  final String apiKey;
   static final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     FormBloc bloc = BlocProvider.of<FormBloc>(context);
+    DensityBloc densityBloc = BlocProvider.of<DensityBloc>(context);
+    OptionsBloc optionsBloc = BlocProvider.of<OptionsBloc>(context);
     return StreamBuilder<Iterable<FormItem>>(
       stream: bloc.outFormController,
       initialData: [],
@@ -75,8 +79,11 @@ class SpecToForm extends StatelessWidget {
             if (_formKey.currentState.validate()) {
               _formKey.currentState.save();
               bloc.onSubmit();
-              //this.onSubmit(fetchOptionPricesAndDensity(
-              //   this.model, this.apiKey, this.formValues));
+              //is this the optimal way??
+              var submittedBody = bloc.getCurrentForm();
+              print(submittedBody);
+              densityBloc.getDensity(model, apiKey, submittedBody);
+              optionsBloc.getOptionPrices(model, apiKey, submittedBody);
             }
           },
           child: Text('Submit'),

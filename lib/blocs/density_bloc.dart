@@ -5,24 +5,31 @@ import 'package:demo_api_app_flutter/models/response.dart';
 import 'package:demo_api_app_flutter/models/forms.dart';
 import 'package:demo_api_app_flutter/utils/services.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:demo_api_app_flutter/models/progress.dart';
 
 class DensityBloc implements bloc_provider.BlocBase {
-  StreamController<List<ModelResult>> _densityController = BehaviorSubject();
+  StreamController<ModelResults> _densityController = BehaviorSubject();
+  StreamController<StreamProgress> _connectionController = BehaviorSubject();
 
-  Stream<List<ModelResult>> get outDensityResults => _densityController.stream;
-
-  DensityBloc();
+  Stream<ModelResults> get outDensityResults => _densityController.stream;
+  Stream<StreamProgress> get outDensityProgress => _connectionController.stream;
+  StreamSink get inDensityProgress => _connectionController.sink;
+  DensityBloc() {
+    inDensityProgress.add(StreamProgress.NoData);
+  }
 
   void getDensity(
       String model, String apiKey, Map<String, SubmitItems> submittedBody) {
     var body = convertSubmission(submittedBody, generateStrikes);
-
-    fetchModelDensity(model, apiKey, body).then((results) {
-      _densityController.sink.add(results.results);
-    });
+    inDensityProgress.add(StreamProgress.Busy);
+    fetchModelDensity(model, apiKey, body).then((result) {
+      _densityController.sink.add(result);
+      inDensityProgress.add(StreamProgress.DataRetrieved);
+    }).catchError(_densityController.addError);
   }
 
   void dispose() {
     _densityController.close();
+    _connectionController.close();
   }
 }

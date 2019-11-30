@@ -13,6 +13,8 @@ class ConstraintsBloc implements BlocBase {
   ConstraintsBloc(String model, String apiKey) {
     fetchConstraints(model, apiKey).then((result) {
       _inConstraintsController.add(result);
+    }).catchError((error) {
+      _inConstraintsController.addError(error);
     });
   }
 

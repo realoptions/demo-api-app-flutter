@@ -15,7 +15,7 @@ class OptionPriceAppBar extends StatelessWidget with PreferredSizeWidget {
     final SelectModelBloc selectBloc =
         BlocProvider.of<SelectModelBloc>(context);
     final ApiBloc apiBloc = BlocProvider.of<ApiBloc>(context);
-    return StreamBuilder(
+    return StreamBuilder<Model>(
         stream: selectBloc.outSelectedModel,
         initialData: this.choices[0],
         builder: (buildContext, snapshot) {

@@ -10,3 +10,9 @@ class PageEntry {
   final Widget icon;
   final String text;
 }
+
+class PageState {
+  PageState({this.index, this.showBadges});
+  int index;
+  final List<bool> showBadges;
+}

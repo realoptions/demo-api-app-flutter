@@ -1,4 +1,5 @@
 import 'package:demo_api_app_flutter/blocs/density_bloc.dart';
+import 'package:demo_api_app_flutter/models/progress.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:demo_api_app_flutter/models/response.dart';
@@ -18,7 +19,33 @@ class ShowDensity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final DensityBloc bloc = BlocProvider.of<DensityBloc>(context);
-    return StreamBuilder(
+    return StreamBuilder<StreamProgress>(
+        stream: bloc.outDensityProgress,
+        initialData: StreamProgress.Busy,
+        builder: (buildContext, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text(snapshot.error.toString()));
+          }
+          switch (snapshot.data) {
+            case StreamProgress.Busy:
+              return Center(child: CircularProgressIndicator());
+            case StreamProgress.NoData:
+              return Center(child: Text("Please submit parameters!"));
+            case StreamProgress.DataRetrieved:
+              return _Density();
+            default:
+              return Center(child: CircularProgressIndicator());
+          }
+        });
+  }
+}
+
+class _Density extends StatelessWidget {
+  _Density();
+  @override
+  Widget build(BuildContext context) {
+    final DensityBloc bloc = BlocProvider.of<DensityBloc>(context);
+    return StreamBuilder<ModelResults>(
         stream: bloc.outDensityResults,
         builder: (buildContext, snapshot) {
           var density = snapshot.data;
@@ -28,7 +55,7 @@ class ShowDensity extends StatelessWidget {
               domainFn: (ModelResult optionData, _) => optionData.atPoint,
               measureFn: (ModelResult optionData, _) => optionData.value,
               colorFn: (ModelResult optionData, _) => orange,
-              data: density,
+              data: density.results,
             ),
           ];
           var domain = utils.getDomain(density);

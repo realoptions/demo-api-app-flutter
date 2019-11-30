@@ -1,7 +1,7 @@
-import 'package:demo_api_app_flutter/components/StreamsBuilder.dart';
+import 'package:demo_api_app_flutter/models/progress.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:demo_api_app_flutter/models/response.dart' as response_model;
+import 'package:demo_api_app_flutter/models/response.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:demo_api_app_flutter/utils/chart_utils.dart' as utils;
 import 'package:demo_api_app_flutter/components/CustomPadding.dart' as padding;
@@ -18,30 +18,50 @@ class ShowOptionPrices extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final OptionsBloc bloc = BlocProvider.of<OptionsBloc>(context);
-    return StreamsBuilder(
-        streams: [bloc.outCallResults, bloc.outPutResults],
-        initialData: [null, null],
-        builder: (buildContext, snapshots) {
-          var callPrices = snapshots[0].data;
-          var putPrices = snapshots[1].data;
+    return StreamBuilder<StreamProgress>(
+        stream: bloc.outOptionsProgress,
+        initialData: StreamProgress.Busy,
+        builder: (buildContext, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text(snapshot.error.toString()));
+          }
+          switch (snapshot.data) {
+            case StreamProgress.Busy:
+              return Center(child: CircularProgressIndicator());
+            case StreamProgress.NoData:
+              return Center(child: Text("Please submit parameters!"));
+            case StreamProgress.DataRetrieved:
+              return _OptionPrices();
+            default:
+              return Center(child: CircularProgressIndicator());
+          }
+        });
+  }
+}
+
+class _OptionPrices extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final OptionsBloc bloc = BlocProvider.of<OptionsBloc>(context);
+    return StreamBuilder<Map<String, ModelResults>>(
+        stream: bloc.outOptionResults,
+        builder: (buildContext, snapshot) {
+          var callPrices = snapshot.data["call"];
+          var putPrices = snapshot.data["put"];
           var optionSeries = [
             charts.Series(
               id: 'Call Prices',
-              domainFn: (response_model.ModelResult optionData, _) =>
-                  optionData.atPoint,
-              measureFn: (response_model.ModelResult optionData, _) =>
-                  optionData.value,
-              colorFn: (response_model.ModelResult optionData, _) => teal,
-              data: callPrices,
+              domainFn: (ModelResult optionData, _) => optionData.atPoint,
+              measureFn: (ModelResult optionData, _) => optionData.value,
+              colorFn: (ModelResult optionData, _) => teal,
+              data: callPrices.results,
             ),
             charts.Series(
               id: 'Put Prices',
-              domainFn: (response_model.ModelResult optionData, _) =>
-                  optionData.atPoint,
-              measureFn: (response_model.ModelResult optionData, _) =>
-                  optionData.value,
-              colorFn: (response_model.ModelResult optionData, _) => orange,
-              data: putPrices,
+              domainFn: (ModelResult optionData, _) => optionData.atPoint,
+              measureFn: (ModelResult optionData, _) => optionData.value,
+              colorFn: (ModelResult optionData, _) => orange,
+              data: putPrices.results,
             )
           ];
           var domain = utils.getDomain(callPrices);
@@ -54,12 +74,10 @@ class ShowOptionPrices extends StatelessWidget {
           var ivSeries = [
             charts.Series(
               id: 'Implied Volatility',
-              data: callPrices,
-              domainFn: (response_model.ModelResult optionData, _) =>
-                  optionData.atPoint,
-              measureFn: (response_model.ModelResult optionData, _) =>
-                  optionData.iv,
-              colorFn: (response_model.ModelResult optionData, _) => orange,
+              data: callPrices.results,
+              domainFn: (ModelResult optionData, _) => optionData.atPoint,
+              measureFn: (ModelResult optionData, _) => optionData.iv,
+              colorFn: (ModelResult optionData, _) => orange,
             )
           ];
           var range = utils.getIVRange(callPrices);

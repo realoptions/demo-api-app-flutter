@@ -14,7 +14,6 @@ import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
 import 'package:demo_api_app_flutter/blocs/select_page_bloc.dart';
 import 'package:demo_api_app_flutter/blocs/options_bloc.dart';
 import 'package:demo_api_app_flutter/blocs/density_bloc.dart';
-import 'package:demo_api_app_flutter/components/StreamsBuilder.dart';
 
 class AppScaffold extends StatelessWidget {
   AppScaffold({
@@ -27,23 +26,43 @@ class AppScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final SelectModelBloc selectBloc =
         BlocProvider.of<SelectModelBloc>(context);
-    final ApiBloc apiBloc = BlocProvider.of<ApiBloc>(context);
-    return StreamsBuilder(
-        streams: [
-          selectBloc.outSelectedModel,
-          apiBloc.outApiKey,
-        ],
-        initialData: [
-          modelChoices[0],
-          ApiKey(id: 1, key: "")
-        ],
-        builder: (buildContext, snapshots) {
-          return BlocProvider<SelectPageBloc>(
-              bloc: SelectPageBloc(),
-              child: _Scaffold(
-                  model: snapshots[0].data,
-                  apiKey: snapshots[1].data,
-                  title: title));
+    return StreamBuilder<Model>(
+        initialData: modelChoices[0],
+        stream: selectBloc.outSelectedModel,
+        builder: (buildContext, snapshot) {
+          final ApiBloc apiBloc = BlocProvider.of<ApiBloc>(context);
+          final Model model = snapshot.data;
+          return StreamBuilder<ApiKey>(
+              stream: apiBloc.outApiKey,
+              builder: (buildContext, snapshot) {
+                print(
+                    "should be called ohnly on load, when model changes, or when API changes");
+                switch (snapshot.connectionState) {
+                  case ConnectionState.waiting:
+                  case ConnectionState.none:
+                    return Center(child: CircularProgressIndicator());
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    final ApiKey apiKey = snapshot.data;
+                    return BlocProvider<ConstraintsBloc>(
+                        bloc: ConstraintsBloc(model.value, apiKey.key),
+                        child: BlocProvider<DensityBloc>(
+                            bloc:
+                                DensityBloc(), //needed so we can get the functions "getDensity" and "getOptionPrices" in the submit function
+                            child: BlocProvider<OptionsBloc>(
+                                bloc: OptionsBloc(),
+                                child: BlocProvider<SelectPageBloc>(
+                                  bloc: SelectPageBloc(),
+                                  child: _Scaffold(
+                                      model: model,
+                                      apiKey: apiKey,
+                                      title: this.title),
+                                ))));
+
+                  default:
+                    return Center(child: CircularProgressIndicator());
+                }
+              });
         });
   }
 }
@@ -59,22 +78,17 @@ class _Scaffold extends StatelessWidget {
       String modelValue, String apiKey, List<bool> showBadge) {
     return [
       PageEntry(
-        widget: BlocProvider<ConstraintsBloc>(
-          bloc: ConstraintsBloc(modelValue, apiKey),
-          child: InputForm(),
-        ),
+        widget: InputForm(model: modelValue, apiKey: apiKey),
         icon: Icon(Icons.input),
         text: "Entry",
       ),
       PageEntry(
-          widget: BlocProvider<DensityBloc>(
-              bloc: DensityBloc(), child: ShowDensity()),
+          widget: ShowDensity(),
           icon: badge.ShowBadge(
               icon: Icon(Icons.show_chart), showBadge: showBadge[1]),
           text: "Density"),
       PageEntry(
-          widget: BlocProvider<OptionsBloc>(
-              bloc: OptionsBloc(), child: ShowOptionPrices()),
+          widget: ShowOptionPrices(),
           icon: badge.ShowBadge(
               icon: Icon(Icons.scatter_plot), showBadge: showBadge[2]),
           text: "Prices"),
@@ -84,19 +98,12 @@ class _Scaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SelectPageBloc pageBloc = BlocProvider.of<SelectPageBloc>(context);
-    return StreamsBuilder(
-        streams: [
-          pageBloc.outPageController,
-          pageBloc.outPageClickedController,
-        ],
-        initialData: [
-          0,
-          [false, false, false]
-        ],
+    return StreamBuilder<PageState>(
+        stream: pageBloc.outPageController,
+        initialData: PageState(index: 0, showBadges: [false, false, false]),
         builder: (buildContext, snapshots) {
-          int selectedIndex = snapshots[0].data;
-          List<bool> showBadges = snapshots[1].data;
-          print(selectedIndex);
+          int selectedIndex = snapshots.data.index;
+          List<bool> showBadges = snapshots.data.showBadges;
           var pages = _getPages(this.model.value, apiKey.key, showBadges);
           return Scaffold(
               appBar: OptionPriceAppBar(
