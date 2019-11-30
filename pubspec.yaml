@@ -27,6 +27,7 @@ dependencies:
   http:
   charts_flutter: ^0.8.0
   badges: ^1.1.0
+  rxdart:
 dev_dependencies:
   flutter_test:
     sdk: flutter
