@@ -1,4 +1,5 @@
 import 'package:demo_api_app_flutter/models/progress.dart';
+import 'package:demo_api_app_flutter/services/api_key_service.dart';
 import 'package:flutter/material.dart';
 import 'package:demo_api_app_flutter/scaffold.dart';
 import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
@@ -26,7 +27,8 @@ class MyApp extends StatelessWidget {
                 fontSize: 15.0,
               ),
             )),
-        home: BlocProvider<ApiBloc>(bloc: ApiBloc(), child: StartupPage()));
+        home: BlocProvider<ApiBloc>(
+            bloc: ApiBloc(db: ApiDB()), child: StartupPage()));
   }
 }
 

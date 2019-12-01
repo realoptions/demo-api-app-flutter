@@ -24,9 +24,7 @@ Widget getField(
 }
 
 class InputForm extends StatelessWidget {
-  const InputForm({Key key, this.model, this.apiKey}) : super(key: key);
-  final String model;
-  final String apiKey;
+  const InputForm({Key key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     ConstraintsBloc bloc = BlocProvider.of<ConstraintsBloc>(context);
@@ -44,8 +42,7 @@ class InputForm extends StatelessWidget {
                   stream: bloc.outConstraintsController,
                   builder: (buildContext, snapshot) {
                     return BlocProvider<FormBloc>(
-                        bloc: FormBloc(snapshot.data),
-                        child: SpecToForm(model: model, apiKey: apiKey));
+                        bloc: FormBloc(snapshot.data), child: SpecToForm());
                   });
             default: //should never get here
               return Center(child: CircularProgressIndicator());
@@ -55,9 +52,7 @@ class InputForm extends StatelessWidget {
 }
 
 class SpecToForm extends StatelessWidget {
-  const SpecToForm({Key key, this.model, this.apiKey}) : super(key: key);
-  final String model;
-  final String apiKey;
+  const SpecToForm({Key key}) : super(key: key);
   static final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
@@ -84,12 +79,10 @@ class SpecToForm extends StatelessWidget {
               bloc.onSubmit();
               //is this the optimal way??
               var submittedBody = bloc.getCurrentForm();
-              densityBloc.getDensity(model, apiKey, submittedBody).then((_) {
+              densityBloc.getDensity(submittedBody).then((_) {
                 pageBloc.setBadge(DENSITY_PAGE);
               });
-              optionsBloc
-                  .getOptionPrices(model, apiKey, submittedBody)
-                  .then((_) {
+              optionsBloc.getOptionPrices(submittedBody).then((_) {
                 pageBloc.setBadge(OPTIONS_PAGE);
               });
             }

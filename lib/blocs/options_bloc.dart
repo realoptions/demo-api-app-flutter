@@ -6,6 +6,7 @@ import 'package:demo_api_app_flutter/models/forms.dart';
 import 'package:demo_api_app_flutter/utils/services.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:demo_api_app_flutter/models/progress.dart';
+import 'package:meta/meta.dart';
 
 class OptionsBloc implements bloc_provider.BlocBase {
   final StreamController<Map<String, List<ModelResult>>> _optionController =
@@ -13,21 +14,20 @@ class OptionsBloc implements bloc_provider.BlocBase {
 
   final StreamController<StreamProgress> _connectionController =
       BehaviorSubject();
-
+  final FinsideApi finside;
   Stream<Map<String, List<ModelResult>>> get outOptionResults =>
       _optionController.stream;
   Stream<StreamProgress> get outOptionsProgress => _connectionController.stream;
   StreamSink get inOptionsProgress => _connectionController.sink;
 
-  OptionsBloc() {
+  OptionsBloc({@required this.finside}) {
     inOptionsProgress.add(StreamProgress.NoData);
   }
 
-  Future<void> getOptionPrices(
-      String model, String apiKey, Map<String, SubmitItems> submittedBody) {
+  Future<void> getOptionPrices(Map<String, SubmitItems> submittedBody) {
     var body = convertSubmission(submittedBody, generateStrikes);
     inOptionsProgress.add(StreamProgress.Busy);
-    return fetchOptionPrices(model, apiKey, body).then((result) {
+    return finside.fetchOptionPrices(body).then((result) {
       _optionController.sink.add(result);
       inOptionsProgress.add(StreamProgress.DataRetrieved);
     }).catchError(_connectionController.addError);

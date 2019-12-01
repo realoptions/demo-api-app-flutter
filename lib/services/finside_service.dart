@@ -10,92 +10,89 @@ const String BASE_ENDPOINT = kReleaseMode
     ? "https://api.finside.org/realoptions"
     : "http://10.0.2.2:8000";
 
-Map<String, String> getHeaders(String apikey) {
-  return {
-    'Content-type': 'application/json',
-    'Accept': 'application/json',
-    'x-api-Key': apikey
-  };
-}
+class FinsideApi {
+  FinsideApi({this.model, this.apiKey});
+  final String model;
+  final String apiKey;
+  Map<String, String> _getHeaders() {
+    return {
+      'Content-type': 'application/json',
+      'Accept': 'application/json',
+      'x-api-Key': apiKey
+    };
+  }
 
-String constructUrl(
-    String base, String version, String model, String endpoint) {
-  return p.join(base, version, model, endpoint);
-}
+  List<InputConstraint> Function(http.Response) _parseConstraint(String model) {
+    return (http.Response response) {
+      if (response.statusCode == 200) {
+        return parseJson(
+            Map<String, Map<String, dynamic>>.from(json.decode(response.body)),
+            model);
+      } else {
+        throw Exception(
+            ErrorMessage.fromJson(json.decode(response.body)).message);
+      }
+    };
+  }
 
-List<InputConstraint> Function(http.Response) parseConstraint(String model) {
-  return (http.Response response) {
+  List<ModelResult> _parseResult(http.Response response) {
     if (response.statusCode == 200) {
-      return parseJson(
-          Map<String, Map<String, dynamic>>.from(json.decode(response.body)),
-          model);
+      return List<Map<String, dynamic>>.from(json.decode(response.body))
+          .map((item) => ModelResult.fromJson(item))
+          .toList();
     } else {
       throw Exception(
           ErrorMessage.fromJson(json.decode(response.body)).message);
     }
-  };
-}
-
-Future<List<InputConstraint>> fetchConstraints(String model, String apiKey) {
-  return Future.wait([
-    http
-        .get(
-            constructUrl(BASE_ENDPOINT, API_VERSION, MARKET_NAME,
-                "parameters/parameter_ranges"),
-            headers: getHeaders(apiKey))
-        .then(parseConstraint(MARKET_NAME)),
-    http
-        .get(
-            constructUrl(BASE_ENDPOINT, API_VERSION, model,
-                "parameters/parameter_ranges"),
-            headers: getHeaders(apiKey))
-        .then(parseConstraint(model)),
-  ]).then((results) {
-    //wish I could desctructure this
-    return [...results[0], ...results[1]];
-  });
-}
-
-List<ModelResult> parseResult(http.Response response) {
-  if (response.statusCode == 200) {
-    return List<Map<String, dynamic>>.from(json.decode(response.body))
-        .map((item) => ModelResult.fromJson(item))
-        .toList();
-  } else {
-    throw Exception(ErrorMessage.fromJson(json.decode(response.body)).message);
   }
-}
 
-Future<List<ModelResult>> fetchModelCalculator(String model, String optionType,
-    String sensitivity, bool includeIV, String apiKey, Map body) {
-  return http
-      .post(
-        constructUrl(BASE_ENDPOINT, API_VERSION, model,
-                p.join("calculator", optionType, sensitivity)) +
-            "?includeImpliedVolatility=$includeIV",
-        headers: getHeaders(apiKey),
-        body: jsonEncode(body),
-      )
-      .then(parseResult);
-}
+  Future<List<InputConstraint>> fetchConstraints() {
+    return Future.wait([
+      http
+          .get(p.join(BASE_ENDPOINT, API_VERSION, MARKET_NAME,
+              "parameters/parameter_ranges"))
+          .then(_parseConstraint(MARKET_NAME)),
+      http
+          .get(
+              p.join(BASE_ENDPOINT, API_VERSION, model,
+                  "parameters/parameter_ranges"),
+              headers: _getHeaders())
+          .then(_parseConstraint(model)),
+    ]).then((results) {
+      //wish I could desctructure this
+      return [...results[0], ...results[1]];
+    });
+  }
 
-Future<List<ModelResult>> fetchModelDensity(
-    String model, String apiKey, Map body) {
-  return http
-      .post(constructUrl(BASE_ENDPOINT, API_VERSION, model, "density"),
-          headers: getHeaders(apiKey), body: jsonEncode(body))
-      .then(parseResult);
-}
+  Future<List<ModelResult>> _fetchModelCalculator(
+      String optionType, String sensitivity, bool includeIV, Map body) {
+    return http
+        .post(
+          p.join(BASE_ENDPOINT, API_VERSION, model, "calculator", optionType,
+                  sensitivity) +
+              "?includeImpliedVolatility=$includeIV",
+          headers: _getHeaders(),
+          body: jsonEncode(body),
+        )
+        .then(_parseResult);
+  }
 
-Future<Map<String, List<ModelResult>>> fetchOptionPrices(
-    String model, String apiKey, Map body) {
-  return Future.wait([
-    fetchModelCalculator(model, "call", "price", true, apiKey, body),
-    fetchModelCalculator(model, "put", "price", false, apiKey, body),
-  ]).then((results) {
-    return {
-      "call": results[0],
-      "put": results[1],
-    };
-  });
+  Future<List<ModelResult>> fetchModelDensity(Map body) {
+    return http
+        .post(p.join(BASE_ENDPOINT, API_VERSION, model, "density"),
+            headers: _getHeaders(), body: jsonEncode(body))
+        .then(_parseResult);
+  }
+
+  Future<Map<String, List<ModelResult>>> fetchOptionPrices(Map body) {
+    return Future.wait([
+      _fetchModelCalculator("call", "price", true, body),
+      _fetchModelCalculator("put", "price", false, body),
+    ]).then((results) {
+      return {
+        "call": results[0],
+        "put": results[1],
+      };
+    });
+  }
 }
