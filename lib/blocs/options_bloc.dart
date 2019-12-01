@@ -1,6 +1,6 @@
 import 'package:demo_api_app_flutter/blocs/bloc_provider.dart' as bloc_provider;
 import 'dart:async';
-import 'package:demo_api_app_flutter/services/api_consume.dart';
+import 'package:demo_api_app_flutter/services/finside_service.dart';
 import 'package:demo_api_app_flutter/models/response.dart';
 import 'package:demo_api_app_flutter/models/forms.dart';
 import 'package:demo_api_app_flutter/utils/services.dart';
@@ -30,7 +30,7 @@ class OptionsBloc implements bloc_provider.BlocBase {
     return fetchOptionPrices(model, apiKey, body).then((result) {
       _optionController.sink.add(result);
       inOptionsProgress.add(StreamProgress.DataRetrieved);
-    }).catchError(_optionController.addError);
+    }).catchError(_connectionController.addError);
   }
 
   void dispose() {

@@ -1,8 +1,7 @@
 import 'package:demo_api_app_flutter/blocs/bloc_provider.dart' as bloc_provider;
 import 'package:demo_api_app_flutter/models/api_key.dart';
 import 'dart:async';
-
-import 'package:demo_api_app_flutter/services/api_key.dart' as auth;
+import 'package:demo_api_app_flutter/services/api_key_service.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:demo_api_app_flutter/models/progress.dart';
 
@@ -17,9 +16,10 @@ class ApiBloc implements bloc_provider.BlocBase {
   StreamSink get _getHomeState => _stateController.sink;
 
   String _apiKey = "";
+  ApiDB db; // = ApiDB();
   ApiBloc() {
     _getHomeState.add(StreamProgress.Busy);
-    auth.retrieveKey().then((apiKeyList) {
+    db.retrieveKey().then((apiKeyList) {
       if (apiKeyList.length > 0 && apiKeyList.first.key != "") {
         _apiKey = apiKeyList.first.key;
         _getApiKey.add(apiKeyList.first);
@@ -43,9 +43,9 @@ class ApiBloc implements bloc_provider.BlocBase {
     ApiKey apiKey = ApiKey(id: keyId, key: _apiKey);
     if (_apiKey == "") {
       _getHomeState.add(StreamProgress.NoData);
-      auth.removeKey(keyId);
+      db.removeKey(keyId);
     } else {
-      auth.insertKey(apiKey).then((result) {
+      db.insertKey(apiKey).then((result) {
         _getHomeState.add(StreamProgress.DataRetrieved);
         _getApiKey.add(apiKey);
       }).catchError(_stateController.addError);

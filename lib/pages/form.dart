@@ -9,6 +9,7 @@ import 'package:demo_api_app_flutter/models/forms.dart';
 import 'package:demo_api_app_flutter/blocs/form_bloc.dart';
 import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
 import 'package:demo_api_app_flutter/blocs/density_bloc.dart';
+import 'package:demo_api_app_flutter/models/progress.dart';
 
 Widget getField(
     Function onSubmit, String defaultValue, InputConstraint constraint) {
@@ -29,23 +30,24 @@ class InputForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ConstraintsBloc bloc = BlocProvider.of<ConstraintsBloc>(context);
-    return StreamBuilder<List<InputConstraint>>(
-        stream: bloc.outConstraintsController,
+    return StreamBuilder<StreamProgress>(
+        stream: bloc.outConstraintsProgress,
         builder: (buildContext, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.none:
-            case ConnectionState.waiting:
+          if (snapshot.hasError) {
+            return Center(child: Text(snapshot.error.toString()));
+          }
+          switch (snapshot.data) {
+            case StreamProgress.Busy:
               return Center(child: CircularProgressIndicator());
-            case ConnectionState.active:
-            case ConnectionState.done:
-              if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-              if (snapshot.data == null) {
-                return Center(child: CircularProgressIndicator());
-              }
-              return BlocProvider<FormBloc>(
-                  bloc: FormBloc(snapshot.data),
-                  child: SpecToForm(model: model, apiKey: apiKey));
-            default: //can never get here
+            case StreamProgress.DataRetrieved:
+              return StreamBuilder<List<InputConstraint>>(
+                  stream: bloc.outConstraintsController,
+                  builder: (buildContext, snapshot) {
+                    return BlocProvider<FormBloc>(
+                        bloc: FormBloc(snapshot.data),
+                        child: SpecToForm(model: model, apiKey: apiKey));
+                  });
+            default: //should never get here
               return Center(child: CircularProgressIndicator());
           }
         });
