@@ -5,7 +5,7 @@ import 'package:demo_api_app_flutter/services/api_consume.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ConstraintsBloc implements BlocBase {
-  StreamController<List<InputConstraint>> _constraintsController =
+  final StreamController<List<InputConstraint>> _constraintsController =
       BehaviorSubject();
   Stream<List<InputConstraint>> get outConstraintsController =>
       _constraintsController.stream;

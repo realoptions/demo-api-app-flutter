@@ -5,7 +5,7 @@ import 'package:demo_api_app_flutter/models/pages.dart';
 
 class SelectPageBloc implements BlocBase {
   PageState _pageState = PageState(index: 0, showBadges: [false, false, false]);
-  StreamController<PageState> _pageController = BehaviorSubject();
+  final StreamController<PageState> _pageController = BehaviorSubject();
   Stream<PageState> get outPageController => _pageController.stream;
   StreamSink get _inPageController => _pageController.sink;
 

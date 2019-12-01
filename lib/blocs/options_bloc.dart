@@ -8,10 +8,11 @@ import 'package:rxdart/rxdart.dart';
 import 'package:demo_api_app_flutter/models/progress.dart';
 
 class OptionsBloc implements bloc_provider.BlocBase {
-  StreamController<Map<String, List<ModelResult>>> _optionController =
+  final StreamController<Map<String, List<ModelResult>>> _optionController =
       BehaviorSubject();
 
-  StreamController<StreamProgress> _connectionController = BehaviorSubject();
+  final StreamController<StreamProgress> _connectionController =
+      BehaviorSubject();
 
   Stream<Map<String, List<ModelResult>>> get outOptionResults =>
       _optionController.stream;
@@ -34,5 +35,6 @@ class OptionsBloc implements bloc_provider.BlocBase {
 
   void dispose() {
     _optionController.close();
+    _connectionController.close();
   }
 }

@@ -61,26 +61,26 @@ Future<void> _showDialog(BuildContext context, ApiBloc apiBloc) {
   return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return new AlertDialog(
-          //contentPadding: const EdgeInsets.all(16.0),
-          content: new Row(
+        return AlertDialog(
+          content: Row(
             children: <Widget>[
-              new Expanded(
-                child: new TextField(
+              Expanded(
+                child: TextFormField(
                   autofocus: true,
                   onChanged: apiBloc.setApiKey,
-                  decoration: new InputDecoration(labelText: 'API Key'),
+                  decoration: InputDecoration(labelText: 'API Key'),
+                  initialValue: apiBloc.getApiKey(),
                 ),
               )
             ],
           ),
           actions: <Widget>[
-            new FlatButton(
+            FlatButton(
                 child: const Text('CANCEL'),
                 onPressed: () {
                   Navigator.pop(context);
                 }),
-            new FlatButton(
+            FlatButton(
                 child: const Text('SAVE'),
                 onPressed: () {
                   Navigator.pop(context);

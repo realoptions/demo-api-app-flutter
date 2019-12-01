@@ -32,6 +32,12 @@ Future<void> insertKey(key_model.ApiKey key) async {
   );
 }
 
+Future<void> removeKey(int id) async {
+  final Database db = await database;
+
+  await db.delete('api_key_store', where: "id==?", whereArgs: [id]);
+}
+
 Future<List<key_model.ApiKey>> retrieveKey() async {
   // Get a reference to the database.
   final Database db = await database;

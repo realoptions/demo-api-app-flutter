@@ -8,8 +8,6 @@ import 'package:demo_api_app_flutter/utils/chart_utils.dart' as utils;
 import 'package:demo_api_app_flutter/components/CustomPadding.dart' as padding;
 import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
 
-var orange = utils.convertColor(Colors.orange);
-
 class ShowDensity extends StatelessWidget {
   const ShowDensity({
     Key key,
@@ -41,6 +39,8 @@ class ShowDensity extends StatelessWidget {
 class _Density extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final ThemeData themeData = Theme.of(context);
+    final charts.Color densityColor = utils.convertColor(themeData.accentColor);
     final DensityBloc bloc = BlocProvider.of<DensityBloc>(context);
     return StreamBuilder<List<ModelResult>>(
         stream: bloc.outDensityResults,
@@ -54,7 +54,7 @@ class _Density extends StatelessWidget {
               id: 'Density',
               domainFn: (ModelResult optionData, _) => optionData.atPoint,
               measureFn: (ModelResult optionData, _) => optionData.value,
-              colorFn: (ModelResult optionData, _) => orange,
+              colorFn: (ModelResult optionData, _) => densityColor,
               data: density,
             ),
           ];

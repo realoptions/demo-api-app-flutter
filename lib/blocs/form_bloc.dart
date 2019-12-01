@@ -40,7 +40,8 @@ class FormItem {
 class FormBloc implements BlocBase {
   Map<String, SubmitItems> _formValues = {};
   List<InputConstraint> _inputConstraints;
-  StreamController<Iterable<FormItem>> _formController = BehaviorSubject();
+  final StreamController<Iterable<FormItem>> _formController =
+      BehaviorSubject();
   Stream<Iterable<FormItem>> get outFormController => _formController.stream;
 
   StreamSink get _inFormController => _formController.sink;

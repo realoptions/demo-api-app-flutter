@@ -10,7 +10,7 @@ const List<Model> modelChoices = const <Model>[
 ];
 
 class SelectModelBloc implements BlocBase {
-  StreamController<Model> _modelController = BehaviorSubject();
+  final StreamController<Model> _modelController = BehaviorSubject();
   Stream<Model> get outSelectedModel => _modelController.stream;
   StreamSink get _getSelectedModel => _modelController.sink;
 

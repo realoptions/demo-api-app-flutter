@@ -20,6 +20,11 @@ class MyApp extends StatelessWidget {
             accentColor: Colors.orange,
             buttonTheme: ButtonThemeData(
               buttonColor: Colors.orange,
+            ),
+            textTheme: TextTheme(
+              body1: TextStyle(
+                fontSize: 15.0,
+              ),
             )),
         home: BlocProvider<ApiBloc>(bloc: ApiBloc(), child: StartupPage()));
   }
@@ -33,6 +38,10 @@ class StartupPage extends StatelessWidget {
         stream: bloc.outHomeState,
         initialData: StreamProgress.Busy,
         builder: (buildContext, snapshot) {
+          if (snapshot.hasError) {
+            //should never get here
+            return Center(child: Text(snapshot.error.toString()));
+          }
           switch (snapshot.data) {
             case StreamProgress.Busy:
               return Center(child: CircularProgressIndicator());

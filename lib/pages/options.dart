@@ -8,9 +8,6 @@ import 'package:demo_api_app_flutter/components/CustomPadding.dart' as padding;
 import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
 import 'package:demo_api_app_flutter/blocs/options_bloc.dart';
 
-var teal = utils.convertColor(Colors.teal);
-var orange = utils.convertColor(Colors.orange);
-
 class ShowOptionPrices extends StatelessWidget {
   const ShowOptionPrices({
     Key key,
@@ -43,6 +40,9 @@ class _OptionPrices extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final OptionsBloc bloc = BlocProvider.of<OptionsBloc>(context);
+    final ThemeData themeData = Theme.of(context);
+    final charts.Color callColor = utils.convertColor(themeData.primaryColor);
+    final charts.Color putColor = utils.convertColor(themeData.accentColor);
     return StreamBuilder<Map<String, List<ModelResult>>>(
         stream: bloc.outOptionResults,
         builder: (buildContext, snapshot) {
@@ -56,14 +56,14 @@ class _OptionPrices extends StatelessWidget {
               id: 'Call Prices',
               domainFn: (ModelResult optionData, _) => optionData.atPoint,
               measureFn: (ModelResult optionData, _) => optionData.value,
-              colorFn: (ModelResult optionData, _) => teal,
+              colorFn: (ModelResult optionData, _) => callColor,
               data: callPrices,
             ),
             charts.Series(
               id: 'Put Prices',
               domainFn: (ModelResult optionData, _) => optionData.atPoint,
               measureFn: (ModelResult optionData, _) => optionData.value,
-              colorFn: (ModelResult optionData, _) => orange,
+              colorFn: (ModelResult optionData, _) => putColor,
               data: putPrices,
             )
           ];
@@ -80,7 +80,7 @@ class _OptionPrices extends StatelessWidget {
               data: callPrices,
               domainFn: (ModelResult optionData, _) => optionData.atPoint,
               measureFn: (ModelResult optionData, _) => optionData.iv,
-              colorFn: (ModelResult optionData, _) => orange,
+              colorFn: (ModelResult optionData, _) => putColor,
             )
           ];
           var range = utils.getIVRange(callPrices);
