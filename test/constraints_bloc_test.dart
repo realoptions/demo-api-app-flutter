@@ -8,12 +8,6 @@ import 'package:mockito/mockito.dart';
 
 class MockFinsideService extends Mock implements FinsideApi {}
 
-/**final num lower;
-  final num upper;
-  final num defaultValue;
-  final FieldType types;
-  final String name;
-  final InputType inputType; */
 void main() {
   MockFinsideService finside;
   List<InputConstraint> constraints;

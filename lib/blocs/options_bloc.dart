@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:demo_api_app_flutter/services/finside_service.dart';
 import 'package:demo_api_app_flutter/models/response.dart';
 import 'package:demo_api_app_flutter/models/forms.dart';
-import 'package:demo_api_app_flutter/utils/services.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:demo_api_app_flutter/models/progress.dart';
 import 'package:meta/meta.dart';
@@ -25,9 +24,10 @@ class OptionsBloc implements bloc_provider.BlocBase {
   }
 
   Future<void> getOptionPrices(Map<String, SubmitItems> submittedBody) {
-    var body = convertSubmission(submittedBody, generateStrikes);
+    SubmitBody body = SubmitBody(formBody: submittedBody);
+    //var body = convertSubmission(submittedBody, generateStrikes);
     inOptionsProgress.add(StreamProgress.Busy);
-    return finside.fetchOptionPrices(body).then((result) {
+    return finside.fetchOptionPrices(body.convertSubmission()).then((result) {
       _optionController.sink.add(result);
       inOptionsProgress.add(StreamProgress.DataRetrieved);
     }).catchError(_connectionController.addError);

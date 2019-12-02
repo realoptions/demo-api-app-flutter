@@ -2,6 +2,7 @@ import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
 import 'dart:async';
 import 'package:demo_api_app_flutter/models/forms.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:quiver/core.dart' show hash2;
 
 const Map<String, String> defaultValueMap = {
   "num_u": "8",
@@ -19,8 +20,8 @@ String valueOtherwiseNull(String value, String defaultValue) {
 
 String getDefaultFormValue(
   Map<String, String> defaultValueMap,
-  Map<String, SubmitItems> formValues,
-  InputConstraint constraint,
+  Map<String, SubmitItems> formValues, //can be empty
+  InputConstraint constraint, //can't be null
 ) {
   //formValues take precedence
   SubmitItems formValue = formValues[constraint.name];
@@ -35,19 +36,35 @@ class FormItem {
   final String defaultValue;
   final InputConstraint constraint;
   FormItem({this.defaultValue, this.constraint});
+  @override
+  bool operator ==(other) {
+    if (other is! FormItem) {
+      return false;
+    }
+
+    if (defaultValue != other.defaultValue) {
+      return false;
+    }
+    if (constraint != other.constraint) {
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  int get hashCode => hash2(defaultValue, constraint);
 }
 
 class FormBloc implements BlocBase {
   Map<String, SubmitItems> _formValues = {};
-  List<InputConstraint> _inputConstraints;
+  final List<InputConstraint> constraints;
   final StreamController<Iterable<FormItem>> _formController =
       BehaviorSubject();
   Stream<Iterable<FormItem>> get outFormController => _formController.stream;
 
   StreamSink get _inFormController => _formController.sink;
 
-  FormBloc(List<InputConstraint> constraints) {
-    _inputConstraints = constraints;
+  FormBloc({this.constraints}) {
     onSubmit();
   }
 
@@ -56,12 +73,12 @@ class FormBloc implements BlocBase {
   }
 
   void onSubmit() {
-    var formItems = _inputConstraints.map<FormItem>((constraint) {
+    var formItems = constraints.map<FormItem>((constraint) {
       return FormItem(
           defaultValue:
               getDefaultFormValue(defaultValueMap, _formValues, constraint),
           constraint: constraint);
-    }); //.toList(); //
+    });
     _inFormController.add(formItems);
   }
 

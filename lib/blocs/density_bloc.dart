@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:demo_api_app_flutter/services/finside_service.dart';
 import 'package:demo_api_app_flutter/models/response.dart';
 import 'package:demo_api_app_flutter/models/forms.dart';
-import 'package:demo_api_app_flutter/utils/services.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:demo_api_app_flutter/models/progress.dart';
 import 'package:meta/meta.dart';
+
 class DensityBloc implements bloc_provider.BlocBase {
   final StreamController<List<ModelResult>> _densityController =
       BehaviorSubject();
@@ -21,9 +21,9 @@ class DensityBloc implements bloc_provider.BlocBase {
   }
 
   Future<void> getDensity(Map<String, SubmitItems> submittedBody) {
-    var body = convertSubmission(submittedBody, generateStrikes);
+    SubmitBody body = SubmitBody(formBody: submittedBody);
     inDensityProgress.add(StreamProgress.Busy);
-    return finside.fetchModelDensity(body).then((result) {
+    return finside.fetchModelDensity(body.convertSubmission()).then((result) {
       _densityController.sink.add(result);
       inDensityProgress.add(StreamProgress.DataRetrieved);
     }).catchError(_connectionController.addError);

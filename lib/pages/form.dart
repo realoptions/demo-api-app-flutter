@@ -42,7 +42,8 @@ class InputForm extends StatelessWidget {
                   stream: bloc.outConstraintsController,
                   builder: (buildContext, snapshot) {
                     return BlocProvider<FormBloc>(
-                        bloc: FormBloc(snapshot.data), child: SpecToForm());
+                        bloc: FormBloc(constraints: snapshot.data),
+                        child: SpecToForm());
                   });
             default: //should never get here
               return Center(child: CircularProgressIndicator());
