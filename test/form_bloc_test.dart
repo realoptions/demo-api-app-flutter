@@ -30,7 +30,7 @@ void main() {
           upper: 3,
           lower: 1,
           types: FieldType.Integer,
-          name: "asset",
+          name: "num_u",
           inputType: InputType.Market)
     ];
     FormBloc bloc = FormBloc(constraints: constraints);
@@ -47,7 +47,7 @@ void main() {
           upper: 3,
           lower: 1,
           types: FieldType.Integer,
-          name: "asset",
+          name: "num_u",
           inputType: InputType.Market)
     ];
     FormBloc bloc = FormBloc(constraints: constraints);
@@ -57,7 +57,24 @@ void main() {
           [FormItem(constraint: constraints[0], defaultValue: "8")],
           [FormItem(constraint: constraints[0], defaultValue: "7")]
         ]));
-    bloc.onSave(InputType.Market, "asset", 7);
+    bloc.onSave(InputType.Market, "num_u", 7);
     bloc.onSubmit();
+  });
+  test('formValue getter appropriately retrieves', () {
+    List<InputConstraint> constraints = [
+      InputConstraint(
+          defaultValue: 2,
+          upper: 3,
+          lower: 1,
+          types: FieldType.Integer,
+          name: "num_u",
+          inputType: InputType.Market)
+    ];
+    FormBloc bloc = FormBloc(constraints: constraints);
+
+    bloc.onSave(InputType.Market, "num_u", 7);
+    var formValues = bloc.getCurrentForm();
+    expect(formValues,
+        {"num_u": SubmitItems(inputType: InputType.Market, value: 7)});
   });
 }

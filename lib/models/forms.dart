@@ -1,5 +1,6 @@
 import 'package:demo_api_app_flutter/components/CustomTextFields.dart';
 import 'package:quiver/core.dart' show hash4;
+import 'package:quiver/core.dart' show hash2;
 
 enum InputType { Model, Market }
 const String MARKET_NAME = "market";
@@ -83,6 +84,23 @@ class SubmitItems {
   final num value;
   final InputType inputType;
   const SubmitItems({this.value, this.inputType});
+  @override
+  bool operator ==(other) {
+    if (other is! SubmitItems) {
+      return false;
+    }
+
+    if (value != other.value) {
+      return false;
+    }
+    if (inputType != other.inputType) {
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  int get hashCode => hash2(value, inputType);
 }
 
 class SubmitBody {

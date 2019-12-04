@@ -10,28 +10,6 @@ const Map<String, String> defaultValueMap = {
   "maturity": "1.0",
 };
 
-String valueOtherwiseNull(String value, String defaultValue) {
-  if (value == null) {
-    return defaultValue;
-  } else {
-    return value;
-  }
-}
-
-String getDefaultFormValue(
-  Map<String, String> defaultValueMap,
-  Map<String, SubmitItems> formValues, //can be empty
-  InputConstraint constraint, //can't be null
-) {
-  //formValues take precedence
-  SubmitItems formValue = formValues[constraint.name];
-  if (formValue != null) {
-    return formValue.value.toString();
-  }
-  return valueOtherwiseNull(
-      defaultValueMap[constraint.name], constraint.defaultValue.toString());
-}
-
 class FormItem {
   final String defaultValue;
   final InputConstraint constraint;
@@ -67,6 +45,27 @@ class FormBloc implements BlocBase {
   FormBloc({this.constraints}) {
     onSubmit();
   }
+  static String _valueOtherwiseNull(String value, String defaultValue) {
+    if (value == null) {
+      return defaultValue;
+    } else {
+      return value;
+    }
+  }
+
+  static String _getDefaultFormValue(
+    Map<String, String> defaultValueMap,
+    Map<String, SubmitItems> formValues, //can be empty
+    InputConstraint constraint, //can't be null
+  ) {
+    //formValues take precedence
+    SubmitItems formValue = formValues[constraint.name];
+    if (formValue != null) {
+      return formValue.value.toString();
+    }
+    return _valueOtherwiseNull(
+        defaultValueMap[constraint.name], constraint.defaultValue.toString());
+  }
 
   void onSave(InputType inputType, String key, num value) {
     _formValues[key] = SubmitItems(inputType: inputType, value: value);
@@ -76,7 +75,7 @@ class FormBloc implements BlocBase {
     var formItems = constraints.map<FormItem>((constraint) {
       return FormItem(
           defaultValue:
-              getDefaultFormValue(defaultValueMap, _formValues, constraint),
+              _getDefaultFormValue(defaultValueMap, _formValues, constraint),
           constraint: constraint);
     });
     _inFormController.add(formItems);
