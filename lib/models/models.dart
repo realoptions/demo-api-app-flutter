@@ -1,9 +1,10 @@
 import 'package:quiver/core.dart' show hash2;
+import 'package:flutter/foundation.dart';
 
 class Model {
   final String value;
   final String label;
-  const Model({this.value, this.label});
+  const Model({@required this.value, @required this.label});
   @override
   bool operator ==(other) {
     if (other is! Model) {

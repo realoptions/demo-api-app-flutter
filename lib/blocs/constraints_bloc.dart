@@ -30,8 +30,8 @@ class ConstraintsBloc implements BlocBase {
 
   Future<void> _init() {
     return finside.fetchConstraints().then((result) {
-      _inConstraintsProgress.add(StreamProgress.DataRetrieved);
       _inConstraintsController.add(result);
+      _inConstraintsProgress.add(StreamProgress.DataRetrieved);
     }).catchError((error) {
       _inConstraintsController.addError(error);
     });

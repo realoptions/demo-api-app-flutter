@@ -18,7 +18,7 @@ void main() {
           defaultValue: 2,
           upper: 3,
           lower: 1,
-          types: FieldType.Float,
+          type: FieldType.Float,
           name: "somename",
           inputType: InputType.Market)
     ];

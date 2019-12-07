@@ -1,9 +1,10 @@
 import 'package:quiver/core.dart' show hash2;
+import 'package:flutter/foundation.dart';
 
 class ApiKey {
   final int id;
   final String key;
-  ApiKey({this.id, this.key});
+  ApiKey({@required this.id, @required this.key});
   Map<String, dynamic> toMap() {
     return {'id': id, 'key': key};
   }

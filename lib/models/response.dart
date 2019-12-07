@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class ErrorMessage {
   String message;
   ErrorMessage({this.message});
@@ -7,12 +9,12 @@ class ErrorMessage {
 }
 
 class ModelResult {
-  num value;
-  num atPoint;
-  num iv;
+  final num value;
+  final num atPoint;
+  final num iv;
   ModelResult({
-    this.value,
-    this.atPoint,
+    @required this.value,
+    @required this.atPoint,
     this.iv,
   });
   factory ModelResult.fromJson(Map<String, dynamic> parsedJson) {

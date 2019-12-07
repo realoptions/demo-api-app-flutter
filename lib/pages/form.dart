@@ -17,7 +17,7 @@ Widget getField(
       child: NumberTextField(
     labelText: constraint.name,
     defaultValue: defaultValue,
-    type: constraint.types,
+    type: constraint.type,
     onSubmit: (String key, num value) =>
         onSubmit(constraint.inputType, key, value),
   ));
@@ -41,9 +41,11 @@ class InputForm extends StatelessWidget {
               return StreamBuilder<List<InputConstraint>>(
                   stream: bloc.outConstraintsController,
                   builder: (buildContext, snapshot) {
-                    return BlocProvider<FormBloc>(
-                        bloc: FormBloc(constraints: snapshot.data),
-                        child: SpecToForm());
+                    return snapshot.data == null
+                        ? Center(child: CircularProgressIndicator())
+                        : BlocProvider<FormBloc>(
+                            bloc: FormBloc(constraints: snapshot.data),
+                            child: SpecToForm());
                   });
             default: //should never get here
               return Center(child: CircularProgressIndicator());

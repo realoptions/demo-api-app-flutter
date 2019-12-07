@@ -11,7 +11,7 @@ const String BASE_ENDPOINT = kReleaseMode
     : "http://10.0.2.2:8000";
 
 class FinsideApi {
-  FinsideApi({this.model, this.apiKey});
+  FinsideApi({@required this.model, @required this.apiKey});
   final String model;
   final String apiKey;
   Map<String, String> _getHeaders() {

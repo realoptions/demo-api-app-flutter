@@ -38,11 +38,11 @@ class AppScaffold extends StatelessWidget {
               stream: apiBloc.outApiKey,
               builder: (buildContext, snapshot) {
                 final ApiKey apiKey = snapshot.data;
-                final FinsideApi finside =
-                    FinsideApi(apiKey: apiKey.key, model: model.value);
                 if (apiKey == null) {
                   return Center(child: CircularProgressIndicator());
                 }
+                final FinsideApi finside =
+                    FinsideApi(apiKey: apiKey.key, model: model.value);
                 return BlocProvider<ConstraintsBloc>(
                     bloc: ConstraintsBloc(finside: finside),
                     child: BlocProvider<DensityBloc>(

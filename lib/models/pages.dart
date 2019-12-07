@@ -14,7 +14,7 @@ class PageEntry {
 }
 
 class PageState {
-  PageState({this.index, this.showBadges});
+  PageState({@required this.index, @required this.showBadges});
   int index;
   final List<bool> showBadges;
   @override

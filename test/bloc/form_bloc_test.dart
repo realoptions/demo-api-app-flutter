@@ -12,7 +12,7 @@ void main() {
           defaultValue: 2,
           upper: 3,
           lower: 1,
-          types: FieldType.Float,
+          type: FieldType.Float,
           name: "somename",
           inputType: InputType.Market)
     ];
@@ -29,7 +29,7 @@ void main() {
           defaultValue: 2,
           upper: 3,
           lower: 1,
-          types: FieldType.Integer,
+          type: FieldType.Integer,
           name: "num_u",
           inputType: InputType.Market)
     ];
@@ -46,7 +46,7 @@ void main() {
           defaultValue: 2,
           upper: 3,
           lower: 1,
-          types: FieldType.Integer,
+          type: FieldType.Integer,
           name: "num_u",
           inputType: InputType.Market)
     ];
@@ -66,7 +66,7 @@ void main() {
           defaultValue: 2,
           upper: 3,
           lower: 1,
-          types: FieldType.Integer,
+          type: FieldType.Integer,
           name: "num_u",
           inputType: InputType.Market)
     ];

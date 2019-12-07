@@ -7,10 +7,12 @@ import 'package:demo_api_app_flutter/blocs/select_model_bloc.dart';
 import 'package:demo_api_app_flutter/blocs/api_bloc.dart';
 import 'package:demo_api_app_flutter/pages/intro.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(MyApp(db: ApiDB()));
 const String title = "Options";
 
 class MyApp extends StatelessWidget {
+  MyApp({this.db});
+  final ApiDB db;
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -27,8 +29,8 @@ class MyApp extends StatelessWidget {
                 fontSize: 15.0,
               ),
             )),
-        home: BlocProvider<ApiBloc>(
-            bloc: ApiBloc(db: ApiDB()), child: StartupPage()));
+        home:
+            BlocProvider<ApiBloc>(bloc: ApiBloc(db: db), child: StartupPage()));
   }
 }
 

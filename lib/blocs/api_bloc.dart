@@ -52,8 +52,8 @@ class ApiBloc implements bloc_provider.BlocBase {
       db.removeKey(keyId);
     } else {
       db.insertKey(apiKey).then((_) {
-        _getHomeState.add(StreamProgress.DataRetrieved);
         _getApiKey.add(apiKey);
+        _getHomeState.add(StreamProgress.DataRetrieved);
       }).catchError(_stateController.addError);
     }
   }
