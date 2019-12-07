@@ -25,7 +25,6 @@ class OptionsBloc implements bloc_provider.BlocBase {
 
   Future<void> getOptionPrices(Map<String, SubmitItems> submittedBody) {
     SubmitBody body = SubmitBody(formBody: submittedBody);
-    //var body = convertSubmission(submittedBody, generateStrikes);
     inOptionsProgress.add(StreamProgress.Busy);
     return finside.fetchOptionPrices(body.convertSubmission()).then((result) {
       _optionController.sink.add(result);
