@@ -75,7 +75,7 @@
 node_modules
 *.xz
 apisprout
-*.yaml
+openapi.yaml
 nohup.out
 coverage
 key.properties

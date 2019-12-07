@@ -17,7 +17,7 @@ Widget getField(
       child: NumberTextField(
     labelText: constraint.name,
     defaultValue: defaultValue,
-    type: constraint.type,
+    type: constraint.fieldType,
     onSubmit: (String key, num value) =>
         onSubmit(constraint.inputType, key, value),
   ));

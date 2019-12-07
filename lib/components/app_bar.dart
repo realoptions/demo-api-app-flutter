@@ -21,6 +21,7 @@ class OptionPriceAppBar extends StatelessWidget with PreferredSizeWidget {
         builder: (buildContext, snapshot) {
           var selectedModel = snapshot.data;
           return AppBar(
+            key: Key("AppBarComponent"),
             title: Text(this.title + ": " + selectedModel.label),
             actions: <Widget>[
               IconButton(

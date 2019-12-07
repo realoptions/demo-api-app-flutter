@@ -73,7 +73,6 @@ class FormBloc implements BlocBase {
 
   void onSubmit() {
     var formItems = constraints.map<FormItem>((constraint) {
-      print(_getDefaultFormValue(defaultValueMap, _formValues, constraint));
       return FormItem(
           defaultValue:
               _getDefaultFormValue(defaultValueMap, _formValues, constraint),

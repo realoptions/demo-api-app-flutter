@@ -10,22 +10,23 @@ class Introduction extends StatelessWidget {
   Widget build(BuildContext context) {
     final ApiBloc bloc = BlocProvider.of<ApiBloc>(context);
     return Scaffold(
+        key: Key("Intro"),
         body: Column(children: <Widget>[
-      PaddingForm(
-        child: introInformation(context),
-      ),
-      PaddingForm(
-          child: TextFormField(
-        decoration: InputDecoration(labelText: 'API Key'),
-        onChanged: bloc.setApiKey,
-        initialValue: "",
-      )),
-      PaddingForm(
-          child: Align(
-              child: RaisedButton(
-                  child: const Text('Save'), onPressed: bloc.saveApiKey),
-              alignment: Alignment.centerLeft))
-    ]));
+          PaddingForm(
+            child: introInformation(context),
+          ),
+          PaddingForm(
+              child: TextFormField(
+            decoration: InputDecoration(labelText: 'API Key'),
+            onChanged: bloc.setApiKey,
+            initialValue: "",
+          )),
+          PaddingForm(
+              child: Align(
+                  child: RaisedButton(
+                      child: const Text('Save'), onPressed: bloc.saveApiKey),
+                  alignment: Alignment.centerLeft))
+        ]));
   }
 }
 

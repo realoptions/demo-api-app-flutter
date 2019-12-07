@@ -9,14 +9,14 @@ class InputConstraint {
   final num lower;
   final num upper;
   final num defaultValue;
-  final FieldType type;
+  final FieldType fieldType;
   final String name;
   final InputType inputType;
 
   InputConstraint({
     this.lower,
     this.upper,
-    this.type,
+    this.fieldType,
     this.name,
     this.defaultValue,
     this.inputType,
@@ -32,7 +32,7 @@ class InputConstraint {
     if (upper != other.upper) {
       return false;
     }
-    if (type != other.types) {
+    if (fieldType != other.fieldType) {
       return false;
     }
     if (name != other.name) {
@@ -62,7 +62,8 @@ List<InputConstraint> parseJson(
         name: key,
         lower: value['lower'],
         upper: value['upper'],
-        type: value['types'] == 'float' ? FieldType.Float : FieldType.Integer,
+        fieldType:
+            value['types'] == 'float' ? FieldType.Float : FieldType.Integer,
         defaultValue: defaultValue,
         inputType: model == MARKET_NAME ? InputType.Market : InputType.Model));
   });
