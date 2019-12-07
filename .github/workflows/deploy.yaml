@@ -1,0 +1,26 @@
+name: release
+on:
+  push:
+    tags:
+    - '*'
+
+jobs:
+  release: 
+    runs-on: ubuntu-latest
+    steps:
+    # A name for your step to display on GitHub.
+    - uses: actions/checkout@v1
+    # Sets up a flutter environment.
+    # https://github.com/marketplace/actions/flutter-action
+    - uses: subosito/flutter-action@v1
+      with:
+        channel: 'stable' # or: 'dev' or 'beta'
+    - name: Create apk
+      run: flutter build apk --split-per-abi
+        
+    - name: release files
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "./build/app/outputs/apk/release/*"
+        # bodyFile: "body.md"
+        token: ${{ secrets.ACCESS_TOKEN }}

@@ -1,20 +1,20 @@
-import 'package:demo_api_app_flutter/blocs/constraints_bloc.dart';
-import 'package:demo_api_app_flutter/blocs/api_bloc.dart';
-import 'package:demo_api_app_flutter/blocs/select_model_bloc.dart';
-import 'package:demo_api_app_flutter/services/finside_service.dart';
+import 'package:realoptions/blocs/constraints_bloc.dart';
+import 'package:realoptions/blocs/api_bloc.dart';
+import 'package:realoptions/blocs/select_model_bloc.dart';
+import 'package:realoptions/services/finside_service.dart';
 import 'package:flutter/material.dart';
-import 'package:demo_api_app_flutter/models/pages.dart';
-import 'package:demo_api_app_flutter/components/app_bar.dart';
-import 'package:demo_api_app_flutter/pages/form.dart';
-import 'package:demo_api_app_flutter/pages/options.dart';
-import 'package:demo_api_app_flutter/pages/density.dart';
-import 'package:demo_api_app_flutter/components/ShowBadge.dart' as badge;
-import 'package:demo_api_app_flutter/models/models.dart';
-import 'package:demo_api_app_flutter/models/api_key.dart';
-import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
-import 'package:demo_api_app_flutter/blocs/select_page_bloc.dart';
-import 'package:demo_api_app_flutter/blocs/options_bloc.dart';
-import 'package:demo_api_app_flutter/blocs/density_bloc.dart';
+import 'package:realoptions/models/pages.dart';
+import 'package:realoptions/components/app_bar.dart';
+import 'package:realoptions/pages/form.dart';
+import 'package:realoptions/pages/options.dart';
+import 'package:realoptions/pages/density.dart';
+import 'package:realoptions/components/ShowBadge.dart' as badge;
+import 'package:realoptions/models/models.dart';
+import 'package:realoptions/models/api_key.dart';
+import 'package:realoptions/blocs/bloc_provider.dart';
+import 'package:realoptions/blocs/select_page_bloc.dart';
+import 'package:realoptions/blocs/options_bloc.dart';
+import 'package:realoptions/blocs/density_bloc.dart';
 
 class AppScaffold extends StatelessWidget {
   AppScaffold({

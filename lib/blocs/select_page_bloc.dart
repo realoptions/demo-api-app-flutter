@@ -1,7 +1,7 @@
-import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
+import 'package:realoptions/blocs/bloc_provider.dart';
 import 'dart:async';
 import 'package:rxdart/rxdart.dart';
-import 'package:demo_api_app_flutter/models/pages.dart';
+import 'package:realoptions/models/pages.dart';
 
 ///Since _pageState is mutated and the stream returns a reference
 ///to the _pageState object, any changes to the _pageState are reflected

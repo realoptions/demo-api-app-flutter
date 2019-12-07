@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:demo_api_app_flutter/blocs/select_model_bloc.dart';
-import 'package:demo_api_app_flutter/models/models.dart';
+import 'package:realoptions/blocs/select_model_bloc.dart';
+import 'package:realoptions/models/models.dart';
 
 void main() {
   test('emits first model choice on instantiation', () {

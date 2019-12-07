@@ -1,11 +1,11 @@
-import 'package:demo_api_app_flutter/models/progress.dart';
-import 'package:demo_api_app_flutter/services/api_key_service.dart';
+import 'package:realoptions/models/progress.dart';
+import 'package:realoptions/services/api_key_service.dart';
 import 'package:flutter/material.dart';
-import 'package:demo_api_app_flutter/scaffold.dart';
-import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
-import 'package:demo_api_app_flutter/blocs/select_model_bloc.dart';
-import 'package:demo_api_app_flutter/blocs/api_bloc.dart';
-import 'package:demo_api_app_flutter/pages/intro.dart';
+import 'package:realoptions/scaffold.dart';
+import 'package:realoptions/blocs/bloc_provider.dart';
+import 'package:realoptions/blocs/select_model_bloc.dart';
+import 'package:realoptions/blocs/api_bloc.dart';
+import 'package:realoptions/pages/intro.dart';
 
 void main() => runApp(MyApp(db: ApiDB()));
 const String title = "Options";

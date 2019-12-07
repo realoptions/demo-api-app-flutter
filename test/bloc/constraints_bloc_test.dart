@@ -1,9 +1,9 @@
-import 'package:demo_api_app_flutter/components/CustomTextFields.dart';
-import 'package:demo_api_app_flutter/models/forms.dart';
+import 'package:realoptions/components/CustomTextFields.dart';
+import 'package:realoptions/models/forms.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:demo_api_app_flutter/blocs/constraints_bloc.dart';
-import 'package:demo_api_app_flutter/models/progress.dart';
-import 'package:demo_api_app_flutter/services/finside_service.dart';
+import 'package:realoptions/blocs/constraints_bloc.dart';
+import 'package:realoptions/models/progress.dart';
+import 'package:realoptions/services/finside_service.dart';
 import 'package:mockito/mockito.dart';
 
 class MockFinsideService extends Mock implements FinsideApi {}

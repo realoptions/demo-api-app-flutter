@@ -1,9 +1,9 @@
-import 'package:demo_api_app_flutter/blocs/bloc_provider.dart' as bloc_provider;
-import 'package:demo_api_app_flutter/models/api_key.dart';
+import 'package:realoptions/blocs/bloc_provider.dart' as bloc_provider;
+import 'package:realoptions/models/api_key.dart';
 import 'dart:async';
-import 'package:demo_api_app_flutter/services/api_key_service.dart';
+import 'package:realoptions/services/api_key_service.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:demo_api_app_flutter/models/progress.dart';
+import 'package:realoptions/models/progress.dart';
 import 'package:meta/meta.dart';
 
 final int keyId = 1;

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:demo_api_app_flutter/utils/chart_utils.dart';
+import 'package:realoptions/utils/chart_utils.dart';
 
 void main() {
   test('gets axis correctly', () {

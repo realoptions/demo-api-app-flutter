@@ -7,7 +7,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:demo_api_app_flutter/components/CustomTextFields.dart';
+import 'package:realoptions/components/CustomTextFields.dart';
 
 void main() {
   test('getRegex returns the correct regex depending on type', () {

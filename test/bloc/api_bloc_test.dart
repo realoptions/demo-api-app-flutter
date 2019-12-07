@@ -1,10 +1,10 @@
-import 'package:demo_api_app_flutter/models/api_key.dart';
+import 'package:realoptions/models/api_key.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 //import "dart:async";
-import 'package:demo_api_app_flutter/blocs/api_bloc.dart';
-import 'package:demo_api_app_flutter/services/api_key_service.dart';
-import 'package:demo_api_app_flutter/models/progress.dart';
+import 'package:realoptions/blocs/api_bloc.dart';
+import 'package:realoptions/services/api_key_service.dart';
+import 'package:realoptions/models/progress.dart';
 
 class MockApiDB extends Mock implements ApiDB {}
 

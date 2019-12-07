@@ -1,6 +1,6 @@
-import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
+import 'package:realoptions/blocs/bloc_provider.dart';
 import 'dart:async';
-import 'package:demo_api_app_flutter/models/models.dart';
+import 'package:realoptions/models/models.dart';
 import 'package:rxdart/rxdart.dart';
 
 const List<Model> modelChoices = const <Model>[

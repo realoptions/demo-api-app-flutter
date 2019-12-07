@@ -1,7 +1,7 @@
-import 'package:demo_api_app_flutter/components/CustomPadding.dart';
+import 'package:realoptions/components/CustomPadding.dart';
 import 'package:flutter/material.dart';
-import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
-import 'package:demo_api_app_flutter/blocs/api_bloc.dart';
+import 'package:realoptions/blocs/bloc_provider.dart';
+import 'package:realoptions/blocs/api_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/gestures.dart';
 

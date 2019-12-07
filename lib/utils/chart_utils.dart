@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:math';
 import 'package:charts_flutter/flutter.dart' as charts;
-import 'package:demo_api_app_flutter/models/response.dart';
+import 'package:realoptions/models/response.dart';
 
 charts.Color convertColor(Color color) {
   return charts.Color(

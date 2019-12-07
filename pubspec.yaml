@@ -1,5 +1,5 @@
-name: demo_api_app_flutter
-description: A new Flutter project.
+name: realoptions
+description: An app for interacting with Finside RealOption apis.
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43

@@ -1,10 +1,10 @@
-import 'package:demo_api_app_flutter/blocs/bloc_provider.dart' as bloc_provider;
+import 'package:realoptions/blocs/bloc_provider.dart' as bloc_provider;
 import 'dart:async';
-import 'package:demo_api_app_flutter/services/finside_service.dart';
-import 'package:demo_api_app_flutter/models/response.dart';
-import 'package:demo_api_app_flutter/models/forms.dart';
+import 'package:realoptions/services/finside_service.dart';
+import 'package:realoptions/models/response.dart';
+import 'package:realoptions/models/forms.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:demo_api_app_flutter/models/progress.dart';
+import 'package:realoptions/models/progress.dart';
 import 'package:meta/meta.dart';
 
 class DensityBloc implements bloc_provider.BlocBase {

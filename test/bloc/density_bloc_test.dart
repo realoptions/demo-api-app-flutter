@@ -1,9 +1,9 @@
-import 'package:demo_api_app_flutter/models/forms.dart';
-import 'package:demo_api_app_flutter/models/response.dart';
+import 'package:realoptions/models/forms.dart';
+import 'package:realoptions/models/response.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:demo_api_app_flutter/blocs/density_bloc.dart';
-import 'package:demo_api_app_flutter/models/progress.dart';
-import 'package:demo_api_app_flutter/services/finside_service.dart';
+import 'package:realoptions/blocs/density_bloc.dart';
+import 'package:realoptions/models/progress.dart';
+import 'package:realoptions/services/finside_service.dart';
 import 'package:mockito/mockito.dart';
 
 class MockFinsideService extends Mock implements FinsideApi {}
