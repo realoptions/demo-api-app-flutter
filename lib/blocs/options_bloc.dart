@@ -29,7 +29,10 @@ class OptionsBloc implements bloc_provider.BlocBase {
     return finside.fetchOptionPrices(body.convertSubmission()).then((result) {
       _optionController.sink.add(result);
       inOptionsProgress.add(StreamProgress.DataRetrieved);
-    }).catchError(_connectionController.addError);
+    }).catchError((error) {
+      _connectionController.addError(error);
+      inOptionsProgress.add(StreamProgress.DataRetrieved);
+    });
   }
 
   void dispose() {

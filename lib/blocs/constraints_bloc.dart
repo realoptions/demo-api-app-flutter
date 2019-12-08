@@ -34,6 +34,7 @@ class ConstraintsBloc implements BlocBase {
       _inConstraintsProgress.add(StreamProgress.DataRetrieved);
     }).catchError((error) {
       _inConstraintsController.addError(error);
+      _inConstraintsProgress.add(StreamProgress.DataRetrieved);
     });
   }
 

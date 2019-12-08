@@ -26,7 +26,10 @@ class DensityBloc implements bloc_provider.BlocBase {
     return finside.fetchModelDensity(body.convertSubmission()).then((result) {
       _densityController.sink.add(result);
       inDensityProgress.add(StreamProgress.DataRetrieved);
-    }).catchError(_connectionController.addError);
+    }).catchError((error) {
+      _connectionController.addError(error);
+      inDensityProgress.add(StreamProgress.DataRetrieved);
+    });
   }
 
   void dispose() {

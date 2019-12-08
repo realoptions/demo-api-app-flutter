@@ -49,8 +49,10 @@ class FinsideApi {
   Future<List<InputConstraint>> fetchConstraints() {
     return Future.wait([
       http
-          .get(p.join(BASE_ENDPOINT, API_VERSION, MARKET_NAME,
-              "parameters/parameter_ranges"))
+          .get(
+              p.join(BASE_ENDPOINT, API_VERSION, MARKET_NAME,
+                  "parameters/parameter_ranges"),
+              headers: _getHeaders())
           .then(_parseConstraint(MARKET_NAME)),
       http
           .get(
