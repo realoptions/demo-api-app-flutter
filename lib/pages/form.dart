@@ -1,14 +1,15 @@
-import 'package:demo_api_app_flutter/blocs/constraints_bloc.dart';
-import 'package:demo_api_app_flutter/blocs/options_bloc.dart';
-import 'package:demo_api_app_flutter/blocs/select_page_bloc.dart';
-import 'package:demo_api_app_flutter/models/pages.dart';
+import 'package:realoptions/blocs/constraints_bloc.dart';
+import 'package:realoptions/blocs/options_bloc.dart';
+import 'package:realoptions/blocs/select_page_bloc.dart';
+import 'package:realoptions/models/pages.dart';
 import 'package:flutter/material.dart';
-import 'package:demo_api_app_flutter/components/CustomPadding.dart';
-import 'package:demo_api_app_flutter/components/CustomTextFields.dart';
-import 'package:demo_api_app_flutter/models/forms.dart';
-import 'package:demo_api_app_flutter/blocs/form_bloc.dart';
-import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
-import 'package:demo_api_app_flutter/blocs/density_bloc.dart';
+import 'package:realoptions/components/CustomPadding.dart';
+import 'package:realoptions/components/CustomTextFields.dart';
+import 'package:realoptions/models/forms.dart';
+import 'package:realoptions/blocs/form_bloc.dart';
+import 'package:realoptions/blocs/bloc_provider.dart';
+import 'package:realoptions/blocs/density_bloc.dart';
+import 'package:realoptions/models/progress.dart';
 
 Widget getField(
     Function onSubmit, String defaultValue, InputConstraint constraint) {
@@ -16,36 +17,38 @@ Widget getField(
       child: NumberTextField(
     labelText: constraint.name,
     defaultValue: defaultValue,
-    type: constraint.types,
+    type: constraint.fieldType,
     onSubmit: (String key, num value) =>
         onSubmit(constraint.inputType, key, value),
   ));
 }
 
 class InputForm extends StatelessWidget {
-  const InputForm({Key key, this.model, this.apiKey}) : super(key: key);
-  final String model;
-  final String apiKey;
+  const InputForm({Key key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     ConstraintsBloc bloc = BlocProvider.of<ConstraintsBloc>(context);
-    return StreamBuilder<List<InputConstraint>>(
-        stream: bloc.outConstraintsController,
+    return StreamBuilder<StreamProgress>(
+        stream: bloc.outConstraintsProgress,
         builder: (buildContext, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.none:
-            case ConnectionState.waiting:
+          switch (snapshot.data) {
+            case StreamProgress.Busy:
               return Center(child: CircularProgressIndicator());
-            case ConnectionState.active:
-            case ConnectionState.done:
-              if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-              if (snapshot.data == null) {
-                return Center(child: CircularProgressIndicator());
-              }
-              return BlocProvider<FormBloc>(
-                  bloc: FormBloc(snapshot.data),
-                  child: SpecToForm(model: model, apiKey: apiKey));
-            default: //can never get here
+            case StreamProgress.DataRetrieved:
+              return StreamBuilder<List<InputConstraint>>(
+                  stream: bloc.outConstraintsController,
+                  builder: (buildContext, snapshot) {
+                    if (snapshot.hasError) {
+                      return Center(child: Text(snapshot.error.toString()));
+                    }
+                    if (snapshot.data == null) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    return BlocProvider<FormBloc>(
+                        bloc: FormBloc(constraints: snapshot.data),
+                        child: SpecToForm());
+                  });
+            default: //should never get here
               return Center(child: CircularProgressIndicator());
           }
         });
@@ -53,9 +56,7 @@ class InputForm extends StatelessWidget {
 }
 
 class SpecToForm extends StatelessWidget {
-  const SpecToForm({Key key, this.model, this.apiKey}) : super(key: key);
-  final String model;
-  final String apiKey;
+  const SpecToForm({Key key}) : super(key: key);
   static final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
@@ -82,12 +83,10 @@ class SpecToForm extends StatelessWidget {
               bloc.onSubmit();
               //is this the optimal way??
               var submittedBody = bloc.getCurrentForm();
-              densityBloc.getDensity(model, apiKey, submittedBody).then((_) {
+              densityBloc.getDensity(submittedBody).then((_) {
                 pageBloc.setBadge(DENSITY_PAGE);
               });
-              optionsBloc
-                  .getOptionPrices(model, apiKey, submittedBody)
-                  .then((_) {
+              optionsBloc.getOptionPrices(submittedBody).then((_) {
                 pageBloc.setBadge(OPTIONS_PAGE);
               });
             }

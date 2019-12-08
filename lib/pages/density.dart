@@ -1,12 +1,12 @@
-import 'package:demo_api_app_flutter/blocs/density_bloc.dart';
-import 'package:demo_api_app_flutter/models/progress.dart';
+import 'package:realoptions/blocs/density_bloc.dart';
+import 'package:realoptions/models/progress.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:demo_api_app_flutter/models/response.dart';
+import 'package:realoptions/models/response.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
-import 'package:demo_api_app_flutter/utils/chart_utils.dart' as utils;
-import 'package:demo_api_app_flutter/components/CustomPadding.dart' as padding;
-import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
+import 'package:realoptions/utils/chart_utils.dart' as utils;
+import 'package:realoptions/components/CustomPadding.dart' as padding;
+import 'package:realoptions/blocs/bloc_provider.dart';
 
 class ShowDensity extends StatelessWidget {
   const ShowDensity({
@@ -19,9 +19,6 @@ class ShowDensity extends StatelessWidget {
         stream: bloc.outDensityProgress,
         initialData: StreamProgress.Busy,
         builder: (buildContext, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text(snapshot.error.toString()));
-          }
           switch (snapshot.data) {
             case StreamProgress.Busy:
               return Center(child: CircularProgressIndicator());
@@ -45,6 +42,9 @@ class _Density extends StatelessWidget {
     return StreamBuilder<List<ModelResult>>(
         stream: bloc.outDensityResults,
         builder: (buildContext, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text(snapshot.error.toString()));
+          }
           if (snapshot.data == null) {
             return Center(child: CircularProgressIndicator());
           }

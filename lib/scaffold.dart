@@ -1,19 +1,20 @@
-import 'package:demo_api_app_flutter/blocs/constraints_bloc.dart';
-import 'package:demo_api_app_flutter/blocs/api_bloc.dart';
-import 'package:demo_api_app_flutter/blocs/select_model_bloc.dart';
+import 'package:realoptions/blocs/constraints_bloc.dart';
+import 'package:realoptions/blocs/api_bloc.dart';
+import 'package:realoptions/blocs/select_model_bloc.dart';
+import 'package:realoptions/services/finside_service.dart';
 import 'package:flutter/material.dart';
-import 'package:demo_api_app_flutter/models/pages.dart';
-import 'package:demo_api_app_flutter/components/app_bar.dart';
-import 'package:demo_api_app_flutter/pages/form.dart';
-import 'package:demo_api_app_flutter/pages/options.dart';
-import 'package:demo_api_app_flutter/pages/density.dart';
-import 'package:demo_api_app_flutter/components/ShowBadge.dart' as badge;
-import 'package:demo_api_app_flutter/models/models.dart';
-import 'package:demo_api_app_flutter/models/api_key.dart';
-import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
-import 'package:demo_api_app_flutter/blocs/select_page_bloc.dart';
-import 'package:demo_api_app_flutter/blocs/options_bloc.dart';
-import 'package:demo_api_app_flutter/blocs/density_bloc.dart';
+import 'package:realoptions/models/pages.dart';
+import 'package:realoptions/components/app_bar.dart';
+import 'package:realoptions/pages/form.dart';
+import 'package:realoptions/pages/options.dart';
+import 'package:realoptions/pages/density.dart';
+import 'package:realoptions/components/ShowBadge.dart' as badge;
+import 'package:realoptions/models/models.dart';
+import 'package:realoptions/models/api_key.dart';
+import 'package:realoptions/blocs/bloc_provider.dart';
+import 'package:realoptions/blocs/select_page_bloc.dart';
+import 'package:realoptions/blocs/options_bloc.dart';
+import 'package:realoptions/blocs/density_bloc.dart';
 
 class AppScaffold extends StatelessWidget {
   AppScaffold({
@@ -26,6 +27,7 @@ class AppScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final SelectModelBloc selectBloc =
         BlocProvider.of<SelectModelBloc>(context);
+
     return StreamBuilder<Model>(
         initialData: modelChoices[0],
         stream: selectBloc.outSelectedModel,
@@ -39,19 +41,19 @@ class AppScaffold extends StatelessWidget {
                 if (apiKey == null) {
                   return Center(child: CircularProgressIndicator());
                 }
+                final FinsideApi finside =
+                    FinsideApi(apiKey: apiKey.key, model: model.value);
                 return BlocProvider<ConstraintsBloc>(
-                    bloc: ConstraintsBloc(model.value, apiKey.key),
+                    bloc: ConstraintsBloc(finside: finside),
                     child: BlocProvider<DensityBloc>(
-                        bloc:
-                            DensityBloc(), //needed so we can get the functions "getDensity" and "getOptionPrices" in the submit function
+                        bloc: DensityBloc(
+                            finside:
+                                finside), //needed so we can get the functions "getDensity" and "getOptionPrices" in the submit function
                         child: BlocProvider<OptionsBloc>(
-                            bloc: OptionsBloc(),
+                            bloc: OptionsBloc(finside: finside),
                             child: BlocProvider<SelectPageBloc>(
                               bloc: SelectPageBloc(),
-                              child: _Scaffold(
-                                  model: model,
-                                  apiKey: apiKey,
-                                  title: this.title),
+                              child: _Scaffold(title: this.title),
                             ))));
               });
         });
@@ -59,17 +61,13 @@ class AppScaffold extends StatelessWidget {
 }
 
 class _Scaffold extends StatelessWidget {
-  _Scaffold(
-      {@required this.model, @required this.apiKey, @required this.title});
-  final Model model;
-  final ApiKey apiKey;
+  _Scaffold({@required this.title});
   final String title;
   final PageStorageBucket _bucket = PageStorageBucket();
-  List<PageEntry> _getPages(
-      String modelValue, String apiKey, List<bool> showBadge) {
+  List<PageEntry> _getPages(List<bool> showBadge) {
     return [
       PageEntry(
-        widget: InputForm(model: modelValue, apiKey: apiKey),
+        widget: InputForm(),
         icon: Icon(Icons.input),
         text: "Entry",
       ),
@@ -96,7 +94,7 @@ class _Scaffold extends StatelessWidget {
         builder: (buildContext, snapshots) {
           int selectedIndex = snapshots.data.index;
           List<bool> showBadges = snapshots.data.showBadges;
-          var pages = _getPages(this.model.value, apiKey.key, showBadges);
+          var pages = _getPages(showBadges);
           return Scaffold(
               appBar: OptionPriceAppBar(
                 title: this.title,

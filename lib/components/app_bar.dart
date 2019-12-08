@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:demo_api_app_flutter/blocs/api_bloc.dart';
-import 'package:demo_api_app_flutter/blocs/select_model_bloc.dart';
-import 'package:demo_api_app_flutter/blocs/bloc_provider.dart';
-import 'package:demo_api_app_flutter/models/models.dart';
+import 'package:realoptions/blocs/api_bloc.dart';
+import 'package:realoptions/blocs/select_model_bloc.dart';
+import 'package:realoptions/blocs/bloc_provider.dart';
+import 'package:realoptions/models/models.dart';
 
 class OptionPriceAppBar extends StatelessWidget with PreferredSizeWidget {
   OptionPriceAppBar({@required this.title, @required this.choices});
@@ -21,6 +21,7 @@ class OptionPriceAppBar extends StatelessWidget with PreferredSizeWidget {
         builder: (buildContext, snapshot) {
           var selectedModel = snapshot.data;
           return AppBar(
+            key: Key("AppBarComponent"),
             title: Text(this.title + ": " + selectedModel.label),
             actions: <Widget>[
               IconButton(

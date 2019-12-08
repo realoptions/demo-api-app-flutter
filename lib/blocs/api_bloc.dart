@@ -1,25 +1,30 @@
-import 'package:demo_api_app_flutter/blocs/bloc_provider.dart' as bloc_provider;
-import 'package:demo_api_app_flutter/models/api_key.dart';
+import 'package:realoptions/blocs/bloc_provider.dart' as bloc_provider;
+import 'package:realoptions/models/api_key.dart';
 import 'dart:async';
-
-import 'package:demo_api_app_flutter/services/api_key.dart' as auth;
+import 'package:realoptions/services/api_key_service.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:demo_api_app_flutter/models/progress.dart';
+import 'package:realoptions/models/progress.dart';
+import 'package:meta/meta.dart';
 
 final int keyId = 1;
 
 class ApiBloc implements bloc_provider.BlocBase {
   final StreamController<ApiKey> _keyController = BehaviorSubject();
   final StreamController<StreamProgress> _stateController = BehaviorSubject();
+  Future<void> _doneConstructor; //helper function for our tests
   Stream<ApiKey> get outApiKey => _keyController.stream;
   Stream<StreamProgress> get outHomeState => _stateController.stream;
   StreamSink get _getApiKey => _keyController.sink;
   StreamSink get _getHomeState => _stateController.sink;
-
+  Future<void> get doneInitialization => _doneConstructor;
   String _apiKey = "";
-  ApiBloc() {
+  final ApiDB db;
+  ApiBloc({@required this.db}) {
     _getHomeState.add(StreamProgress.Busy);
-    auth.retrieveKey().then((apiKeyList) {
+    _doneConstructor = _init();
+  }
+  Future<void> _init() {
+    return db.retrieveKey().then((apiKeyList) {
       if (apiKeyList.length > 0 && apiKeyList.first.key != "") {
         _apiKey = apiKeyList.first.key;
         _getApiKey.add(apiKeyList.first);
@@ -29,6 +34,7 @@ class ApiBloc implements bloc_provider.BlocBase {
       }
     }).catchError(_stateController.addError);
   }
+
   void setApiKey(String apiKey) {
     _apiKey = apiKey;
   }
@@ -43,11 +49,11 @@ class ApiBloc implements bloc_provider.BlocBase {
     ApiKey apiKey = ApiKey(id: keyId, key: _apiKey);
     if (_apiKey == "") {
       _getHomeState.add(StreamProgress.NoData);
-      auth.removeKey(keyId);
+      db.removeKey(keyId);
     } else {
-      auth.insertKey(apiKey).then((result) {
-        _getHomeState.add(StreamProgress.DataRetrieved);
+      db.insertKey(apiKey).then((_) {
         _getApiKey.add(apiKey);
+        _getHomeState.add(StreamProgress.DataRetrieved);
       }).catchError(_stateController.addError);
     }
   }

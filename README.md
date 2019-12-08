@@ -1,16 +1,14 @@
-# demo_api_app_flutter
+| [Linux][lin-link] | [Codecov][cov-link] |
+| :---------------: | :-----------------: |
+| ![lin-badge]      | ![cov-badge]        |
 
-A new Flutter project.
+[lin-badge]: https://github.com/realoptions/demo-api-app-flutter/workflows/test/badge.svg
+[lin-link]:  https://github.com/realoptions/demo-api-app-flutter/actions
+[cov-badge]: https://codecov.io/gh/realoptions/demo-api-app-flutter/branch/master/graph/badge.svg
+[cov-link]:  https://codecov.io/gh/realoptions/demo-api-app-flutter
 
-## Getting Started
+# RealOptions mobile app
 
-This project is a starting point for a Flutter application.
+This is the mobile app for consuming [Finside's](https://finside.org) APIs.  
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
