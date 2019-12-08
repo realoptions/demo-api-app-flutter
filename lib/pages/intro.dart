@@ -62,17 +62,20 @@ Widget introInformation(BuildContext context) {
   return Padding(
       padding: const EdgeInsets.only(top: 80),
       child: RichText(
+          key: Key("textdescription"),
           text: TextSpan(children: <TextSpan>[
-        TextSpan(
-            style: aboutTextStyle,
-            text:
-                "Welcome to the demo application for Finside's Option Pricing API!  "
-                "To start, please enter your API key.  This key can be obtained by "
-                "logging into "),
-        _LinkTextSpan(
-            text: "finside.org", url: "https://finside.org", style: linkStyle),
-        TextSpan(
-            text: " and using the developer tab to retrieve your API key.",
-            style: aboutTextStyle)
-      ])));
+            TextSpan(
+                style: aboutTextStyle,
+                text:
+                    "Welcome to the demo application for Finside's Option Pricing API!  "
+                    "To start, please enter your API key.  This key can be obtained by "
+                    "logging into "),
+            _LinkTextSpan(
+                text: "finside.org",
+                url: "https://finside.org",
+                style: linkStyle),
+            TextSpan(
+                text: " and using the developer tab to retrieve your API key.",
+                style: aboutTextStyle)
+          ])));
 }

@@ -44,7 +44,7 @@ void main() {
     Map<String, SubmitItems> body = {
       "asset": SubmitItems(inputType: InputType.Market, value: 5.0)
     };
-    expect(bloc.outDensityResults, emitsInOrder([results]));
+    expect(bloc.outDensityController, emitsInOrder([results]));
     bloc.getDensity(body);
   });
 }

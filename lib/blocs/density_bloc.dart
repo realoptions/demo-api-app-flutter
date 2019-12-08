@@ -13,9 +13,13 @@ class DensityBloc implements bloc_provider.BlocBase {
   final StreamController<StreamProgress> _connectionController =
       BehaviorSubject();
   final FinsideApi finside;
-  Stream<List<ModelResult>> get outDensityResults => _densityController.stream;
+  Stream<List<ModelResult>> get outDensityController =>
+      _densityController.stream;
+  StreamSink get _inDensityController => _densityController.sink;
+
   Stream<StreamProgress> get outDensityProgress => _connectionController.stream;
   StreamSink get inDensityProgress => _connectionController.sink;
+
   DensityBloc({@required this.finside}) {
     inDensityProgress.add(StreamProgress.NoData);
   }
@@ -24,10 +28,10 @@ class DensityBloc implements bloc_provider.BlocBase {
     SubmitBody body = SubmitBody(formBody: submittedBody);
     inDensityProgress.add(StreamProgress.Busy);
     return finside.fetchModelDensity(body.convertSubmission()).then((result) {
-      _densityController.sink.add(result);
+      _inDensityController.add(result);
       inDensityProgress.add(StreamProgress.DataRetrieved);
     }).catchError((error) {
-      _connectionController.addError(error);
+      _inDensityController.addError(error);
       inDensityProgress.add(StreamProgress.DataRetrieved);
     });
   }

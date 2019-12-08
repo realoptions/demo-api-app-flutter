@@ -41,7 +41,7 @@ class _OptionPrices extends StatelessWidget {
     final charts.Color callColor = utils.convertColor(themeData.primaryColor);
     final charts.Color putColor = utils.convertColor(themeData.accentColor);
     return StreamBuilder<Map<String, List<ModelResult>>>(
-        stream: bloc.outOptionResults,
+        stream: bloc.outOptionsController,
         builder: (buildContext, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text(snapshot.error.toString()));
