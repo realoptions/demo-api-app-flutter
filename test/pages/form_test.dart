@@ -9,7 +9,6 @@
 ///The asyncronous streams make this awkward, but
 ///shouldn't make this impossible...
 
-/*
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:realoptions/pages/form.dart';
@@ -50,7 +49,7 @@ void main() {
     when(finside.fetchConstraints())
         .thenAnswer((_) => Future.error("Big error!"));
   }
-
+/*
   testWidgets('Input form shows error if error', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     stubRetrieveDataWithError();
@@ -76,7 +75,5 @@ void main() {
       expect(find.text("Big error!"), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
-  });
+  });*/
 }
-
-*/
