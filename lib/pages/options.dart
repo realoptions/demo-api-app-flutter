@@ -19,9 +19,6 @@ class ShowOptionPrices extends StatelessWidget {
         stream: bloc.outOptionsProgress,
         initialData: StreamProgress.Busy,
         builder: (buildContext, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text(snapshot.error.toString()));
-          }
           switch (snapshot.data) {
             case StreamProgress.Busy:
               return Center(child: CircularProgressIndicator());
@@ -46,6 +43,9 @@ class _OptionPrices extends StatelessWidget {
     return StreamBuilder<Map<String, List<ModelResult>>>(
         stream: bloc.outOptionResults,
         builder: (buildContext, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text(snapshot.error.toString()));
+          }
           if (snapshot.data == null) {
             return Center(child: CircularProgressIndicator());
           }

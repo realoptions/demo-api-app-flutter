@@ -19,9 +19,6 @@ class ShowDensity extends StatelessWidget {
         stream: bloc.outDensityProgress,
         initialData: StreamProgress.Busy,
         builder: (buildContext, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text(snapshot.error.toString()));
-          }
           switch (snapshot.data) {
             case StreamProgress.Busy:
               return Center(child: CircularProgressIndicator());
@@ -45,6 +42,9 @@ class _Density extends StatelessWidget {
     return StreamBuilder<List<ModelResult>>(
         stream: bloc.outDensityResults,
         builder: (buildContext, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text(snapshot.error.toString()));
+          }
           if (snapshot.data == null) {
             return Center(child: CircularProgressIndicator());
           }
