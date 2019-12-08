@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:realoptions/models/forms.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:quiver/core.dart' show hash2;
+import 'package:meta/meta.dart';
 
 const Map<String, String> defaultValueMap = {
   "num_u": "8",
@@ -42,7 +43,7 @@ class FormBloc implements BlocBase {
 
   StreamSink get _inFormController => _formController.sink;
 
-  FormBloc({this.constraints}) {
+  FormBloc({@required this.constraints}) {
     onSubmit();
   }
   static String _valueOtherwiseNull(String value, String defaultValue) {

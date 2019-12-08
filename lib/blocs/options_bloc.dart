@@ -14,8 +14,9 @@ class OptionsBloc implements bloc_provider.BlocBase {
   final StreamController<StreamProgress> _connectionController =
       BehaviorSubject();
   final FinsideApi finside;
-  Stream<Map<String, List<ModelResult>>> get outOptionResults =>
+  Stream<Map<String, List<ModelResult>>> get outOptionsController =>
       _optionController.stream;
+  StreamSink get _inOptionsController => _optionController.sink;
   Stream<StreamProgress> get outOptionsProgress => _connectionController.stream;
   StreamSink get inOptionsProgress => _connectionController.sink;
 
@@ -27,10 +28,10 @@ class OptionsBloc implements bloc_provider.BlocBase {
     SubmitBody body = SubmitBody(formBody: submittedBody);
     inOptionsProgress.add(StreamProgress.Busy);
     return finside.fetchOptionPrices(body.convertSubmission()).then((result) {
-      _optionController.sink.add(result);
+      _inOptionsController.add(result);
       inOptionsProgress.add(StreamProgress.DataRetrieved);
     }).catchError((error) {
-      _connectionController.addError(error);
+      _inOptionsController.addError(error);
       inOptionsProgress.add(StreamProgress.DataRetrieved);
     });
   }

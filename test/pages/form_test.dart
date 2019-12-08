@@ -15,6 +15,10 @@ import 'package:realoptions/pages/form.dart';
 import 'package:mockito/mockito.dart';
 import 'package:realoptions/blocs/bloc_provider.dart';
 import 'package:realoptions/blocs/constraints_bloc.dart';
+import 'package:realoptions/blocs/form_bloc.dart';
+import 'package:realoptions/blocs/options_bloc.dart';
+import 'package:realoptions/blocs/density_bloc.dart';
+import 'package:realoptions/blocs/select_page_bloc.dart';
 import 'package:realoptions/services/finside_service.dart';
 import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/components/CustomTextFields.dart';
@@ -49,31 +53,45 @@ void main() {
     when(finside.fetchConstraints())
         .thenAnswer((_) => Future.error("Big error!"));
   }
-/*
+
   testWidgets('Input form shows error if error', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     stubRetrieveDataWithError();
-    await tester.runAsync(() async {
-      await tester.pumpWidget(BlocProvider<ConstraintsBloc>(
-          bloc: ConstraintsBloc(finside: finside), child: InputForm()));
-      await tester.idle();
-      await tester.pump(Duration(milliseconds: 50));
-      //await Future.delayed(
-      //    const Duration(milliseconds: 50)); //wait for stream to stop
-      expect(find.text("Big error!"), findsOneWidget);
-    });
+    //await tester.runAsync(() async {
+    //var bloc = ConstraintsBloc(finside: finside);
+    await tester.pumpWidget(Directionality(
+      child: BlocProvider<ConstraintsBloc>(
+          bloc: ConstraintsBloc(finside: finside), child: InputForm()),
+      textDirection: TextDirection.ltr,
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text("Big error!"), findsOneWidget);
   });
   testWidgets('Input no error or progress when data is returned',
       (WidgetTester tester) async {
     stubRetrieveData();
-    await tester.runAsync(() async {
-      await tester.pumpWidget(BlocProvider<ConstraintsBloc>(
-          bloc: ConstraintsBloc(finside: finside), child: InputForm()));
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      await tester.idle();
-      await tester.pump(Duration(milliseconds: 50));
-      expect(find.text("Big error!"), findsNothing);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
-    });
-  });*/
+    //var bloc = ConstraintsBloc(finside: finside);
+    await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+            body: Directionality(
+      child: BlocProvider<FormBloc>(
+        child: BlocProvider<DensityBloc>(
+          child: BlocProvider<OptionsBloc>(
+            child: BlocProvider<SelectPageBloc>(
+              child: BlocProvider<ConstraintsBloc>(
+                  bloc: ConstraintsBloc(finside: finside), child: InputForm()),
+              bloc: SelectPageBloc(),
+            ),
+            bloc: OptionsBloc(finside: finside),
+          ),
+          bloc: DensityBloc(finside: finside),
+        ),
+        bloc: FormBloc(constraints: constraints),
+      ),
+      textDirection: TextDirection.ltr,
+    ))));
+    await tester.pumpAndSettle();
+    expect(find.text("Big error!"), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
 }

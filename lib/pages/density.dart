@@ -40,7 +40,7 @@ class _Density extends StatelessWidget {
     final charts.Color densityColor = utils.convertColor(themeData.accentColor);
     final DensityBloc bloc = BlocProvider.of<DensityBloc>(context);
     return StreamBuilder<List<ModelResult>>(
-        stream: bloc.outDensityResults,
+        stream: bloc.outDensityController,
         builder: (buildContext, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text(snapshot.error.toString()));
