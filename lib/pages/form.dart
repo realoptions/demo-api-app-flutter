@@ -18,6 +18,8 @@ Widget getField(
     labelText: constraint.name,
     defaultValue: defaultValue,
     type: constraint.fieldType,
+    lowValue: constraint.lower,
+    highValue: constraint.upper,
     onSubmit: (String key, num value) =>
         onSubmit(constraint.inputType, key, value),
   ));
@@ -61,9 +63,6 @@ class SpecToForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     FormBloc bloc = BlocProvider.of<FormBloc>(context);
-    DensityBloc densityBloc = BlocProvider.of<DensityBloc>(context);
-    OptionsBloc optionsBloc = BlocProvider.of<OptionsBloc>(context);
-    SelectPageBloc pageBloc = BlocProvider.of<SelectPageBloc>(context);
     return StreamBuilder<Iterable<FormItem>>(
       stream: bloc.outFormController,
       initialData: [],
@@ -73,26 +72,7 @@ class SpecToForm extends StatelessWidget {
           return getField(
               bloc.onSave, formItem.defaultValue, formItem.constraint);
         }).toList();
-        formFields.add(PaddingForm(
-            child: RaisedButton(
-          onPressed: () {
-            // Validate returns true if the form is valid, or false
-            // otherwise.
-            if (_formKey.currentState.validate()) {
-              _formKey.currentState.save();
-              bloc.onSubmit();
-              //is this the optimal way??
-              var submittedBody = bloc.getCurrentForm();
-              densityBloc.getDensity(submittedBody).then((_) {
-                pageBloc.setBadge(DENSITY_PAGE);
-              });
-              optionsBloc.getOptionPrices(submittedBody).then((_) {
-                pageBloc.setBadge(OPTIONS_PAGE);
-              });
-            }
-          },
-          child: Text('Submit'),
-        )));
+        formFields.add(PaddingForm(child: FormButton(formKey: _formKey)));
         return SingleChildScrollView(
             child: Form(
                 autovalidate: true,
@@ -103,5 +83,49 @@ class SpecToForm extends StatelessWidget {
             key: PageStorageKey("Form"));
       },
     );
+  }
+}
+
+class FormButton extends StatelessWidget {
+  FormButton({@required this.formKey});
+  final GlobalKey<FormState> formKey;
+  @override
+  Widget build(BuildContext context) {
+    FormBloc bloc = BlocProvider.of<FormBloc>(context);
+    DensityBloc densityBloc = BlocProvider.of<DensityBloc>(context);
+    OptionsBloc optionsBloc = BlocProvider.of<OptionsBloc>(context);
+    SelectPageBloc pageBloc = BlocProvider.of<SelectPageBloc>(context);
+
+    return StreamBuilder<StreamProgress>(
+        stream: densityBloc.outDensityProgress,
+        builder: (buildContext, snapshotDensity) {
+          return StreamBuilder<StreamProgress>(
+              stream: optionsBloc.outOptionsProgress,
+              builder: (buildContext, snapshotOptions) {
+                if (snapshotDensity.data == StreamProgress.Busy &&
+                    snapshotOptions.data == StreamProgress.Busy) {
+                  return CircularProgressIndicator();
+                }
+                return RaisedButton(
+                  onPressed: () {
+                    // Validate returns true if the form is valid, or false
+                    // otherwise.
+                    if (formKey.currentState.validate()) {
+                      formKey.currentState.save();
+                      bloc.onSubmit();
+                      //is this the optimal way??
+                      var submittedBody = bloc.getCurrentForm();
+                      densityBloc.getDensity(submittedBody).then((_) {
+                        pageBloc.setBadge(DENSITY_PAGE);
+                      });
+                      optionsBloc.getOptionPrices(submittedBody).then((_) {
+                        pageBloc.setBadge(OPTIONS_PAGE);
+                      });
+                    }
+                  },
+                  child: Text('Submit'),
+                );
+              });
+        });
   }
 }

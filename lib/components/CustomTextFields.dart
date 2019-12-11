@@ -33,6 +33,8 @@ class NumberTextField extends StatelessWidget {
       this.hintText,
       this.labelText,
       this.defaultValue,
+      this.lowValue = double.negativeInfinity,
+      this.highValue = double.infinity,
       @required this.type,
       @required this.onSubmit})
       : super(key: key);
@@ -42,6 +44,8 @@ class NumberTextField extends StatelessWidget {
   final FieldType type;
   final void Function(String, num) onSubmit;
   final StringUtils strUtils = StringUtils();
+  final num lowValue;
+  final num highValue;
   @override
   Widget build(BuildContext context) {
     return TextFormField(
@@ -53,6 +57,13 @@ class NumberTextField extends StatelessWidget {
         validator: (value) {
           if (value.isEmpty) {
             return 'Please enter some text';
+          }
+          num currentValue = strUtils.getValueFromString(type, value);
+          if (currentValue < lowValue || currentValue > highValue) {
+            return 'Number must be between ' +
+                lowValue.toString() +
+                ' and ' +
+                highValue.toString();
           }
           return null;
         },
