@@ -36,7 +36,6 @@ class FormItem {
 
 class FormBloc implements BlocBase {
   Map<String, SubmitItems> _formValues = {};
-  Map<String, bool> _errorValues = {};
   final List<InputConstraint> constraints;
   final StreamController<Iterable<FormItem>> _formController =
       BehaviorSubject();

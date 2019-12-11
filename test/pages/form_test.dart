@@ -21,6 +21,7 @@ import 'package:realoptions/blocs/density_bloc.dart';
 import 'package:realoptions/blocs/select_page_bloc.dart';
 import 'package:realoptions/services/finside_service.dart';
 import 'package:realoptions/models/forms.dart';
+import 'package:realoptions/models/response.dart';
 import 'package:realoptions/components/CustomTextFields.dart';
 
 class MockFinsideService extends Mock implements FinsideApi {}
@@ -36,7 +37,7 @@ void main() {
           upper: 3,
           lower: 1,
           fieldType: FieldType.Float,
-          name: "somename",
+          name: "asset",
           inputType: InputType.Market)
     ];
   });
@@ -47,6 +48,18 @@ void main() {
   void stubRetrieveData() {
     when(finside.fetchConstraints())
         .thenAnswer((_) => Future.value(constraints));
+  }
+
+  void stubRetrieveOptions() {
+    when(finside.fetchOptionPrices(any)).thenAnswer((_) => Future.value({
+          "call": [ModelResult(value: 4, atPoint: 4)],
+          "put": [ModelResult(value: 4, atPoint: 4)]
+        }));
+  }
+
+  void stubRetrieveDensity() {
+    when(finside.fetchModelDensity(any))
+        .thenAnswer((_) => Future.value([ModelResult(value: 4, atPoint: 4)]));
   }
 
   void stubRetrieveDataWithError() {
@@ -93,5 +106,40 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text("Big error!"), findsNothing);
     expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+  testWidgets('submits form', (WidgetTester tester) async {
+    stubRetrieveData();
+    stubRetrieveOptions();
+    stubRetrieveDensity();
+    var bloc = FormBloc(constraints: constraints);
+    await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+            body: Directionality(
+      child: BlocProvider<ConstraintsBloc>(
+        child: BlocProvider<DensityBloc>(
+          child: BlocProvider<OptionsBloc>(
+            child: BlocProvider<SelectPageBloc>(
+              child: BlocProvider<FormBloc>(bloc: bloc, child: SpecToForm()),
+              bloc: SelectPageBloc(),
+            ),
+            bloc: OptionsBloc(finside: finside),
+          ),
+          bloc: DensityBloc(finside: finside),
+        ),
+        bloc: ConstraintsBloc(finside: finside),
+      ),
+      textDirection: TextDirection.ltr,
+    ))));
+    await tester.pumpAndSettle();
+    expect(find.text("Big error!"), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    await tester.enterText(find.byType(TextFormField), "2.5");
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(RaisedButton));
+    await tester.pumpAndSettle();
+    expect(find.text("Big error!"), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(bloc.getCurrentForm(),
+        {"asset": SubmitItems(value: 2.5, inputType: InputType.Market)});
   });
 }

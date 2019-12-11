@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-//import "dart:async";
+import 'package:realoptions/components/CustomTextFields.dart';
+
 import 'package:realoptions/models/forms.dart';
 
 void main() {
@@ -19,5 +20,77 @@ void main() {
     var submission = body.convertSubmission();
     expect(submission["asset"], 4.0);
     expect(submission["cf_parameters"], {"v0": 4.0});
+  });
+  test('equality with inputconstraint', () {
+    expect(
+        InputConstraint(
+                lower: 2.0,
+                upper: 3.0,
+                fieldType: FieldType.Float,
+                name: "hello",
+                inputType: InputType.Market) ==
+            InputConstraint(
+                lower: 2.0,
+                upper: 3.0,
+                fieldType: FieldType.Float,
+                name: "hello",
+                inputType: InputType.Market),
+        true);
+    expect(
+        InputConstraint(
+                lower: 2.0,
+                upper: 3.0,
+                fieldType: FieldType.Float,
+                name: "hello",
+                inputType: InputType.Market) ==
+            InputConstraint(
+                lower: 2.0,
+                upper: 4.0,
+                fieldType: FieldType.Float,
+                name: "hello",
+                inputType: InputType.Market),
+        false);
+    expect(
+        InputConstraint(
+                lower: 2.0,
+                upper: 3.0,
+                fieldType: FieldType.Float,
+                name: "hello",
+                inputType: InputType.Market) ==
+            InputConstraint(
+                lower: 2.0,
+                upper: 3.0,
+                fieldType: FieldType.Integer,
+                name: "hello",
+                inputType: InputType.Market),
+        false);
+    expect(
+        InputConstraint(
+                lower: 2.0,
+                upper: 3.0,
+                fieldType: FieldType.Integer,
+                name: "hello",
+                inputType: InputType.Market) ==
+            InputConstraint(
+                lower: 2.0,
+                upper: 3.0,
+                fieldType: FieldType.Integer,
+                name: "hello",
+                inputType: InputType.Model),
+        false);
+  });
+  test('equality with submititems', () {
+    expect(
+        SubmitItems(value: 3.0, inputType: InputType.Market) ==
+            SubmitItems(value: 3.0, inputType: InputType.Market),
+        true);
+    expect(
+        SubmitItems(value: 3.0, inputType: InputType.Market) ==
+            SubmitItems(value: 4.0, inputType: InputType.Market),
+        false);
+    expect(
+        SubmitItems(value: 3.0, inputType: InputType.Market) ==
+            SubmitItems(value: 3.0, inputType: InputType.Model),
+        false);
   });
 }
