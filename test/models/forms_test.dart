@@ -93,4 +93,32 @@ void main() {
             SubmitItems(value: 3.0, inputType: InputType.Model),
         false);
   });
+  test('parse json works on the right type of map', () {
+    expect(
+        parseJson({
+          "hello": {"lower": 3.0, "upper": 4.0, "types": "float"}
+        }, "mymodel"),
+        [
+          InputConstraint(
+              lower: 3.0,
+              upper: 4.0,
+              name: "hello",
+              defaultValue: 3.5,
+              fieldType: FieldType.Float,
+              inputType: InputType.Model)
+        ]);
+    expect(
+        parseJson({
+          "hello": {"lower": 3.0, "upper": 4.0, "types": "integer"}
+        }, "market"),
+        [
+          InputConstraint(
+              lower: 3.0,
+              upper: 4.0,
+              name: "hello",
+              defaultValue: 3.5,
+              fieldType: FieldType.Integer,
+              inputType: InputType.Market)
+        ]);
+  });
 }

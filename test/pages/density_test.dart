@@ -1,14 +1,3 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility that Flutter provides. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-///For some reason, I can't get these tests to pass
-///The asyncronous streams make this awkward, but
-///shouldn't make this impossible...
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:realoptions/pages/density.dart';
@@ -18,6 +7,7 @@ import 'package:realoptions/blocs/density_bloc.dart';
 import 'package:realoptions/services/finside_service.dart';
 import 'package:realoptions/models/response.dart';
 import 'package:realoptions/models/forms.dart';
+import 'package:realoptions/components/CustomPadding.dart';
 
 class MockFinsideService extends Mock implements FinsideApi {}
 
@@ -86,5 +76,21 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text("Big error!"), findsNothing);
     expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+  testWidgets('Displays charts ratio when data is returned',
+      (WidgetTester tester) async {
+    stubRetrieveData();
+
+    var bloc = DensityBloc(finside: finside);
+    await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+      body: BlocProvider<DensityBloc>(bloc: bloc, child: ShowDensity()),
+    )));
+    await tester.pumpAndSettle();
+    await bloc.getDensity(
+        {"asset": SubmitItems(inputType: InputType.Market, value: 3.0)});
+    await tester.pumpAndSettle();
+    expect(find.text("Please submit parameters!"), findsNothing);
+    expect(find.byType(PaddingForm), findsOneWidget);
   });
 }

@@ -1,17 +1,7 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility that Flutter provides. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-///For some reason, I can't get these tests to pass
-///The asyncronous streams make this awkward, but
-///shouldn't make this impossible...
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:realoptions/pages/options.dart';
+import 'package:realoptions/components/CustomPadding.dart';
 import 'package:mockito/mockito.dart';
 import 'package:realoptions/blocs/bloc_provider.dart';
 import 'package:realoptions/blocs/options_bloc.dart';
@@ -30,8 +20,14 @@ void main() {
   setUp(() {
     finside = MockFinsideService();
     results = {
-      "calls": [ModelResult(value: 4, atPoint: 4)],
-      "puts": [ModelResult(value: 4, atPoint: 4)]
+      "call": [
+        ModelResult(value: 4, atPoint: 4, iv: 0.3),
+        ModelResult(value: 5, atPoint: 5, iv: 0.3)
+      ],
+      "put": [
+        ModelResult(value: 4, atPoint: 4),
+        ModelResult(value: 5, atPoint: 5)
+      ]
     };
   });
   tearDown(() {
@@ -88,6 +84,23 @@ void main() {
     )));
     await tester.pumpAndSettle();
     expect(find.text("Big error!"), findsNothing);
+    expect(find.text("Please submit parameters!"), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+  testWidgets('Displays charts ratio when data is returned',
+      (WidgetTester tester) async {
+    stubRetrieveData();
+
+    var bloc = OptionsBloc(finside: finside);
+    await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+      body: BlocProvider<OptionsBloc>(bloc: bloc, child: ShowOptionPrices()),
+    )));
+    await tester.pumpAndSettle();
+    await bloc.getOptionPrices(
+        {"asset": SubmitItems(inputType: InputType.Market, value: 3.0)});
+    await tester.pumpAndSettle();
+    expect(find.text("Please submit parameters!"), findsNothing);
+    expect(find.byType(PaddingForm), findsNWidgets(2));
   });
 }

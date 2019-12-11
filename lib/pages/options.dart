@@ -68,6 +68,7 @@ class _OptionPrices extends StatelessWidget {
             )
           ];
           var domain = utils.getDomain(callPrices);
+
           var optionChart = charts.LineChart(
             optionSeries,
             animate: true,
@@ -91,22 +92,19 @@ class _OptionPrices extends StatelessWidget {
             primaryMeasureAxis: charts.NumericAxisSpec(tickProviderSpec: range),
             behaviors: [charts.SeriesLegend()],
           );
-          return SingleChildScrollView(
-              child: Column(children: [
-                padding.PaddingForm(
-                  child: AspectRatio(
-                    aspectRatio: 1.2,
-                    child: optionChart,
-                  ),
-                ),
-                padding.PaddingForm(
-                  child: AspectRatio(
-                    aspectRatio: 1.2,
-                    child: ivChart,
-                  ),
-                ),
-              ]),
-              key: PageStorageKey("Options"));
+          var children = [
+            padding.PaddingForm(
+              child: optionChart,
+            ),
+            padding.PaddingForm(
+              child: ivChart,
+            ),
+          ];
+          return OrientationBuilder(builder: (context, orientation) {
+            return GridView.count(
+                crossAxisCount: orientation == Orientation.portrait ? 1 : 2,
+                children: children);
+          });
         });
   }
 }

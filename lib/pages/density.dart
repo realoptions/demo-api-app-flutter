@@ -67,16 +67,13 @@ class _Density extends StatelessWidget {
             primaryMeasureAxis: charts.NumericAxisSpec(tickProviderSpec: range),
             behaviors: [charts.SeriesLegend()],
           );
-          return SingleChildScrollView(
-              child: Column(children: [
-                padding.PaddingForm(
-                  child: AspectRatio(
-                    aspectRatio: 1.2,
-                    child: densityChart,
-                  ),
-                ),
-              ]),
-              key: PageStorageKey("density"));
+          return OrientationBuilder(builder: (context, orientation) {
+            return GridView.count(
+                crossAxisCount: orientation == Orientation.portrait ? 1 : 2,
+                children: [
+                  padding.PaddingForm(child: densityChart),
+                ]);
+          });
         });
   }
 }

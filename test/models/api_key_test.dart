@@ -8,4 +8,7 @@ void main() {
     expect(
         ApiKey(id: 4, key: "apikey") == ApiKey(id: 4, key: "apikeys"), false);
   });
+  test('ApiKeys returns map', () {
+    expect(ApiKey(id: 4, key: "apikey").toMap(), {"id": 4, "key": "apikey"});
+  });
 }

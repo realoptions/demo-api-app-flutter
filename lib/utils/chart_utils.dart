@@ -21,9 +21,8 @@ List<charts.TickSpec<num>> getAxis(num firstPoint, num lastPoint) {
 }
 
 charts.StaticNumericTickProviderSpec getDomain(List<ModelResult> modelResults) {
-  var results = modelResults;
-  var firstDomain = results.first.atPoint;
-  var lastDomain = results.last.atPoint;
+  var firstDomain = modelResults.first.atPoint;
+  var lastDomain = modelResults.last.atPoint;
   return charts.StaticNumericTickProviderSpec(getAxis(firstDomain, lastDomain));
 }
 
