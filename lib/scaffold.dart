@@ -4,7 +4,7 @@ import 'package:realoptions/blocs/select_model_bloc.dart';
 import 'package:realoptions/services/finside_service.dart';
 import 'package:flutter/material.dart';
 import 'package:realoptions/models/pages.dart';
-import 'package:realoptions/components/app_bar.dart';
+import 'package:realoptions/components/OptionsAppBar.dart';
 import 'package:realoptions/pages/form.dart';
 import 'package:realoptions/pages/options.dart';
 import 'package:realoptions/pages/density.dart';
@@ -96,7 +96,7 @@ class _Scaffold extends StatelessWidget {
           List<bool> showBadges = snapshots.data.showBadges;
           var pages = _getPages(showBadges);
           return Scaffold(
-              appBar: OptionPriceAppBar(
+              appBar: OptionsAppBar(
                 title: this.title,
                 choices: modelChoices,
               ),

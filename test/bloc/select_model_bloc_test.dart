@@ -16,16 +16,6 @@ void main() {
           Model(label: "Heston", value: "heston"),
           Model(label: "CGMY", value: "cgmy")
         ]));
-    bloc.setModel("cgmy");
-  });
-  test('emits nothing if model input does not exist', () {
-    SelectModelBloc bloc = SelectModelBloc();
-    expect(
-        bloc.outSelectedModel,
-        emitsInOrder([
-          Model(label: "Heston", value: "heston"),
-          Model(label: "Heston", value: "heston")
-        ]));
-    bloc.setModel("non existant");
+    bloc.setModel(Model(value: "cgmy", label: "CGMY"));
   });
 }

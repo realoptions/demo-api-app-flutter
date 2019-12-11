@@ -17,10 +17,8 @@ class SelectModelBloc implements BlocBase {
   SelectModelBloc() {
     _getSelectedModel.add(modelChoices[0]);
   }
-  void setModel(String modelValue) {
-    _getSelectedModel.add(modelChoices.firstWhere(
-        (model) => model.value == modelValue,
-        orElse: () => modelChoices[0]));
+  void setModel(Model modelValue) {
+    _getSelectedModel.add(modelValue);
   }
 
   void dispose() {

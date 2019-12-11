@@ -4,8 +4,8 @@ import 'package:realoptions/blocs/select_model_bloc.dart';
 import 'package:realoptions/blocs/bloc_provider.dart';
 import 'package:realoptions/models/models.dart';
 
-class OptionPriceAppBar extends StatelessWidget with PreferredSizeWidget {
-  OptionPriceAppBar({@required this.title, @required this.choices});
+class OptionsAppBar extends StatelessWidget with PreferredSizeWidget {
+  OptionsAppBar({@required this.title, @required this.choices});
   final String title;
   final List<Model> choices;
   @override
@@ -40,10 +40,10 @@ class OptionPriceAppBar extends StatelessWidget with PreferredSizeWidget {
                             shrinkWrap: true,
                             children: this
                                 .choices
-                                .map((choice) => RadioListTile<String>(
+                                .map((choice) => RadioListTile<Model>(
                                     title: Text(choice.label),
-                                    value: choice.value,
-                                    groupValue: selectedModel.value,
+                                    value: choice,
+                                    groupValue: selectedModel,
                                     onChanged: (choice) {
                                       selectBloc.setModel(choice);
                                       Navigator.pop(context);
