@@ -1,32 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:realoptions/pages/form.dart';
 import 'package:realoptions/blocs/bloc_provider.dart';
 import 'package:realoptions/blocs/select_model_bloc.dart';
 import 'package:realoptions/components/OptionsAppBar.dart';
 import 'package:mockito/mockito.dart';
-import 'package:realoptions/services/api_key_service.dart';
+import 'package:realoptions/services/persistant_storage_service.dart';
 import 'package:realoptions/blocs/api_bloc.dart';
-import 'package:realoptions/models/api_key.dart';
 
-class MockApiDB extends Mock implements ApiDB {}
+class MockPersistentStorage extends Mock implements PersistentStorage {}
 
 void main() {
-  MockApiDB db;
+  MockPersistentStorage apiStorage;
 
   setUp(() {
-    db = MockApiDB();
+    apiStorage = MockPersistentStorage();
   });
   tearDown(() {
-    db = null;
+    apiStorage = null;
   });
   void stubRetrieveData() {
-    ApiKey key = ApiKey(id: 1, key: "somekey");
-    when(db.retrieveKey()).thenAnswer((_) => Future.value([key]));
+    String key = "somekey";
+    when(apiStorage.retrieveValue(any)).thenAnswer((_) => Future.value(key));
   }
 
   void stubInsertKey() {
-    when(db.insertKey(any)).thenAnswer((_) => Future.value());
+    when(apiStorage.insertValue(any, any)).thenAnswer((_) => Future.value());
   }
 
   testWidgets('AppBar displays with no inputs', (WidgetTester tester) async {
@@ -34,7 +32,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: Material(
             child: BlocProvider<ApiBloc>(
-                bloc: ApiBloc(db: db),
+                bloc: ApiBloc(apiStorage: apiStorage),
                 child: BlocProvider<SelectModelBloc>(
                     bloc: SelectModelBloc(),
                     child: Scaffold(
@@ -49,7 +47,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: Material(
             child: BlocProvider<ApiBloc>(
-                bloc: ApiBloc(db: db),
+                bloc: ApiBloc(apiStorage: apiStorage),
                 child: BlocProvider<SelectModelBloc>(
                     bloc: SelectModelBloc(),
                     child: Scaffold(
@@ -70,7 +68,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: Material(
             child: BlocProvider<ApiBloc>(
-                bloc: ApiBloc(db: db),
+                bloc: ApiBloc(apiStorage: apiStorage),
                 child: BlocProvider<SelectModelBloc>(
                     bloc: SelectModelBloc(),
                     child: Scaffold(
@@ -93,7 +91,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: Material(
             child: BlocProvider<ApiBloc>(
-                bloc: ApiBloc(db: db),
+                bloc: ApiBloc(apiStorage: apiStorage),
                 child: BlocProvider<SelectModelBloc>(
                     bloc: SelectModelBloc(),
                     child: Scaffold(

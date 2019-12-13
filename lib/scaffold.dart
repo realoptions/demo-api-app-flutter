@@ -10,7 +10,6 @@ import 'package:realoptions/pages/options.dart';
 import 'package:realoptions/pages/density.dart';
 import 'package:realoptions/components/ShowBadge.dart' as badge;
 import 'package:realoptions/models/models.dart';
-import 'package:realoptions/models/api_key.dart';
 import 'package:realoptions/blocs/bloc_provider.dart';
 import 'package:realoptions/blocs/select_page_bloc.dart';
 import 'package:realoptions/blocs/options_bloc.dart';
@@ -34,15 +33,15 @@ class AppScaffold extends StatelessWidget {
         builder: (buildContext, snapshot) {
           final ApiBloc apiBloc = BlocProvider.of<ApiBloc>(context);
           final Model model = snapshot.data;
-          return StreamBuilder<ApiKey>(
+          return StreamBuilder<String>(
               stream: apiBloc.outApiKey,
               builder: (buildContext, snapshot) {
-                final ApiKey apiKey = snapshot.data;
+                final String apiKey = snapshot.data;
                 if (apiKey == null) {
                   return Center(child: CircularProgressIndicator());
                 }
                 final FinsideApi finside =
-                    FinsideApi(apiKey: apiKey.key, model: model.value);
+                    FinsideApi(apiKey: apiKey, model: model.value);
                 return BlocProvider<ConstraintsBloc>(
                     bloc: ConstraintsBloc(finside: finside),
                     child: BlocProvider<DensityBloc>(

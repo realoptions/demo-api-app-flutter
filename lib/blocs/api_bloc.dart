@@ -1,33 +1,32 @@
 import 'package:realoptions/blocs/bloc_provider.dart' as bloc_provider;
-import 'package:realoptions/models/api_key.dart';
 import 'dart:async';
-import 'package:realoptions/services/api_key_service.dart';
+import 'package:realoptions/services/persistant_storage_service.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:realoptions/models/progress.dart';
 import 'package:meta/meta.dart';
 
-final int keyId = 1;
+final String apiKeyId = "apiKey";
 
 class ApiBloc implements bloc_provider.BlocBase {
-  final StreamController<ApiKey> _keyController = BehaviorSubject();
+  final StreamController<String> _keyController = BehaviorSubject();
   final StreamController<StreamProgress> _stateController = BehaviorSubject();
   Future<void> _doneConstructor; //helper function for our tests
-  Stream<ApiKey> get outApiKey => _keyController.stream;
+  Stream<String> get outApiKey => _keyController.stream;
   Stream<StreamProgress> get outHomeState => _stateController.stream;
   StreamSink get _getApiKey => _keyController.sink;
   StreamSink get _getHomeState => _stateController.sink;
   Future<void> get doneInitialization => _doneConstructor;
   String _apiKey = "";
-  final ApiDB db;
-  ApiBloc({@required this.db}) {
+  final PersistentStorage apiStorage;
+  ApiBloc({@required this.apiStorage}) {
     _getHomeState.add(StreamProgress.Busy);
     _doneConstructor = _init();
   }
   Future<void> _init() {
-    return db.retrieveKey().then((apiKeyList) {
-      if (apiKeyList.length > 0 && apiKeyList.first.key != "") {
-        _apiKey = apiKeyList.first.key;
-        _getApiKey.add(apiKeyList.first);
+    return apiStorage.retrieveValue(apiKeyId).then((apiKey) {
+      if (apiKey != null && apiKey != "") {
+        _apiKey = apiKey;
+        _getApiKey.add(apiKey);
         _getHomeState.add(StreamProgress.DataRetrieved);
       } else {
         _getHomeState.add(StreamProgress.NoData);
@@ -46,13 +45,12 @@ class ApiBloc implements bloc_provider.BlocBase {
 
   void saveApiKey() {
     _getHomeState.add(StreamProgress.Busy);
-    ApiKey apiKey = ApiKey(id: keyId, key: _apiKey);
     if (_apiKey == "") {
       _getHomeState.add(StreamProgress.NoData);
-      db.removeKey(keyId);
+      apiStorage.removeValue(apiKeyId);
     } else {
-      db.insertKey(apiKey).then((_) {
-        _getApiKey.add(apiKey);
+      apiStorage.insertValue(apiKeyId, _apiKey).then((_) {
+        _getApiKey.add(_apiKey);
         _getHomeState.add(StreamProgress.DataRetrieved);
       }).catchError(_stateController.addError);
     }
