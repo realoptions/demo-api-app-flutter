@@ -17,6 +17,12 @@ jobs:
         channel: 'stable' # or: 'dev' or 'beta'
     - name: Create apk
       run: flutter build apk --split-per-abi
+    - name: Create web app
+      run: |
+        flutter channel beta
+        flutter upgrade
+        flutter config --enable-web
+        flutter build web
         
     - name: release files
       uses: ncipollo/release-action@v1
