@@ -13,37 +13,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:realoptions/blocs/bloc_provider.dart';
-import 'package:realoptions/blocs/options_bloc.dart';
-import 'package:realoptions/models/api_key.dart';
 import 'package:realoptions/blocs/api_bloc.dart';
 import 'package:realoptions/pages/intro.dart';
 
-import 'package:realoptions/services/api_key_service.dart';
+import 'package:realoptions/services/persistant_storage_service.dart';
 
-class MockApiDB extends Mock implements ApiDB {}
+class MockPersistentStorage extends Mock implements PersistentStorage {}
 
 void main() {
-  MockApiDB db;
+  MockPersistentStorage apiStorage;
   setUp(() {
-    db = MockApiDB();
+    apiStorage = MockPersistentStorage();
   });
   tearDown(() {
-    db = null;
+    apiStorage = null;
   });
   void stubRetrieveData() {
-    ApiKey key = ApiKey(id: 1, key: "somekey");
-    when(db.retrieveKey()).thenAnswer((_) => Future.value([key]));
+    String key = "somekey";
+    when(apiStorage.retrieveValue(any)).thenAnswer((_) => Future.value(key));
   }
 
   void stubInsertKey() {
-    when(db.insertKey(any)).thenAnswer((_) => Future.value("hello"));
+    when(apiStorage.insertValue(any, any))
+        .thenAnswer((_) => Future.value("hello"));
   }
 
   testWidgets('Updates api key on change', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     stubInsertKey();
     stubRetrieveData();
-    var bloc = ApiBloc(db: db);
+    var bloc = ApiBloc(apiStorage: apiStorage);
     await tester.pumpWidget(MaterialApp(
       home: Directionality(
         child: BlocProvider<ApiBloc>(bloc: bloc, child: Introduction()),
