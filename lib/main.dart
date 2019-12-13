@@ -7,7 +7,11 @@ import 'package:realoptions/blocs/select_model_bloc.dart';
 import 'package:realoptions/blocs/api_bloc.dart';
 import 'package:realoptions/pages/intro.dart';
 
-void main() => runApp(MyApp(apiStorage: PersistentStorage()));
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(MyApp(apiStorage: PersistentStorage()));
+}
+
 const String title = "Options";
 
 class MyApp extends StatelessWidget {
