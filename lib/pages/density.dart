@@ -65,7 +65,7 @@ class _Density extends StatelessWidget {
               measureFn: (ModelResult optionData, _) => optionData.value,
               colorFn: (ModelResult optionData, _) => densityColor,
               data:
-                  density.where((data) => data.atPoint < valueAtRisk).toList(),
+                  density.where((data) => data.atPoint < -valueAtRisk).toList(),
             )..setAttribute(charts.rendererIdKey, 'shadedforExpectedShortfall'),
           ];
           var domain = utils.getDomain(density);
