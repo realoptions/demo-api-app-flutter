@@ -13,25 +13,27 @@ class MockFinsideService extends Mock implements FinsideApi {}
 
 void main() {
   MockFinsideService finside;
-  List<ModelResult> results;
+  DensityAndVaR results;
   Map<String, SubmitItems> body = {
     "asset": SubmitItems(value: 40.0, inputType: InputType.Market)
   };
   setUp(() {
     finside = MockFinsideService();
-    results = [ModelResult(value: 4, atPoint: 4)];
+    results = DensityAndVaR(
+        density: [ModelResult(atPoint: 4, value: 3)],
+        riskMetrics: VaRResult(valueAtRisk: 0.3, expectedShortfall: 0.4));
   });
   tearDown(() {
     finside = null;
     results = null;
   });
   void stubRetrieveData() {
-    when(finside.fetchModelDensity(any))
+    when(finside.fetchDensityAndVaR(any))
         .thenAnswer((_) => Future.value(results));
   }
 
   void stubRetrieveDataWithError() {
-    when(finside.fetchModelDensity(any))
+    when(finside.fetchDensityAndVaR(any))
         .thenAnswer((_) => Future.error("Big error!"));
   }
 

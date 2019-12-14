@@ -14,6 +14,9 @@ import 'package:realoptions/blocs/bloc_provider.dart';
 import 'package:realoptions/blocs/select_page_bloc.dart';
 import 'package:realoptions/blocs/options_bloc.dart';
 import 'package:realoptions/blocs/density_bloc.dart';
+import 'package:realoptions/models/progress.dart';
+import 'package:realoptions/models/forms.dart';
+import 'package:realoptions/blocs/form_bloc.dart';
 
 class AppScaffold extends StatelessWidget {
   AppScaffold({
@@ -38,7 +41,8 @@ class AppScaffold extends StatelessWidget {
               builder: (buildContext, snapshot) {
                 final String apiKey = snapshot.data;
                 if (apiKey == null) {
-                  return Center(child: CircularProgressIndicator());
+                  return Scaffold(
+                      body: Center(child: CircularProgressIndicator()));
                 }
                 final FinsideApi finside =
                     FinsideApi(apiKey: apiKey, model: model.value);
@@ -51,10 +55,49 @@ class AppScaffold extends StatelessWidget {
                         child: BlocProvider<OptionsBloc>(
                             bloc: OptionsBloc(finside: finside),
                             child: BlocProvider<SelectPageBloc>(
-                              bloc: SelectPageBloc(),
-                              child: _Scaffold(title: this.title),
-                            ))));
+                                bloc: SelectPageBloc(),
+                                child: WaitForConstraints(
+                                  child: _Scaffold(title: title),
+                                )))));
               });
+        });
+  }
+}
+
+class WaitForConstraints extends StatelessWidget {
+  const WaitForConstraints({
+    Key key,
+    @required this.child,
+  }) : super(key: key);
+  final Widget child;
+  @override
+  Widget build(BuildContext context) {
+    ConstraintsBloc bloc = BlocProvider.of<ConstraintsBloc>(context);
+    return StreamBuilder<StreamProgress>(
+        stream: bloc.outConstraintsProgress,
+        builder: (buildContext, snapshot) {
+          switch (snapshot.data) {
+            case StreamProgress.Busy:
+              return Scaffold(body: Center(child: CircularProgressIndicator()));
+            case StreamProgress.DataRetrieved:
+              return StreamBuilder<List<InputConstraint>>(
+                  stream: bloc.outConstraintsController,
+                  builder: (buildContext, snapshot) {
+                    if (snapshot.hasError) {
+                      return Scaffold(
+                          body: Center(child: Text(snapshot.error.toString())));
+                    }
+                    if (snapshot.data == null) {
+                      return Scaffold(
+                          body: Center(child: CircularProgressIndicator()));
+                    }
+                    return BlocProvider<FormBloc>(
+                        bloc: FormBloc(constraints: snapshot.data),
+                        child: child);
+                  });
+            default: //should never get here
+              return Scaffold(body: Center(child: CircularProgressIndicator()));
+          }
         });
   }
 }

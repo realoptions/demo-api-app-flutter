@@ -1,14 +1,3 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility that Flutter provides. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-///For some reason, I can't get these tests to pass
-///The asyncronous streams make this awkward, but
-///shouldn't make this impossible...
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:realoptions/pages/form.dart';
@@ -58,28 +47,13 @@ void main() {
   }
 
   void stubRetrieveDensity() {
-    when(finside.fetchModelDensity(any))
-        .thenAnswer((_) => Future.value([ModelResult(value: 4, atPoint: 4)]));
+    var results = DensityAndVaR(
+        density: [ModelResult(atPoint: 4, value: 3)],
+        riskMetrics: VaRResult(valueAtRisk: 0.3, expectedShortfall: 0.4));
+    when(finside.fetchDensityAndVaR(any))
+        .thenAnswer((_) => Future.value(results));
   }
 
-  void stubRetrieveDataWithError() {
-    when(finside.fetchConstraints())
-        .thenAnswer((_) => Future.error("Big error!"));
-  }
-
-  testWidgets('Input form shows error if error', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    stubRetrieveDataWithError();
-    //await tester.runAsync(() async {
-    //var bloc = ConstraintsBloc(finside: finside);
-    await tester.pumpWidget(Directionality(
-      child: BlocProvider<ConstraintsBloc>(
-          bloc: ConstraintsBloc(finside: finside), child: InputForm()),
-      textDirection: TextDirection.ltr,
-    ));
-    await tester.pumpAndSettle();
-    expect(find.text("Big error!"), findsOneWidget);
-  });
   testWidgets('Input no error or progress when data is returned',
       (WidgetTester tester) async {
     stubRetrieveData();
@@ -119,7 +93,7 @@ void main() {
         child: BlocProvider<DensityBloc>(
           child: BlocProvider<OptionsBloc>(
             child: BlocProvider<SelectPageBloc>(
-              child: BlocProvider<FormBloc>(bloc: bloc, child: SpecToForm()),
+              child: BlocProvider<FormBloc>(bloc: bloc, child: InputForm()),
               bloc: SelectPageBloc(),
             ),
             bloc: OptionsBloc(finside: finside),

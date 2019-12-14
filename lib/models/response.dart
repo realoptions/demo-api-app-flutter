@@ -25,3 +25,20 @@ class ModelResult {
     );
   }
 }
+
+class VaRResult {
+  final num valueAtRisk;
+  final num expectedShortfall;
+  VaRResult({@required this.valueAtRisk, @required this.expectedShortfall});
+  factory VaRResult.fromJson(Map<String, dynamic> parsedJson) {
+    return VaRResult(
+        valueAtRisk: parsedJson['value_at_risk'],
+        expectedShortfall: parsedJson['expected_shortfall']);
+  }
+}
+
+class DensityAndVaR {
+  final List<ModelResult> density;
+  final VaRResult riskMetrics;
+  DensityAndVaR({@required this.density, @required this.riskMetrics});
+}
