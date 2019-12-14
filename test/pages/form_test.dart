@@ -58,8 +58,11 @@ void main() {
   }
 
   void stubRetrieveDensity() {
-    when(finside.fetchModelDensity(any))
-        .thenAnswer((_) => Future.value([ModelResult(value: 4, atPoint: 4)]));
+    var results = DensityAndVaR(
+        density: [ModelResult(atPoint: 4, value: 3)],
+        riskMetrics: VaRResult(valueAtRisk: 0.3, expectedShortfall: 0.4));
+    when(finside.fetchDensityAndVaR(any))
+        .thenAnswer((_) => Future.value(results));
   }
 
   void stubRetrieveDataWithError() {

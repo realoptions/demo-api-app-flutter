@@ -8,13 +8,11 @@ import 'package:realoptions/models/progress.dart';
 import 'package:meta/meta.dart';
 
 class DensityBloc implements bloc_provider.BlocBase {
-  final StreamController<List<ModelResult>> _densityController =
-      BehaviorSubject();
+  final StreamController<DensityAndVaR> _densityController = BehaviorSubject();
   final StreamController<StreamProgress> _connectionController =
       BehaviorSubject();
   final FinsideApi finside;
-  Stream<List<ModelResult>> get outDensityController =>
-      _densityController.stream;
+  Stream<DensityAndVaR> get outDensityController => _densityController.stream;
   StreamSink get _inDensityController => _densityController.sink;
 
   Stream<StreamProgress> get outDensityProgress => _connectionController.stream;
@@ -27,7 +25,7 @@ class DensityBloc implements bloc_provider.BlocBase {
   Future<void> getDensity(Map<String, SubmitItems> submittedBody) {
     SubmitBody body = SubmitBody(formBody: submittedBody);
     inDensityProgress.add(StreamProgress.Busy);
-    return finside.fetchModelDensity(body.convertSubmission()).then((result) {
+    return finside.fetchDensityAndVaR(body.convertSubmission()).then((result) {
       _inDensityController.add(result);
       inDensityProgress.add(StreamProgress.DataRetrieved);
     }).catchError((error) {

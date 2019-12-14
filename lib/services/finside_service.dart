@@ -46,6 +46,15 @@ class FinsideApi {
     }
   }
 
+  VaRResult _parseMetric(http.Response response) {
+    if (response.statusCode == 200) {
+      return VaRResult.fromJson(json.decode(response.body));
+    } else {
+      throw Exception(
+          ErrorMessage.fromJson(json.decode(response.body)).message);
+    }
+  }
+
   Future<List<InputConstraint>> fetchConstraints() {
     return Future.wait([
       http
@@ -79,22 +88,33 @@ class FinsideApi {
         .then(_parseResult);
   }
 
-  Future<List<ModelResult>> fetchModelDensity(Map body) {
+  Future<List<ModelResult>> _fetchModelDensity(Map body) {
     return http
         .post(p.join(BASE_ENDPOINT, API_VERSION, model, "density"),
             headers: _getHeaders(), body: jsonEncode(body))
         .then(_parseResult);
   }
 
+  Future<VaRResult> _fetchModelValueAtRisk(Map body) {
+    return http
+        .post(p.join(BASE_ENDPOINT, API_VERSION, model, "riskmetric"),
+            headers: _getHeaders(), body: jsonEncode(body))
+        .then(_parseMetric);
+  }
+
+  Future<DensityAndVaR> fetchDensityAndVaR(Map body) {
+    return Future.wait([_fetchModelDensity(body), _fetchModelValueAtRisk(body)])
+        .then((results) =>
+            DensityAndVaR(density: results[0], riskMetrics: results[1]));
+  }
+
   Future<Map<String, List<ModelResult>>> fetchOptionPrices(Map body) {
     return Future.wait([
       _fetchModelCalculator("call", "price", true, body),
       _fetchModelCalculator("put", "price", false, body),
-    ]).then((results) {
-      return {
-        "call": results[0],
-        "put": results[1],
-      };
-    });
+    ]).then((results) => {
+          "call": results[0],
+          "put": results[1],
+        });
   }
 }
