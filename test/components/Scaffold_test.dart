@@ -6,7 +6,7 @@ import 'package:realoptions/blocs/constraints_bloc.dart';
 import 'package:realoptions/services/finside_service.dart';
 import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/models/response.dart';
-import 'package:realoptions/scaffold.dart';
+import 'package:realoptions/components/AppScaffold.dart';
 import 'package:realoptions/components/CustomTextFields.dart';
 
 class MockFinsideService extends Mock implements FinsideApi {}

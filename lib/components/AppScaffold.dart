@@ -41,7 +41,8 @@ class AppScaffold extends StatelessWidget {
               builder: (buildContext, snapshot) {
                 final String apiKey = snapshot.data;
                 if (apiKey == null) {
-                  return Center(child: CircularProgressIndicator());
+                  return Scaffold(
+                      body: Center(child: CircularProgressIndicator()));
                 }
                 final FinsideApi finside =
                     FinsideApi(apiKey: apiKey, model: model.value);
@@ -77,23 +78,25 @@ class WaitForConstraints extends StatelessWidget {
         builder: (buildContext, snapshot) {
           switch (snapshot.data) {
             case StreamProgress.Busy:
-              return Center(child: CircularProgressIndicator());
+              return Scaffold(body: Center(child: CircularProgressIndicator()));
             case StreamProgress.DataRetrieved:
               return StreamBuilder<List<InputConstraint>>(
                   stream: bloc.outConstraintsController,
                   builder: (buildContext, snapshot) {
                     if (snapshot.hasError) {
-                      return Center(child: Text(snapshot.error.toString()));
+                      return Scaffold(
+                          body: Center(child: Text(snapshot.error.toString())));
                     }
                     if (snapshot.data == null) {
-                      return Center(child: CircularProgressIndicator());
+                      return Scaffold(
+                          body: Center(child: CircularProgressIndicator()));
                     }
                     return BlocProvider<FormBloc>(
                         bloc: FormBloc(constraints: snapshot.data),
                         child: child);
                   });
             default: //should never get here
-              return Center(child: CircularProgressIndicator());
+              return Scaffold(body: Center(child: CircularProgressIndicator()));
           }
         });
   }
