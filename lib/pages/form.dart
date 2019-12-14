@@ -27,38 +27,6 @@ Widget getField(
 
 class InputForm extends StatelessWidget {
   const InputForm({Key key}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    ConstraintsBloc bloc = BlocProvider.of<ConstraintsBloc>(context);
-    return StreamBuilder<StreamProgress>(
-        stream: bloc.outConstraintsProgress,
-        builder: (buildContext, snapshot) {
-          switch (snapshot.data) {
-            case StreamProgress.Busy:
-              return Center(child: CircularProgressIndicator());
-            case StreamProgress.DataRetrieved:
-              return StreamBuilder<List<InputConstraint>>(
-                  stream: bloc.outConstraintsController,
-                  builder: (buildContext, snapshot) {
-                    if (snapshot.hasError) {
-                      return Center(child: Text(snapshot.error.toString()));
-                    }
-                    if (snapshot.data == null) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                    return BlocProvider<FormBloc>(
-                        bloc: FormBloc(constraints: snapshot.data),
-                        child: SpecToForm());
-                  });
-            default: //should never get here
-              return Center(child: CircularProgressIndicator());
-          }
-        });
-  }
-}
-
-class SpecToForm extends StatelessWidget {
-  const SpecToForm({Key key}) : super(key: key);
   static final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
