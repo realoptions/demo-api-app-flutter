@@ -6,6 +6,8 @@ import 'package:realoptions/blocs/bloc_provider.dart';
 import 'package:realoptions/blocs/select_model_bloc.dart';
 import 'package:realoptions/blocs/api_bloc.dart';
 import 'package:realoptions/pages/intro.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_analytics/observer.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +17,9 @@ void main() {
 const String title = "Options";
 
 class MyApp extends StatelessWidget {
+  static FirebaseAnalytics analytics = FirebaseAnalytics();
+  static FirebaseAnalyticsObserver observer =
+      FirebaseAnalyticsObserver(analytics: analytics);
   MyApp({this.apiStorage});
   final PersistentStorage apiStorage;
   // This widget is the root of your application.
