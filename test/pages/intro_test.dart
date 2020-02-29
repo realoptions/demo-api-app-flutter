@@ -1,7 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:realoptions/blocs/bloc_provider.dart';
 import 'package:realoptions/blocs/api_bloc.dart';
 import 'package:realoptions/pages/intro.dart';
@@ -23,11 +21,7 @@ void main() {
     var bloc = ApiBloc(firebaseAuth: auth);
     await tester.pumpWidget(MaterialApp(
       home: Directionality(
-        child: BlocProvider<ApiBloc>(
-            bloc: bloc,
-            child: Introduction(
-              firebaseAuth: auth,
-            )),
+        child: BlocProvider<ApiBloc>(bloc: bloc, child: Introduction()),
         textDirection: TextDirection.ltr,
       ),
       theme: ThemeData(

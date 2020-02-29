@@ -9,16 +9,20 @@ final String apiKeyId = "apiKey";
 
 class ApiBloc implements bloc_provider.BlocBase {
   final StreamController<String> _keyController = BehaviorSubject();
+  final StreamController<FirebaseAuth> _authController = BehaviorSubject();
   final StreamController<StreamProgress> _stateController = BehaviorSubject();
   Future<void> _doneConstructor; //helper function for our tests
   Stream<String> get outApiKey => _keyController.stream;
+  Stream<FirebaseAuth> get outAuth => _authController.stream;
   Stream<StreamProgress> get outHomeState => _stateController.stream;
   StreamSink get _getApiKey => _keyController.sink;
+  StreamSink get _getAuth => _authController.sink;
   StreamSink get _getHomeState => _stateController.sink;
   Future<void> get doneInitialization => _doneConstructor;
   final FirebaseAuth firebaseAuth;
   ApiBloc({@required this.firebaseAuth}) {
     _getHomeState.add(StreamProgress.Busy);
+    _getAuth.add(firebaseAuth);
     _doneConstructor = _init();
   }
   void setKeyFromUser(FirebaseUser user) {
@@ -41,6 +45,7 @@ class ApiBloc implements bloc_provider.BlocBase {
 
   void dispose() {
     _keyController.close();
+    _authController.close();
     _stateController.close();
   }
 }
