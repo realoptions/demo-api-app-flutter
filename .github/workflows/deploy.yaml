@@ -10,6 +10,9 @@ jobs:
     steps:
     # A name for your step to display on GitHub.
     - uses: actions/checkout@v1
+    - name: insert api key
+      run: |
+        sed -i "s/API_KEY/${{ secrets.API_KEY }}/g" ./android/app/google-services.json
     # Sets up a flutter environment.
     # https://github.com/marketplace/actions/flutter-action
     - uses: subosito/flutter-action@v1
@@ -28,6 +31,7 @@ jobs:
         artifacts: "./build/app/outputs/apk/release/*"
         # bodyFile: "body.md"
         token: ${{ secrets.ACCESS_TOKEN }}
+
     - name: Deploy pages
       uses: JamesIves/github-pages-deploy-action@master
       env: 

@@ -8,7 +8,7 @@ void main() {
   MockFirebaseUser user;
 
   setUp(() {
-    auth = MockFirebaseAuth();
+    auth = MockFirebaseAuth(signedIn: true);
     user = MockFirebaseUser();
   });
   tearDown(() {
@@ -16,22 +16,14 @@ void main() {
     user = null;
   });
   test('executes api creation in correct order', () async {
-    //stubRetrieveData();
     ApiBloc bloc = ApiBloc(firebaseAuth: auth);
     await bloc.doneInitialization;
     bloc.setKeyFromUser(user);
-    //expect(bloc.getApiKey(), "Hello");
     expect(bloc.outApiKey, emitsInOrder(["fake_token", "fake_token"]));
   });
   test('when key is retrieved, stream shows that data is retrieved', () {
     ApiBloc bloc = ApiBloc(firebaseAuth: auth);
     expect(bloc.outHomeState,
         emitsInOrder([StreamProgress.Busy, StreamProgress.DataRetrieved]));
-  });
-  test('if no key, stream shows no data', () {
-    ApiBloc bloc = ApiBloc(firebaseAuth: auth);
-    bloc.setKeyFromUser(null);
-    expect(bloc.outHomeState,
-        emitsInOrder([StreamProgress.Busy, StreamProgress.NoData]));
   });
 }

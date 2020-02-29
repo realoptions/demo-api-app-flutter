@@ -6,9 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 const String API_VERSION = "v1";
-const String BASE_ENDPOINT = kReleaseMode
-    ? "https://api.finside.org/realoptions"
-    : "http://10.0.2.2:8000";
+const String BASE_ENDPOINT =
+    kReleaseMode ? "https://api2.finside.org" : "http://10.0.2.2:8000";
 
 class FinsideApi {
   FinsideApi({@required this.model, @required this.apiKey});
@@ -18,7 +17,7 @@ class FinsideApi {
     return {
       'Content-type': 'application/json',
       'Accept': 'application/json',
-      'x-api-Key': apiKey
+      'Authorization:': 'Bearer $apiKey'
     };
   }
 
