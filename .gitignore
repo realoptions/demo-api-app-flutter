@@ -79,3 +79,4 @@ openapi.yaml
 nohup.out
 coverage
 key.properties
+.flutter-plugins-dependencies
