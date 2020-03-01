@@ -43,11 +43,12 @@ Widget signInSheet(BuildContext context, FirebaseAuth auth, ApiBloc bloc) {
   return Column(key: Key("SignIn"), children: [
     SocialSignInButton(
       key: Key("google"),
-      assetName: 'assets/google-logo_small.png',
+      assetName: 'assets/go-logo.png',
       text: "Sign in with Google",
       onPressed: () => handleGoogleSignIn(auth).then(bloc.setKeyFromUser),
       color: Colors.white,
     ),
+    SizedBox(height: 8),
     SocialSignInButton(
       key: Key("facebook"),
       assetName: 'assets/fb-logo.png',
