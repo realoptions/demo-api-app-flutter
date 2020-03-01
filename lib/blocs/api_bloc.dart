@@ -33,15 +33,12 @@ class ApiBloc implements bloc_provider.BlocBase {
       return user.getIdToken().then((idToken) {
         _getApiKey.add(idToken.token);
         _getHomeState.add(StreamProgress.DataRetrieved);
-      });
+      }).catchError(_stateController.addError);
     }
   }
 
   Future<void> _init() {
-    return firebaseAuth
-        .currentUser()
-        .then(setKeyFromUser)
-        .catchError(_stateController.addError);
+    return firebaseAuth.currentUser().then(setKeyFromUser);
   }
 
   void dispose() {
