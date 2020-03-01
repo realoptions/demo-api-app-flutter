@@ -2,9 +2,27 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="google-signin-client_id" content="117231459701-t0t85k3egn6f6770e1kt5a4uh0gk693b.apps.googleusercontent.com" />
   <title>RealOptions</title>
 </head>
 <body>
+  <script src="https://www.gstatic.com/firebasejs/7.9.3/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.9.3/firebase-auth.js"></script>
+  <script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+      apiKey: "API_KEY",
+      authDomain: "finside.firebaseapp.com",
+      databaseURL: "https://finside.firebaseio.com",
+      projectId: "finside",
+      storageBucket: "finside.appspot.com",
+      messagingSenderId: "117231459701",
+      appId: "1:117231459701:web:01dad1d92d5df68cf7c73c",
+      measurementId: "G-1DYJD80BEB"
+    }
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
   <script src="main.dart.js" type="application/javascript"></script>
 </body>
 </html>

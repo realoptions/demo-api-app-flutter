@@ -5,10 +5,9 @@ import 'package:realoptions/models/response.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-const String API_VERSION = "v1";
-const String BASE_ENDPOINT = kReleaseMode
-    ? "https://api.finside.org/realoptions"
-    : "http://10.0.2.2:8000";
+const String API_VERSION = "v2";
+const String BASE_ENDPOINT =
+    kReleaseMode ? "https://api2.finside.org" : "http://10.0.2.2:8000";
 
 class FinsideApi {
   FinsideApi({@required this.model, @required this.apiKey});
@@ -18,7 +17,7 @@ class FinsideApi {
     return {
       'Content-type': 'application/json',
       'Accept': 'application/json',
-      'x-api-Key': apiKey
+      'Authorization': 'Bearer $apiKey'
     };
   }
 
@@ -81,7 +80,7 @@ class FinsideApi {
         .post(
           p.join(BASE_ENDPOINT, API_VERSION, model, "calculator", optionType,
                   sensitivity) +
-              "?includeImpliedVolatility=$includeIV",
+              "?include_implied_volatility=$includeIV",
           headers: _getHeaders(),
           body: jsonEncode(body),
         )

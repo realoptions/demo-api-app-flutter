@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "117231459701",
+    "firebase_url": "https://finside.firebaseio.com",
+    "project_id": "finside",
+    "storage_bucket": "finside.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:117231459701:android:845b4106b75e06edf7c73c",
+        "android_client_info": {
+          "package_name": "com.finside.realoptions"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "117231459701-423r9o27dh7nck6b8vpnt28ukvfiuul4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.finside.realoptions",
+            "certificate_hash": "f3a3edf7643d67d9a2a1cb3c144875b81955a971"
+          }
+        },
+        {
+          "client_id": "117231459701-t0t85k3egn6f6770e1kt5a4uh0gk693b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "API_KEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "117231459701-t0t85k3egn6f6770e1kt5a4uh0gk693b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

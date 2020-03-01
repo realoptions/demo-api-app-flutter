@@ -13,9 +13,12 @@ jobs:
     # https://github.com/marketplace/actions/flutter-action
     - uses: subosito/flutter-action@v1
       with:
-        channel: 'stable' # or: 'dev' or 'beta'
+        flutter_version: '1.14.6'
+        channel: 'beta' # or: 'dev' or 'beta'
     - name: "Run Flutter Driver tests"
       run: |
+        flutter pub get
+        flutter clean
         flutter test --coverage
         bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
     - name: Create apk

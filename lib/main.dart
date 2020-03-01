@@ -1,23 +1,22 @@
 import 'package:realoptions/models/progress.dart';
-import 'package:realoptions/services/persistant_storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:realoptions/components/AppScaffold.dart';
 import 'package:realoptions/blocs/bloc_provider.dart';
 import 'package:realoptions/blocs/select_model_bloc.dart';
 import 'package:realoptions/blocs/api_bloc.dart';
 import 'package:realoptions/pages/intro.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp(apiStorage: PersistentStorage()));
+  runApp(MyApp(firebaseAuth: FirebaseAuth.instance));
 }
 
 const String title = "Options";
 
 class MyApp extends StatelessWidget {
-  MyApp({this.apiStorage});
-  final PersistentStorage apiStorage;
-  // This widget is the root of your application.
+  MyApp({this.firebaseAuth});
+  final FirebaseAuth firebaseAuth;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -29,12 +28,12 @@ class MyApp extends StatelessWidget {
               buttonColor: Colors.orange,
             ),
             textTheme: TextTheme(
-              body1: TextStyle(
+              bodyText2: TextStyle(
                 fontSize: 15.0,
               ),
             )),
         home: BlocProvider<ApiBloc>(
-            bloc: ApiBloc(apiStorage: apiStorage), child: StartupPage()));
+            bloc: ApiBloc(firebaseAuth: firebaseAuth), child: StartupPage()));
   }
 }
 

@@ -53,7 +53,7 @@ void main() {
             buttonColor: Colors.orange,
           ),
           textTheme: TextTheme(
-            body1: TextStyle(
+            bodyText2: TextStyle(
               fontSize: 15.0,
             ),
           )),
