@@ -14,8 +14,10 @@ class Introduction extends StatelessWidget {
         stream: bloc.outAuth,
         builder: (buildContext, snapshot) {
           if (snapshot.hasError) {
-            //should never get here
             return Center(child: Text(snapshot.error.toString()));
+          }
+          if (snapshot.data == null) {
+            return Center(child: Text("No auth!"));
           }
           return Scaffold(
               key: Key("Intro"),

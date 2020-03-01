@@ -25,11 +25,12 @@ class ApiBloc implements bloc_provider.BlocBase {
     _getAuth.add(firebaseAuth);
     _doneConstructor = _init();
   }
-  void setKeyFromUser(FirebaseUser user) {
+  Future<void> setKeyFromUser(FirebaseUser user) {
     if (user == null) {
       _getHomeState.add(StreamProgress.NoData);
+      return Future.value();
     } else {
-      user.getIdToken().then((idToken) {
+      return user.getIdToken().then((idToken) {
         _getApiKey.add(idToken.token);
         _getHomeState.add(StreamProgress.DataRetrieved);
       });
