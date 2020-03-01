@@ -24,7 +24,7 @@ jobs:
     - name: Create web app
       run: |
         flutter config --enable-web
-        flutter build web
+        flutter build web --release
         
     - name: release files
       uses: ncipollo/release-action@v1
