@@ -37,9 +37,6 @@ dependencies:
   charts_flutter: ^0.8.0
   badges: ^1.1.0
   rxdart:
-  url_launcher: 
-  shared_preferences: ^0.5.4+3
-  url_launcher_web: ^0.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
