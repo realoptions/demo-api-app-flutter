@@ -12,3 +12,5 @@
 This is the mobile app for consuming [Finside's](https://finside.org) APIs.  
 
 
+# How to install on phone
+

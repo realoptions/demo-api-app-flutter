@@ -47,7 +47,8 @@ Widget signInSheet(BuildContext context, FirebaseAuth auth, ApiBloc bloc) {
       key: Key("google"),
       assetName: 'assets/go-logo.png',
       text: "Sign in with Google",
-      onPressed: () => handleGoogleSignIn(auth).then(bloc.setKeyFromUser),
+      onPressed: () =>
+          handleGoogleSignIn(auth, bloc.setBusy).then(bloc.setKeyFromUser),
       color: Colors.white,
     ),
     SizedBox(height: 8),
@@ -56,7 +57,8 @@ Widget signInSheet(BuildContext context, FirebaseAuth auth, ApiBloc bloc) {
       assetName: 'assets/fb-logo.png',
       text: "Sign in with Facebook",
       textColor: Colors.white,
-      onPressed: () => handleFacebookSignIn(auth).then(bloc.setKeyFromUser),
+      onPressed: () =>
+          handleFacebookSignIn(auth, bloc.setBusy).then(bloc.setKeyFromUser),
       color: Color(0xFF334D92),
     ),
   ]);

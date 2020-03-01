@@ -26,4 +26,10 @@ void main() {
     expect(bloc.outHomeState,
         emitsInOrder([StreamProgress.Busy, StreamProgress.DataRetrieved]));
   });
+  test('when set busy emits busy', () async {
+    ApiBloc bloc = ApiBloc(firebaseAuth: auth);
+    await bloc.doneInitialization;
+    bloc.setBusy();
+    expect(bloc.outHomeState, emitsInOrder([StreamProgress.Busy]));
+  });
 }
