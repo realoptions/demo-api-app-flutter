@@ -14,7 +14,7 @@ jobs:
     - uses: subosito/flutter-action@v1
       with:
         flutter_version: '1.14.6'
-        channel: 'stable' # or: 'dev' or 'beta'
+        channel: 'beta' # or: 'dev' or 'beta'
     - name: "Run Flutter Driver tests"
       run: |
         flutter pub get
