@@ -45,6 +45,7 @@ jobs:
         echo "keyPassword=$ANDROID_KEY_PASSWORD" >> ./android/key.properties
         echo "keyAlias=$ANDROID_KEY_ALIAS" >> ./android/key.properties
         echo "storeFile=$ANDROID_KEYSTORE_PATH" >> ./android/key.properties
+        flutter clean
         flutter build appbundle
         rm ./android/key.properties
       env:
