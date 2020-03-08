@@ -1,9 +1,8 @@
-name: release-alpha
+name: release-prod
 on:
   push:
     branches:
-      - '*'
-      - '!master'
+      - 'master'
 
 jobs:
   release: 
@@ -14,12 +13,13 @@ jobs:
     - name: insert api key
       run: |
         sed -i "s/API_KEY/${{ secrets.ANDROID_API_KEY }}/g" ./android/app/google-services.json
+        sed -i "s/API_KEY/${{ secrets.WEB_API_KEY }}/g" ./web/index.html
     # Sets up a flutter environment.
     # https://github.com/marketplace/actions/flutter-action
     - uses: subosito/flutter-action@v1
       with:
         channel: 'beta' # or: 'dev' or 'beta'
-        
+   
     - name: Write JKS
       id: write_jks
       uses: timheuer/base64-to-file@v1.0.3
@@ -52,6 +52,15 @@ jobs:
       run: |
         flutter config --enable-web
         flutter build web --release
+        
+    
+
+    - name: Deploy pages
+      uses: JamesIves/github-pages-deploy-action@master
+      env: 
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BRANCH: gh-pages
+        FOLDER: build/web
 
     - name: Deploy google play store
       uses: r0adkll/upload-google-play@v1
@@ -59,7 +68,7 @@ jobs:
         serviceAccountJson: access_key.json
         packageName: com.finside.realoptions
         releaseFile: build/app/outputs/bundle/release/app.aab
-        track: alpha
+        track: beta
         # userFraction: 0.33
         whatsNewDirectory: assets/whatsnew
         # mappingFile: build/outputs/mapping/release/mapping.txt
