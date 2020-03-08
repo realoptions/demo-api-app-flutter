@@ -22,6 +22,7 @@ jobs:
     
     - name: bundle
       run: |
+        gem install bundler
         cd android
         # echo "${{ secrets.SERVICE_ACCOUNT_JSON }}" | base64 --decode > ./access_key.json
         echo "${{ secrets.SIGN_KEY_JKS }}" | base64 --decode > ./sign_key.jks
@@ -60,7 +61,7 @@ jobs:
         # userFraction: 0.33
         whatsNewDirectory: assets/whatsnew
         # mappingFile: build/outputs/mapping/release/mapping.txt
-        
+
     - name: release files
       uses: ncipollo/release-action@v1
       with:
