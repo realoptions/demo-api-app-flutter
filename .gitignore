@@ -80,3 +80,5 @@ nohup.out
 coverage
 key.properties
 .flutter-plugins-dependencies
+.gradle
+android/fastlane/report.xml
