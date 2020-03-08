@@ -14,3 +14,6 @@ This is the mobile app for consuming [Finside's](https://finside.org) APIs.
 
 # How to install on phone
 
+# CI
+
+See https://appditto.com/blog/automate-your-flutter-workflow
