@@ -19,7 +19,10 @@ jobs:
     - uses: subosito/flutter-action@v1
       with:
         channel: 'beta' # or: 'dev' or 'beta'
-    
+    - name: Set up Ruby
+      uses: actions/setup-ruby@v1
+      with:
+        version: 2.6.x
     - name: bundle
       run: |
         gem install bundler
