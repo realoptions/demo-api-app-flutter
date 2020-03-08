@@ -21,3 +21,6 @@ jobs:
         flutter clean
         flutter test --coverage
         bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
+    - name: build apk
+      run: |
+        flutter build apk --split-per-abi

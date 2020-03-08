@@ -49,11 +49,11 @@ jobs:
         flutter build appbundle
         rm ./android/key.properties
       env:
-        ANDROID_KEYSTORE_PATH: sign_key.jks
+        ANDROID_KEYSTORE_PATH: ${{ steps.write_jks.outputs.filePath }} # sign_key.jks
         ANDROID_KEY_STORE_PASSWORD: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
         ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-
+        CI: true
     - name: Create web app
       run: |
         flutter config --enable-web
@@ -71,7 +71,7 @@ jobs:
     - name: Deploy google play store
       uses: r0adkll/upload-google-play@v1
       with:
-        serviceAccountJson: access_key.json
+        serviceAccountJson: ${{ steps.write_json.outputs.filePath }} # access_key.json
         packageName: com.finside.realoptions
         releaseFile: build/app/outputs/bundle/release/app.aab
         track: beta
