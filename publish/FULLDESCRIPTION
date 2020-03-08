@@ -1,0 +1,1 @@
+Simple option pricing calculator for time-changed Black Scholes (Heston), time-changed Merton jump-diffusion, and time-changed CGMY models.  Uses Fang-Oosterlee's algorithm to efficiently price options over many strikes.

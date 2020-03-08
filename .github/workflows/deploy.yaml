@@ -20,18 +20,19 @@ jobs:
       with:
         channel: 'beta' # or: 'dev' or 'beta'
     - name: Create apk
-      run: flutter build apk --split-per-abi
+      # run: flutter build apk --split-per-abi
+      run: flutter build appbundle
     - name: Create web app
       run: |
         flutter config --enable-web
         flutter build web --release
         
-    - name: release files
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: "./build/app/outputs/apk/release/*"
+    #- name: release files
+    #  uses: ncipollo/release-action@v1
+    #  with:
+    #    artifacts: "./build/app/outputs/apk/release/*"
         # bodyFile: "body.md"
-        token: ${{ secrets.ACCESS_TOKEN }}
+    #    token: ${{ secrets.ACCESS_TOKEN }}
 
     - name: Deploy pages
       uses: JamesIves/github-pages-deploy-action@master
@@ -39,3 +40,14 @@ jobs:
         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         BRANCH: gh-pages
         FOLDER: build/web
+
+    - name: Deploy google play store
+      uses: r0adkll/upload-google-play@v1
+      with:
+        serviceAccountJsonPlainText: ${{ SERVICE_ACCOUNT_JSON }}
+        packageName: com.finside.realoptions
+        releaseFile: build/app/outputs/bundle/release/app.aab
+        track: alpha
+        # userFraction: 0.33
+        whatsNewDirectory: assets/whatsnew
+        # mappingFile: build/outputs/mapping/release/mapping.txt
