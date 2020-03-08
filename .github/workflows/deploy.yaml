@@ -23,19 +23,27 @@ jobs:
       uses: actions/setup-ruby@v1
       with:
         version: 2.6.x
+    - name: Write JKS
+      id: write_jks
+      uses: timheuer/base64-to-file@v1.0.3
+      with:
+        fileName: sign_key.jks
+        encodedString: ${{ secrets.SIGN_KEY_JKS }}
+    - name: Write json
+        id: write_json
+        uses: timheuer/base64-to-file@v1.0.3
+        with:
+          fileName: access_key.json
+          encodedString: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          
     - name: bundle
       run: |
         gem install bundler
         cd android
-        # echo "${{ secrets.SERVICE_ACCOUNT_JSON }}" | base64 --decode > ./access_key.json
-        echo "${{ secrets.SIGN_KEY_JKS }}" | base64 --decode > ./sign_key.jks
         bundle exec fastlane build_android
-        # bundle exec fastlane deploy_android alpha:true
-        # rm ./access_key.json
-        rm ./sign_key.jks
         cd ..
       env:
-        ANDROID_KEYSTORE_PATH: ./sign_key.jks
+        ANDROID_KEYSTORE_PATH: sign_key.jks
         ANDROID_KEY_STORE_PASSWORD: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
         ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
@@ -57,7 +65,7 @@ jobs:
     - name: Deploy google play store
       uses: r0adkll/upload-google-play@v1
       with:
-        serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+        serviceAccountJson: access_key.json
         packageName: com.finside.realoptions
         releaseFile: build/app/outputs/bundle/release/app.aab
         track: alpha
