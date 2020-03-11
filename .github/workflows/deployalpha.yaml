@@ -48,6 +48,7 @@ jobs:
         flutter clean
         flutter build appbundle
         rm ./android/key.properties
+        cat ./android/local.properties
       env:
         ANDROID_KEYSTORE_PATH: ${{ steps.write_jks.outputs.filePath }} # sign_key.jks
         ANDROID_KEY_STORE_PASSWORD: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
