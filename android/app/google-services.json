@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "117231459701-932i2imdgttdoi7jcvrks3kshtedttmk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.finside.realoptions",
+            "certificate_hash": "79d8c5187b7265a26b8b5f6c7f5fa69a4911619c"
+          }
+        },
+        {
           "client_id": "117231459701-423r9o27dh7nck6b8vpnt28ukvfiuul4.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
