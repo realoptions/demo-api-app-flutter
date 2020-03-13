@@ -46,6 +46,8 @@ jobs:
         echo "keyAlias=$ANDROID_KEY_ALIAS" >> ./android/key.properties
         echo "storeFile=$ANDROID_KEYSTORE_PATH" >> ./android/key.properties
         flutter clean
+        flutter pub get
+        flutter packages pub run flutter_launcher_icons:main
         flutter build appbundle
         rm ./android/key.properties
         cat ./android/local.properties
