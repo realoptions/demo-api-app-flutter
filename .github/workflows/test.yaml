@@ -46,9 +46,11 @@ jobs:
         --data '{
           "tag": "${{ env.CUSTOM_TAG }}"",
           "message": "Updating to ${{ env.CUSTOM_TAG }}\n",
-          "object": "${GITHUB_SHA}",
+          "object": "${{ env.GITHUB_SHA }}",
           "type": "commit"
         }'
+      env:
+        GITHUB_SHA: ${{ GITHUB_SHA }}
 
       #env:
       #  GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
