@@ -39,16 +39,19 @@ jobs:
     - name: Bump version and push tag
       if: env.TAG_DOES_NOT_EXIST
       run: |
-        curl --request POST \
-        --url https://api.github.com/repos/${{ github.repository }}/git/tags \
-        --header 'authorization: Bearer ${{ secrets.ACCESS_TOKEN }}' \
-        --header 'content-type: application/json' \
-        --data '{
-          "tag": "${{ env.CUSTOM_TAG }}",
-          "message": "Updating to ${{ env.CUSTOM_TAG }}\n",
-          "object": "${{ github.sha }}",
-          "type": "commit"
-        }'
+        git tag -a ${{ env.CUSTOM_TAG }} -m "Updating to ${{ env.CUSTOM_TAG }}"
+        git push origin -u phillyfan1138 -p ${{ secrets.ACCESS_TOKEN }} ${{ env.CUSTOM_TAG }}
+
+        #curl --request POST \
+        #--url https://api.github.com/repos/${{ github.repository }}/git/tags \
+        #--header 'authorization: Bearer ${{ secrets.ACCESS_TOKEN }}' \
+        #--header 'content-type: application/json' \
+        #--data '{
+        #  "tag": "${{ env.CUSTOM_TAG }}",
+        #  "message": "Updating to ${{ env.CUSTOM_TAG }}\n",
+        #  "object": "${{ github.sha }}",
+        #  "type": "commit"
+        #}'
 
       #env:
       #  GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
