@@ -24,3 +24,16 @@ jobs:
     - name: build apk
       run: |
         flutter build apk --split-per-abi
+    
+    - name: set flutter version
+      run: echo ::set-env name=FLUTTER_VERSION::$(grep 'version:' pubspec.yaml | tail -n1 | cut -c 10-)
+    
+    - name: does tag exist
+      run: echo ::set-env name=TAG_DOES_NOT_EXIST::$(git tag | grep -q ${{ GITHUB_REF }}-${{ env.FLUTTER_VERSION }} ; echo $?)
+    
+    - name: Bump version and push tag
+      if: env.TAG_DOES_NOT_EXIST
+      uses: anothrNick/github-tag-action@1.17.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CUSTOM_TAG: ${{ GITHUB_REF }}-${{ env.FLUTTER_VERSION }}
