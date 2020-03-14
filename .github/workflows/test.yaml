@@ -44,7 +44,7 @@ jobs:
         --header 'authorization: Bearer ${{ secrets.ACCESS_TOKEN }}' \
         --header 'content-type: application/json' \
         --data '{
-          "tag": "${{ env.CUSTOM_TAG }}"",
+          "tag": "${{ env.CUSTOM_TAG }}",
           "message": "Updating to ${{ env.CUSTOM_TAG }}\n",
           "object": "${{ github.sha }}",
           "type": "commit"
