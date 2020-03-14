@@ -39,20 +39,14 @@ jobs:
     - name: Bump version and push tag
       if: env.TAG_DOES_NOT_EXIST
       run: |
-        #git tag -a $CUSTOM_TAG -m "Updating to $CUSTOM_TAG"
-        #git config --global user.name 'phillyfan1138'
-        #git config --global user.email 'danstahl1138@gmail.com'
-        #git remote set-url origin https://x-access-token:${{ secrets.ACCESS_TOKEN }}@github.com/${{ github.repository }}
-        #git push origin $CUSTOM_TAG
-
         curl --request POST \
         --url https://api.github.com/repos/${{ github.repository }}/git/tags \
         --header 'authorization: Bearer ${{ secrets.ACCESS_TOKEN }}' \
         --header 'content-type: application/json' \
         --data '{
-          "tag": ${{ env.CUSTOM_TAG }},
+          "tag": "${{ env.CUSTOM_TAG }}"",
           "message": "Updating to ${{ env.CUSTOM_TAG }}\n",
-          "object": ${{ secrets.GITHUB_SHA }},
+          "object": "${{ secrets.GITHUB_SHA }}",
           "type": "commit"
         }'
 
