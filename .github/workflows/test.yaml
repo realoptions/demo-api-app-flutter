@@ -3,8 +3,6 @@ name: test
 on: 
   push:
     branches: '*'
-  pull_request:
-    branches: '*'
     
 jobs:
   test:
@@ -43,7 +41,7 @@ jobs:
         
     - name: Bump version and push tag
       uses: anothrNick/github-tag-action@1.17.2
-      if: env.TAG_DOES_NOT_EXIST==1
+      if: env.TAG_DOES_NOT_EXIST=='1'
       env:
         GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         CUSTOM_TAG: ${{ env.CUSTOM_TAG }}

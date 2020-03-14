@@ -2,7 +2,7 @@ name: releaseprod
 on:
   push:
     tags:        
-      - 'master-*'
+      - 'release-*'
 jobs:
   release: 
     runs-on: ubuntu-latest
