@@ -42,7 +42,8 @@ jobs:
         git config --global user.email "danstahl1138@gmail.com"
         git config --global user.name "phillyfan1138"
         git tag -a ${{ env.CUSTOM_TAG }} -m "Updating to ${{ env.CUSTOM_TAG }}"
-        git push origin ${{ env.CUSTOM_TAG }}
+        remote_repo="https://${{ github.actor }}:${{ secrets.ACCESS_TOKEN }}@github.com/${{ github.repository }}.git"
+        git push $remote_repo  origin ${{ env.CUSTOM_TAG }}
         
         
         #curl --request POST \
