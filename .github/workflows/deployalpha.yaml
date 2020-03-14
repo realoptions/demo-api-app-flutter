@@ -1,9 +1,9 @@
-name: release
+name: releasealpha
 on:
   push:
-    tags:
-    - '*'
-
+    tags-ignore:
+      - '!master-*'
+      
 jobs:
   release: 
     runs-on: ubuntu-latest
@@ -13,23 +13,25 @@ jobs:
     - name: insert api key
       run: |
         sed -i "s/API_KEY/${{ secrets.ANDROID_API_KEY }}/g" ./android/app/google-services.json
-        sed -i "s/API_KEY/${{ secrets.WEB_API_KEY }}/g" ./web/index.html
     # Sets up a flutter environment.
     # https://github.com/marketplace/actions/flutter-action
     - uses: subosito/flutter-action@v1
       with:
         channel: 'beta' # or: 'dev' or 'beta'
-    - name: Set up Ruby
-      uses: actions/setup-ruby@v1
-      with:
-        version: 2.6.x
+
+    - name: "Run Flutter Driver tests"
+      run: |
+        flutter pub get
+        flutter clean
+        flutter test
+
     - name: Write JKS
       id: write_jks
       uses: timheuer/base64-to-file@v1.0.3
       with:
         fileName: sign_key.jks
         encodedString: ${{ secrets.SIGN_KEY_JKS }}
-        
+
     - name: Write json
       id: write_json
       uses: timheuer/base64-to-file@v1.0.3
@@ -39,44 +41,34 @@ jobs:
 
     - name: bundle
       run: |
-        gem install bundler
-        cd android
-        bundle exec fastlane build_android
-        cd ..
+        echo "storePassword=$ANDROID_KEY_STORE_PASSWORD" > ./android/key.properties
+        echo "keyPassword=$ANDROID_KEY_PASSWORD" >> ./android/key.properties
+        echo "keyAlias=$ANDROID_KEY_ALIAS" >> ./android/key.properties
+        echo "storeFile=$ANDROID_KEYSTORE_PATH" >> ./android/key.properties
+        flutter clean
+        flutter pub get
+        flutter packages pub run flutter_launcher_icons:main
+        flutter build appbundle
+        rm ./android/key.properties
       env:
-        ANDROID_KEYSTORE_PATH: sign_key.jks
+        ANDROID_KEYSTORE_PATH: ${{ steps.write_jks.outputs.filePath }} # sign_key.jks
         ANDROID_KEY_STORE_PASSWORD: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
         ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        CI: true
 
     - name: Create web app
       run: |
         flutter config --enable-web
         flutter build web --release
-        
-    
-
-    - name: Deploy pages
-      uses: JamesIves/github-pages-deploy-action@master
-      env: 
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        BRANCH: gh-pages
-        FOLDER: build/web
 
     - name: Deploy google play store
       uses: r0adkll/upload-google-play@v1
       with:
-        serviceAccountJson: access_key.json
+        serviceAccountJson: ${{ steps.write_json.outputs.filePath }} # access_key.json
         packageName: com.finside.realoptions
         releaseFile: build/app/outputs/bundle/release/app.aab
         track: alpha
         # userFraction: 0.33
         whatsNewDirectory: assets/whatsnew
         # mappingFile: build/outputs/mapping/release/mapping.txt
-
-    - name: release files
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: "./build/app/outputs/apk/release/*"
-        # bodyFile: "body.md"
-        token: ${{ secrets.ACCESS_TOKEN }}

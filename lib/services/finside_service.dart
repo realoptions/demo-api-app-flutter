@@ -6,8 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 const String API_VERSION = "v2";
-const String BASE_ENDPOINT =
-    kReleaseMode ? "https://api2.finside.org" : "http://10.0.2.2:8000";
+const String BASE_ENDPOINT = "https://api2.finside.org";
 
 class FinsideApi {
   FinsideApi({@required this.model, @required this.apiKey});

@@ -1,6 +1,11 @@
 # Name of your workflow.
 name: test
-on: [push, pull_request] # A workflow run is made up of one or more jobs.
+on: 
+  push:
+    branches: '*'
+  pull_request:
+    branches: '*'
+    
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -21,3 +26,25 @@ jobs:
         flutter clean
         flutter test --coverage
         bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
+    - name: build apk
+      run: |
+        flutter build apk --split-per-abi
+    
+    - name: set flutter version
+      run: echo ::set-env name=FLUTTER_VERSION::$(grep 'version:' pubspec.yaml | tail -n1 | cut -c 10-)
+    - name: get branch name
+      run: echo ::set-env name=BRANCH_NAME::${GITHUB_REF##*/}
+    - name: get branch tag
+      run: echo ::set-env name=RELEASE_TAG::$([ ${{ env.BRANCH_NAME }} == master ] && echo "release" || echo "alpha")
+    - name: get tag
+      run: echo ::set-env name=CUSTOM_TAG::${{ env.RELEASE_TAG }}-${{ env.FLUTTER_VERSION }} 
+    - name: does tag exist
+      run: echo ::set-env name=TAG_DOES_NOT_EXIST::$(git tag | grep -q ${{ env.CUSTOM_TAG }} ; echo $?)
+        
+    - name: Bump version and push tag
+      uses: anothrNick/github-tag-action@1.17.2
+      if: env.TAG_DOES_NOT_EXIST==1
+      env:
+        GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        CUSTOM_TAG: ${{ env.CUSTOM_TAG }}
+        RELEASE_BRANCHES: '.*'
