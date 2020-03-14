@@ -37,7 +37,7 @@ jobs:
       run: echo ::set-env name=TAG_DOES_NOT_EXIST::$(git tag | grep -q ${{ env.CUSTOM_TAG }} ; echo $?)
         
     - name: Bump version and push tag
-      with: anothrNick/github-tag-action@1.17.2
+      uses: anothrNick/github-tag-action@1.17.2
       if: env.TAG_DOES_NOT_EXIST
       # run: |
         #git config --global user.email "danstahl1138@gmail.com"
