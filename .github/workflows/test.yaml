@@ -1,8 +1,9 @@
 # Name of your workflow.
 name: test
-on: 
+on:
   push:
-    branches: '*'
+    branches:
+      - '*'
     
 jobs:
   test:
