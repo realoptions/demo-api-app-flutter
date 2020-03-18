@@ -23,6 +23,18 @@ void main() {
     expect(strUtils.getValueFromString(FieldType.Integer, "-1"), -1);
     expect(strUtils.getValueFromString(FieldType.Integer, "2"), 2);
   });
+  test('parses int to string', () {
+    StringUtils strUtils = StringUtils();
+    expect(strUtils.getStringFromValue(FieldType.Integer, 1), "1");
+    expect(strUtils.getStringFromValue(FieldType.Integer, -1), "-1");
+    expect(strUtils.getStringFromValue(FieldType.Integer, 2), "2");
+  });
+  test('parses float to string', () {
+    StringUtils strUtils = StringUtils();
+    expect(strUtils.getStringFromValue(FieldType.Float, 1.0), "1.00");
+    expect(strUtils.getStringFromValue(FieldType.Float, -1), "-1.00");
+    expect(strUtils.getStringFromValue(FieldType.Float, 2.0), "2.00");
+  });
   testWidgets('shows error if blank', (WidgetTester tester) async {
     final formKey = GlobalKey<FormState>();
     // Build our app and trigger a frame.

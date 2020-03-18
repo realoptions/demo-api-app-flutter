@@ -13,7 +13,7 @@ const Map<String, Map<String, double>> DEFAULT_VALUES = {
     "speed": 1.5,
     "eta_v": 1.5,
     "sigma": 0.35,
-    "rho": -0.2
+    "rho": -0.2,
   },
   "cgmy": {
     "c": 0.5,
@@ -24,7 +24,7 @@ const Map<String, Map<String, double>> DEFAULT_VALUES = {
     "v0": 0.98,
     "speed": 1.5,
     "eta_v": 1.5,
-    "rho": -0.2
+    "rho": -0.2,
   },
   "merton": {
     "lambda": 1.0,
@@ -34,9 +34,15 @@ const Map<String, Map<String, double>> DEFAULT_VALUES = {
     "v0": 0.98,
     "speed": 1.5,
     "eta_v": 1.5,
-    "rho": -0.2
+    "rho": -0.2,
   },
-  "market": {"num_u": 8, "asset": 50.0, "maturity": 1.0},
+  "market": {
+    "asset": 50.0,
+    "maturity": 1.0,
+    "num_u": 8,
+    "quantile": 0.05,
+    "rate": 0.04
+  },
 };
 
 class Model {

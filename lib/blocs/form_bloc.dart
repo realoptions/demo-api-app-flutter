@@ -4,6 +4,7 @@ import 'package:realoptions/models/forms.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:quiver/core.dart' show hash2;
 import 'package:meta/meta.dart';
+import 'package:realoptions/components/CustomTextFields.dart';
 
 class FormItem {
   final String valueAtLastSubmit;
@@ -28,11 +29,14 @@ class FormItem {
   int get hashCode => hash2(valueAtLastSubmit, constraint);
 }
 
+final StringUtils stringUtils = StringUtils();
+
 class FormBloc implements BlocBase {
   Map<String, SubmitItems> _formValues = {};
   final List<InputConstraint> constraints;
   final StreamController<Iterable<FormItem>> _formController =
       BehaviorSubject();
+
   Stream<Iterable<FormItem>> get outFormController => _formController.stream;
 
   StreamSink get _inFormController => _formController.sink;
@@ -50,7 +54,8 @@ class FormBloc implements BlocBase {
     if (formValue != null) {
       return formValue.value.toString();
     }
-    return constraint.defaultValue.toString();
+    return stringUtils.getStringFromValue(
+        constraint.fieldType, constraint.defaultValue);
   }
 
   void onSave(InputType inputType, String key, num value) {

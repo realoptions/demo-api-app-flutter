@@ -14,6 +14,17 @@ class StringUtils {
         return null; //can never get here.  I miss rust...
     }
   }
+
+  String getStringFromValue(FieldType fieldType, num val) {
+    switch (fieldType) {
+      case FieldType.Float:
+        return val.toStringAsFixed(2);
+      case FieldType.Integer:
+        return val.toStringAsFixed(0);
+      default:
+        return "";
+    }
+  }
 }
 
 class NumberTextField extends StatelessWidget {

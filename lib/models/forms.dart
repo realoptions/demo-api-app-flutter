@@ -40,7 +40,7 @@ const NUM_STRIKES = 10;
 const PERCENT_RANGE = 0.5;
 
 List<InputConstraint> parseJson(Map<String, Map<String, dynamic>> response,
-    Map<String, double> defaultValues, String model) {
+    Map<String, num> defaultValues, String model) {
   return defaultValues.entries.map((entry) {
     var constraint = response[entry.key];
     num lower = constraint['lower'];

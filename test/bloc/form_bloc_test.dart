@@ -21,7 +21,7 @@ void main() {
     expect(
         bloc.outFormController,
         emitsInOrder([
-          [FormItem(constraint: constraints[0], valueAtLastSubmit: "2")]
+          [FormItem(constraint: constraints[0], valueAtLastSubmit: "2.00")]
         ]));
   });
   test('gets defaultValueMap if formValues are empty', () {
