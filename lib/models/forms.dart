@@ -1,6 +1,7 @@
 import 'package:realoptions/components/CustomTextFields.dart';
 import 'package:quiver/core.dart' show hash4;
 import 'package:quiver/core.dart' show hash2;
+import 'package:realoptions/models/models.dart';
 
 enum InputType { Model, Market }
 const String MARKET_NAME = "market";
@@ -12,33 +13,21 @@ class InputConstraint {
   final FieldType fieldType;
   final String name;
   final InputType inputType;
-
-  InputConstraint({
-    this.lower,
-    this.upper,
-    this.fieldType,
-    this.name,
-    this.defaultValue,
-    this.inputType,
-  });
+  final String description;
+  InputConstraint(
+      {this.lower,
+      this.upper,
+      this.fieldType,
+      this.name,
+      this.defaultValue,
+      this.inputType,
+      this.description});
   @override
   bool operator ==(other) {
     if (other is! InputConstraint) {
       return false;
     }
-    if (lower != other.lower) {
-      return false;
-    }
-    if (upper != other.upper) {
-      return false;
-    }
-    if (fieldType != other.fieldType) {
-      return false;
-    }
     if (name != other.name) {
-      return false;
-    }
-    if (inputType != other.inputType) {
       return false;
     }
     return true;
@@ -53,21 +42,23 @@ const PERCENT_RANGE = 0.5;
 
 List<InputConstraint> parseJson(
     Map<String, Map<String, dynamic>> response, String model) {
-  List<InputConstraint> inputConstraints = [];
-  response.forEach((key, value) {
-    num lower = value['lower'];
-    num upper = value['upper'];
-    num defaultValue = (lower + upper) / 2.0;
-    inputConstraints.add(InputConstraint(
-        name: key,
-        lower: value['lower'],
-        upper: value['upper'],
-        fieldType:
-            value['types'] == 'float' ? FieldType.Float : FieldType.Integer,
+  var defaultValues = DEFAULT_VALUES[model];
+  return defaultValues.entries.map((entry) {
+    var constraint = response[entry.key];
+    num lower = constraint['lower'];
+    num upper = constraint['upper'];
+    num defaultValue = entry.value;
+    return InputConstraint(
+        name: entry.key,
+        lower: lower,
+        upper: upper,
+        fieldType: constraint['types'] == 'float'
+            ? FieldType.Float
+            : FieldType.Integer,
         defaultValue: defaultValue,
-        inputType: model == MARKET_NAME ? InputType.Market : InputType.Model));
-  });
-  return inputConstraints;
+        inputType: model == MARKET_NAME ? InputType.Market : InputType.Model,
+        description: constraint['description']);
+  }).toList();
 }
 
 class SubmitItems {

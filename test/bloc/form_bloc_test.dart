@@ -14,13 +14,14 @@ void main() {
           lower: 1,
           fieldType: FieldType.Float,
           name: "somename",
-          inputType: InputType.Market)
+          inputType: InputType.Market,
+          description: "hello")
     ];
     FormBloc bloc = FormBloc(constraints: constraints);
     expect(
         bloc.outFormController,
         emitsInOrder([
-          [FormItem(constraint: constraints[0], defaultValue: "2")]
+          [FormItem(constraint: constraints[0], valueAtLastSubmit: "2")]
         ]));
   });
   test('gets defaultValueMap if formValues are empty', () {
@@ -31,16 +32,17 @@ void main() {
           lower: 1,
           fieldType: FieldType.Integer,
           name: "num_u",
-          inputType: InputType.Market)
+          inputType: InputType.Market,
+          description: "hello")
     ];
     FormBloc bloc = FormBloc(constraints: constraints);
     expect(
         bloc.outFormController,
         emitsInOrder([
-          [FormItem(constraint: constraints[0], defaultValue: "8")]
+          [FormItem(constraint: constraints[0], valueAtLastSubmit: "8")]
         ]));
   });
-  test('gets formValue  even if defaultValueMap is set', () {
+  test('gets formValue even if defaultValueMap is set', () {
     List<InputConstraint> constraints = [
       InputConstraint(
           defaultValue: 2,
@@ -48,14 +50,15 @@ void main() {
           lower: 1,
           fieldType: FieldType.Integer,
           name: "num_u",
-          inputType: InputType.Market)
+          inputType: InputType.Market,
+          description: "hello")
     ];
     FormBloc bloc = FormBloc(constraints: constraints);
     expect(
         bloc.outFormController,
         emitsInOrder([
-          [FormItem(constraint: constraints[0], defaultValue: "8")],
-          [FormItem(constraint: constraints[0], defaultValue: "7")]
+          [FormItem(constraint: constraints[0], valueAtLastSubmit: "8")],
+          [FormItem(constraint: constraints[0], valueAtLastSubmit: "7")]
         ]));
     bloc.onSave(InputType.Market, "num_u", 7);
     bloc.onSubmit();
@@ -68,7 +71,8 @@ void main() {
           lower: 1,
           fieldType: FieldType.Integer,
           name: "num_u",
-          inputType: InputType.Market)
+          inputType: InputType.Market,
+          description: "hello")
     ];
     FormBloc bloc = FormBloc(constraints: constraints);
 

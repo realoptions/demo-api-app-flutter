@@ -11,11 +11,11 @@ import 'package:realoptions/blocs/density_bloc.dart';
 import 'package:realoptions/models/progress.dart';
 
 Widget getField(
-    Function onSubmit, String defaultValue, InputConstraint constraint) {
+    Function onSubmit, String valueAtLastSubmit, InputConstraint constraint) {
   return PaddingForm(
       child: NumberTextField(
     labelText: constraint.name,
-    defaultValue: defaultValue,
+    defaultValue: valueAtLastSubmit,
     type: constraint.fieldType,
     lowValue: constraint.lower,
     highValue: constraint.upper,
@@ -37,7 +37,7 @@ class InputForm extends StatelessWidget {
         List<Widget> formFields =
             snapshot.data.map<Widget>((FormItem formItem) {
           return getField(
-              bloc.onSave, formItem.defaultValue, formItem.constraint);
+              bloc.onSave, formItem.valueAtLastSubmit, formItem.constraint);
         }).toList();
         formFields.add(PaddingForm(child: FormButton(formKey: _formKey)));
         return SingleChildScrollView(

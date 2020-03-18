@@ -96,8 +96,13 @@ void main() {
   test('parse json works on the right type of map', () {
     expect(
         parseJson({
-          "hello": {"lower": 3.0, "upper": 4.0, "types": "float"}
-        }, "mymodel"),
+          "hello": {
+            "lower": 3.0,
+            "upper": 4.0,
+            "types": "float",
+            "description": "hello"
+          }
+        }, "heston"),
         [
           InputConstraint(
               lower: 3.0,
@@ -109,7 +114,12 @@ void main() {
         ]);
     expect(
         parseJson({
-          "hello": {"lower": 3.0, "upper": 4.0, "types": "integer"}
+          "hello": {
+            "lower": 3.0,
+            "upper": 4.0,
+            "types": "integer",
+            "description": "hello"
+          }
         }, "market"),
         [
           InputConstraint(
