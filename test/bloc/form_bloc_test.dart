@@ -39,7 +39,7 @@ void main() {
     expect(
         bloc.outFormController,
         emitsInOrder([
-          [FormItem(constraint: constraints[0], valueAtLastSubmit: "8")]
+          [FormItem(constraint: constraints[0], valueAtLastSubmit: "2")]
         ]));
   });
   test('gets formValue even if defaultValueMap is set', () {
@@ -57,7 +57,7 @@ void main() {
     expect(
         bloc.outFormController,
         emitsInOrder([
-          [FormItem(constraint: constraints[0], valueAtLastSubmit: "8")],
+          [FormItem(constraint: constraints[0], valueAtLastSubmit: "2")],
           [FormItem(constraint: constraints[0], valueAtLastSubmit: "7")]
         ]));
     bloc.onSave(InputType.Market, "num_u", 7);

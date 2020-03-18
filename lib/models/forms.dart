@@ -1,7 +1,6 @@
 import 'package:realoptions/components/CustomTextFields.dart';
 import 'package:quiver/core.dart' show hash4;
 import 'package:quiver/core.dart' show hash2;
-import 'package:realoptions/models/models.dart';
 
 enum InputType { Model, Market }
 const String MARKET_NAME = "market";
@@ -40,9 +39,8 @@ class InputConstraint {
 const NUM_STRIKES = 10;
 const PERCENT_RANGE = 0.5;
 
-List<InputConstraint> parseJson(
-    Map<String, Map<String, dynamic>> response, String model) {
-  var defaultValues = DEFAULT_VALUES[model];
+List<InputConstraint> parseJson(Map<String, Map<String, dynamic>> response,
+    Map<String, double> defaultValues, String model) {
   return defaultValues.entries.map((entry) {
     var constraint = response[entry.key];
     num lower = constraint['lower'];

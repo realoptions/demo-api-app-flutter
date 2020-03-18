@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:path/path.dart' as p;
 import 'package:realoptions/models/forms.dart';
+import 'package:realoptions/models/models.dart';
 import 'package:realoptions/models/response.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -25,6 +26,7 @@ class FinsideApi {
       if (response.statusCode == 200) {
         return parseJson(
             Map<String, Map<String, dynamic>>.from(json.decode(response.body)),
+            DEFAULT_VALUES[model],
             model);
       } else {
         throw Exception(
