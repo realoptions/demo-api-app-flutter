@@ -10,18 +10,33 @@ import 'package:realoptions/blocs/bloc_provider.dart';
 import 'package:realoptions/blocs/density_bloc.dart';
 import 'package:realoptions/models/progress.dart';
 
-Widget getField(
-    Function onSubmit, String valueAtLastSubmit, InputConstraint constraint) {
+Widget getField(BuildContext context, Function onSubmit,
+    String valueAtLastSubmit, InputConstraint constraint) {
+  final ThemeData themeData = Theme.of(context);
   return PaddingForm(
-      child: NumberTextField(
-    labelText: constraint.name,
-    defaultValue: valueAtLastSubmit,
-    type: constraint.fieldType,
-    lowValue: constraint.lower,
-    highValue: constraint.upper,
-    onSubmit: (String key, num value) =>
-        onSubmit(constraint.inputType, key, value),
-  ));
+      child: Row(children: [
+    Expanded(
+        child: NumberTextField(
+      labelText: constraint.name,
+      defaultValue: valueAtLastSubmit,
+      type: constraint.fieldType,
+      lowValue: constraint.lower,
+      highValue: constraint.upper,
+      onSubmit: (String key, num value) =>
+          onSubmit(constraint.inputType, key, value),
+    )),
+    IconButton(
+      color: themeData.primaryColor,
+      icon: Icon(Icons.help),
+      onPressed: () {
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(content: Text(constraint.description));
+            });
+      },
+    )
+  ]));
 }
 
 class InputForm extends StatelessWidget {
@@ -36,8 +51,8 @@ class InputForm extends StatelessWidget {
       builder: (buildContext, snapshot) {
         List<Widget> formFields =
             snapshot.data.map<Widget>((FormItem formItem) {
-          return getField(
-              bloc.onSave, formItem.valueAtLastSubmit, formItem.constraint);
+          return getField(context, bloc.onSave, formItem.valueAtLastSubmit,
+              formItem.constraint);
         }).toList();
         formFields.add(PaddingForm(child: FormButton(formKey: _formKey)));
         return SingleChildScrollView(

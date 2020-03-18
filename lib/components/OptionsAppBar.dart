@@ -35,17 +35,7 @@ class OptionsAppBar extends StatelessWidget with PreferredSizeWidget {
                                 child: ListBody(
                                   children: <Widget>[
                                     Text(
-                                        'Asset is the dollar value of the underlying.'),
-                                    Text(
-                                        'Maturity is the time in years until the option expires.'),
-                                    Text(
-                                        'num_u is exponent for the precision of the numeric inversion.  For example, 8 represents 2^8=256.'),
-                                    Text(
-                                        'Quantile is used for VaR and expected shortfall.  For example, 0.05 is a 95% VaR.'),
-                                    Text(
-                                        'Rate is the (annualized) risk free rate.'),
-                                    Text(
-                                        'The remaining variables are dependent on the model.'),
+                                        '''This app calculates option prices for three models: Heston, CGMY with a diffusion and a stochastic clock, and Merton jump-diffusion with stochastic clock.  It uses Fang and Oosterlee's algorithm for efficient pricing across many strikes.'''),
                                     RaisedButton(
                                       onPressed: _launchDocs,
                                       child: Text('References'),
