@@ -2,7 +2,7 @@ name: releasealpha
 on:
   push:
     tags:
-      - 'alpha-*'
+      - 'beta-*'
 
 jobs:
   release: 
@@ -68,7 +68,7 @@ jobs:
         serviceAccountJson: ${{ steps.write_json.outputs.filePath }} # access_key.json
         packageName: com.finside.realoptions
         releaseFile: build/app/outputs/bundle/release/app.aab
-        track: alpha
+        track: beta
         # userFraction: 0.33
         whatsNewDirectory: assets/whatsnew
         # mappingFile: build/outputs/mapping/release/mapping.txt
