@@ -3,19 +3,13 @@ import 'dart:async';
 import 'package:realoptions/models/models.dart';
 import 'package:rxdart/rxdart.dart';
 
-const List<Model> modelChoices = const <Model>[
-  const Model(label: "Heston", value: "heston"),
-  const Model(label: "CGMY", value: "cgmy"),
-  const Model(label: "Merton", value: "merton")
-];
-
 class SelectModelBloc implements BlocBase {
   final StreamController<Model> _modelController = BehaviorSubject();
   Stream<Model> get outSelectedModel => _modelController.stream;
   StreamSink get _getSelectedModel => _modelController.sink;
 
   SelectModelBloc() {
-    _getSelectedModel.add(modelChoices[0]);
+    _getSelectedModel.add(MODEL_CHOICES[0]);
   }
   void setModel(Model modelValue) {
     _getSelectedModel.add(modelValue);

@@ -1,8 +1,6 @@
 # Name of your workflow.
 name: test
-on: 
-  push:
-    branches: '*'
+on: [push]
     
 jobs:
   test:
@@ -33,7 +31,7 @@ jobs:
     - name: get branch name
       run: echo ::set-env name=BRANCH_NAME::${GITHUB_REF##*/}
     - name: get branch tag
-      run: echo ::set-env name=RELEASE_TAG::$([ ${{ env.BRANCH_NAME }} == master ] && echo "release" || echo "alpha")
+      run: echo ::set-env name=RELEASE_TAG::$([ ${{ env.BRANCH_NAME }} == master ] && echo "release" || echo "beta")
     - name: get tag
       run: echo ::set-env name=CUSTOM_TAG::${{ env.RELEASE_TAG }}-${{ env.FLUTTER_VERSION }} 
     - name: does tag exist

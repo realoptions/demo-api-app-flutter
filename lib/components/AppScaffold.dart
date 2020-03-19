@@ -31,7 +31,7 @@ class AppScaffold extends StatelessWidget {
         BlocProvider.of<SelectModelBloc>(context);
 
     return StreamBuilder<Model>(
-        initialData: modelChoices[0],
+        initialData: MODEL_CHOICES[0],
         stream: selectBloc.outSelectedModel,
         builder: (buildContext, snapshot) {
           final ApiBloc apiBloc = BlocProvider.of<ApiBloc>(context);
@@ -140,7 +140,7 @@ class _Scaffold extends StatelessWidget {
           return Scaffold(
               appBar: OptionsAppBar(
                 title: this.title,
-                choices: modelChoices,
+                choices: MODEL_CHOICES,
               ),
               body: PageStorage(
                   child: pages[selectedIndex].widget, bucket: _bucket),

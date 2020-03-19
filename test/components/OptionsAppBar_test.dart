@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:realoptions/blocs/bloc_provider.dart';
 import 'package:realoptions/blocs/select_model_bloc.dart';
 import 'package:realoptions/components/OptionsAppBar.dart';
+import 'package:realoptions/models/models.dart';
 
 void main() {
   testWidgets('AppBar displays with no inputs', (WidgetTester tester) async {
@@ -12,7 +13,7 @@ void main() {
                 bloc: SelectModelBloc(),
                 child: Scaffold(
                     appBar: OptionsAppBar(
-                        choices: modelChoices, title: "SomeTitle"))))));
+                        choices: MODEL_CHOICES, title: "SomeTitle"))))));
     await tester.pumpAndSettle();
     expect(find.text("SomeTitle: Heston"), findsOneWidget);
     expect(find.text("SomeTitle: CGMY"), findsNothing);
@@ -24,7 +25,7 @@ void main() {
                 bloc: SelectModelBloc(),
                 child: Scaffold(
                     appBar: OptionsAppBar(
-                        choices: modelChoices, title: "SomeTitle"))))));
+                        choices: MODEL_CHOICES, title: "SomeTitle"))))));
     await tester.pumpAndSettle();
     expect(find.text("SomeTitle: Heston"), findsOneWidget);
     await tester.tap(find.byIcon(Icons.more_vert));

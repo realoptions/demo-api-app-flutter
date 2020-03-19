@@ -11,32 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:realoptions/components/CustomTextFields.dart';
 
 void main() {
-  test('getRegex returns the correct regex depending on type', () {
-    StringUtils strUtils = StringUtils();
-    expect(strUtils.getRegex(FieldType.Float),
-        r"[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)");
-    expect(strUtils.getRegex(FieldType.Integer), r"^[1-9]\d*$");
-  });
-  test('regex for integer', () {
-    StringUtils strUtils = StringUtils();
-    var regExp = RegExp(strUtils.getRegex(FieldType.Integer));
-    expect(regExp.hasMatch("5"), true);
-    expect(regExp.hasMatch("5.0"), false);
-    expect(regExp.hasMatch("05"), false);
-    expect(regExp.hasMatch("5.5"), false);
-    expect(regExp.hasMatch("-2"), false); //only positive
-  });
-  test('regex for float', () {
-    StringUtils strUtils = StringUtils();
-    var regExp = RegExp(strUtils.getRegex(FieldType.Float));
-    expect(regExp.hasMatch("5"), true);
-    expect(regExp.hasMatch("5.0"), true);
-    expect(regExp.hasMatch(".6"), true);
-    expect(regExp.hasMatch("05"),
-        true); //I'll keep this for now...too complicated to remove
-    expect(regExp.hasMatch("5.5"), true);
-    expect(regExp.hasMatch("-2"), true);
-  });
   test('parses strings for float', () {
     StringUtils strUtils = StringUtils();
     expect(strUtils.getValueFromString(FieldType.Float, "1.0"), 1.0);
@@ -48,6 +22,18 @@ void main() {
     expect(strUtils.getValueFromString(FieldType.Integer, "1"), 1);
     expect(strUtils.getValueFromString(FieldType.Integer, "-1"), -1);
     expect(strUtils.getValueFromString(FieldType.Integer, "2"), 2);
+  });
+  test('parses int to string', () {
+    StringUtils strUtils = StringUtils();
+    expect(strUtils.getStringFromValue(FieldType.Integer, 1), "1");
+    expect(strUtils.getStringFromValue(FieldType.Integer, -1), "-1");
+    expect(strUtils.getStringFromValue(FieldType.Integer, 2), "2");
+  });
+  test('parses float to string', () {
+    StringUtils strUtils = StringUtils();
+    expect(strUtils.getStringFromValue(FieldType.Float, 1.0), "1.00");
+    expect(strUtils.getStringFromValue(FieldType.Float, -1), "-1.00");
+    expect(strUtils.getStringFromValue(FieldType.Float, 2.0), "2.00");
   });
   testWidgets('shows error if blank', (WidgetTester tester) async {
     final formKey = GlobalKey<FormState>();

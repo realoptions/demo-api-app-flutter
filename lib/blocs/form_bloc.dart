@@ -4,24 +4,19 @@ import 'package:realoptions/models/forms.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:quiver/core.dart' show hash2;
 import 'package:meta/meta.dart';
-
-const Map<String, String> defaultValueMap = {
-  "num_u": "8",
-  "asset": "50.0",
-  "maturity": "1.0",
-};
+import 'package:realoptions/components/CustomTextFields.dart';
 
 class FormItem {
-  final String defaultValue;
+  final String valueAtLastSubmit;
   final InputConstraint constraint;
-  FormItem({this.defaultValue, this.constraint});
+  FormItem({this.valueAtLastSubmit, this.constraint});
   @override
   bool operator ==(other) {
     if (other is! FormItem) {
       return false;
     }
 
-    if (defaultValue != other.defaultValue) {
+    if (valueAtLastSubmit != other.valueAtLastSubmit) {
       return false;
     }
     if (constraint != other.constraint) {
@@ -31,14 +26,17 @@ class FormItem {
   }
 
   @override
-  int get hashCode => hash2(defaultValue, constraint);
+  int get hashCode => hash2(valueAtLastSubmit, constraint);
 }
+
+final StringUtils stringUtils = StringUtils();
 
 class FormBloc implements BlocBase {
   Map<String, SubmitItems> _formValues = {};
   final List<InputConstraint> constraints;
   final StreamController<Iterable<FormItem>> _formController =
       BehaviorSubject();
+
   Stream<Iterable<FormItem>> get outFormController => _formController.stream;
 
   StreamSink get _inFormController => _formController.sink;
@@ -46,16 +44,8 @@ class FormBloc implements BlocBase {
   FormBloc({@required this.constraints}) {
     onSubmit();
   }
-  static String _valueOtherwiseNull(String value, String defaultValue) {
-    if (value == null) {
-      return defaultValue;
-    } else {
-      return value;
-    }
-  }
 
-  static String _getDefaultFormValue(
-    Map<String, String> defaultValueMap,
+  static String _getValueAtLastSubmit(
     Map<String, SubmitItems> formValues, //can be empty
     InputConstraint constraint, //can't be null
   ) {
@@ -64,8 +54,8 @@ class FormBloc implements BlocBase {
     if (formValue != null) {
       return formValue.value.toString();
     }
-    return _valueOtherwiseNull(
-        defaultValueMap[constraint.name], constraint.defaultValue.toString());
+    return stringUtils.getStringFromValue(
+        constraint.fieldType, constraint.defaultValue);
   }
 
   void onSave(InputType inputType, String key, num value) {
@@ -75,9 +65,8 @@ class FormBloc implements BlocBase {
   void onSubmit() {
     var formItems = constraints.map<FormItem>((constraint) {
       return FormItem(
-          defaultValue:
-              _getDefaultFormValue(defaultValueMap, _formValues, constraint),
-          constraint: constraint);
+          constraint: constraint,
+          valueAtLastSubmit: _getValueAtLastSubmit(_formValues, constraint));
     }).toList();
     _inFormController.add(formItems);
   }

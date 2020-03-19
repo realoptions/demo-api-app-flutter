@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:realoptions/blocs/select_model_bloc.dart';
 import 'package:realoptions/blocs/bloc_provider.dart';
 import 'package:realoptions/models/models.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class OptionsAppBar extends StatelessWidget with PreferredSizeWidget {
   OptionsAppBar({@required this.title, @required this.choices});
@@ -22,6 +23,28 @@ class OptionsAppBar extends StatelessWidget with PreferredSizeWidget {
             key: Key("AppBarComponent"),
             title: Text(this.title + ": " + selectedModel.label),
             actions: <Widget>[
+              IconButton(
+                  icon: Icon(Icons.help),
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                              title: Text('Help'),
+                              content: SingleChildScrollView(
+                                child: ListBody(
+                                  children: <Widget>[
+                                    Text(
+                                        '''This app calculates option prices for three models: Heston, CGMY with a diffusion and a stochastic clock, and Merton jump-diffusion with stochastic clock.  It uses Fang and Oosterlee's algorithm for efficient pricing across many strikes.'''),
+                                    RaisedButton(
+                                      onPressed: _launchDocs,
+                                      child: Text('References'),
+                                    ),
+                                  ],
+                                ),
+                              ));
+                        });
+                  }),
               IconButton(
                 icon: Icon(Icons.more_vert),
                 onPressed: () {
@@ -47,5 +70,15 @@ class OptionsAppBar extends StatelessWidget with PreferredSizeWidget {
             ],
           );
         });
+  }
+}
+
+_launchDocs() async {
+  const url =
+      'https://github.com/phillyfan1138/fang_oost_cal_charts/raw/master/docs/OptionCalculation.pdf';
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    throw 'Could not launch $url';
   }
 }

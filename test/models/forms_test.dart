@@ -28,13 +28,15 @@ void main() {
                 upper: 3.0,
                 fieldType: FieldType.Float,
                 name: "hello",
-                inputType: InputType.Market) ==
+                inputType: InputType.Market,
+                description: "body") ==
             InputConstraint(
                 lower: 2.0,
                 upper: 3.0,
                 fieldType: FieldType.Float,
                 name: "hello",
-                inputType: InputType.Market),
+                inputType: InputType.Market,
+                description: "body"),
         true);
     expect(
         InputConstraint(
@@ -42,41 +44,47 @@ void main() {
                 upper: 3.0,
                 fieldType: FieldType.Float,
                 name: "hello",
-                inputType: InputType.Market) ==
+                inputType: InputType.Market,
+                description: "body") ==
             InputConstraint(
                 lower: 2.0,
                 upper: 4.0,
                 fieldType: FieldType.Float,
                 name: "hello",
-                inputType: InputType.Market),
-        false);
+                inputType: InputType.Market,
+                description: "body"),
+        true);
     expect(
         InputConstraint(
                 lower: 2.0,
                 upper: 3.0,
                 fieldType: FieldType.Float,
                 name: "hello",
-                inputType: InputType.Market) ==
+                inputType: InputType.Market,
+                description: "body") ==
             InputConstraint(
                 lower: 2.0,
                 upper: 3.0,
                 fieldType: FieldType.Integer,
                 name: "hello",
-                inputType: InputType.Market),
-        false);
+                inputType: InputType.Market,
+                description: "body"),
+        true);
     expect(
         InputConstraint(
                 lower: 2.0,
                 upper: 3.0,
                 fieldType: FieldType.Integer,
                 name: "hello",
-                inputType: InputType.Market) ==
+                inputType: InputType.Market,
+                description: "body") ==
             InputConstraint(
                 lower: 2.0,
                 upper: 3.0,
                 fieldType: FieldType.Integer,
-                name: "hello",
-                inputType: InputType.Model),
+                name: "goodbye",
+                inputType: InputType.Model,
+                description: "body"),
         false);
   });
   test('equality with submititems', () {
@@ -96,8 +104,15 @@ void main() {
   test('parse json works on the right type of map', () {
     expect(
         parseJson({
-          "hello": {"lower": 3.0, "upper": 4.0, "types": "float"}
-        }, "mymodel"),
+          "hello": {
+            "lower": 3.0,
+            "upper": 4.0,
+            "types": "float",
+            "description": "hello"
+          }
+        }, {
+          "hello": 3.5
+        }, "hello"),
         [
           InputConstraint(
               lower: 3.0,
@@ -109,14 +124,21 @@ void main() {
         ]);
     expect(
         parseJson({
-          "hello": {"lower": 3.0, "upper": 4.0, "types": "integer"}
+          "hello": {
+            "lower": 3.0,
+            "upper": 4.0,
+            "types": "integer",
+            "description": "hello"
+          }
+        }, {
+          "hello": 3
         }, "market"),
         [
           InputConstraint(
               lower: 3.0,
               upper: 4.0,
               name: "hello",
-              defaultValue: 3.5,
+              defaultValue: 3,
               fieldType: FieldType.Integer,
               inputType: InputType.Market)
         ]);
