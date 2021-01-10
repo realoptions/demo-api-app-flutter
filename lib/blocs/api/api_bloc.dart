@@ -7,27 +7,57 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:bloc/bloc.dart';
 import './api_events.dart';
 import './api_state.dart';
+import '../../repositories/api_repository.dart';
 
 final String apiKeyId = "apiKey";
 
 class ApiBloc extends Bloc<ApiEvents, ApiState> {
-  final FirebaseAuth firebaseAuth;
-  final StreamSubscription _keyController;
-  /final StreamSubscription _stateController;
-  ApiBloc({@required this.firebaseAuth}),super(ApiIsFetching());
+  final FirebaseAuth _firebaseAuth;
+  //final StreamSubscription<ApiState> _keyController;
+  final ApiRepository _apiRepository;
+  //final StreamSubscription _stateController;
+  ApiBloc(
+      {@required FirebaseAuth firebaseAuth,
+      @required ApiRepository apiRepository})
+      : assert(firebaseAuth != null),
+        _firebaseAuth = firebaseAuth,
+        _apiRepository = apiRepository,
+        super(ApiIsFetching());
   @override
   Stream<ApiState> mapEventToState(ApiEvents event) async* {
-    if (event is FetchingApiKey) {
-      yield* _keyController.add(ApiIsFetching());
-    } else if (event is NoApiKey) {
-      yield* _keyController.add(ApiNoData());
-    } else if (event is RetrievedApiKey) {
-      yield* _keyController.add(ApiToken(event.apiToken));
-    } else if (event is ApiKeyError) {
-      yield* _keyController.addError(event.apiError);
+    switch (event) {
+      case ApiEvents.RequestApiKey:
+        yield ApiIsFetching();
+        try {
+          final user = await _firebaseAuth.currentUser();
+          final token = await _apiRepository.getToken(user);
+          yield ApiToken({token: token});
+        } catch (err) {
+          yield ApiError({apiError: err});
+        }
+        break;
+      case ApiEvents.GoogleSignIn:
+        final authCredential =
+            await _apiRepository.handleGoogleSignIn(_firebaseAuth);
+        yield ApiIsFetching();
+        await _apiRepository.convertCredentialToUser(
+            _firebaseAuth, authCredential);
+        add(ApiEvents.RequestApiKey);
+        break;
+      case ApiEvents.FacebookSignIn:
+        final facebookLogin =
+            await _apiRepository.handleFacebookSignIn(_firebaseAuth);
+        yield ApiIsFetching();
+        if (facebookLogin != null) {
+          await _apiRepository.convertFacebookToUser(
+              _firebaseAuth, facebookLogin);
+        }
+        add(ApiEvents.RequestApiKey);
+        break;
     }
   }
-  Future<void> setKeyFromUser(FirebaseUser user) {
+
+  /*Future<void> setKeyFromUser(FirebaseUser user) {
     if (user == null) {
       //_getHomeState.add(StreamProgress.NoData);
       add(NoApiKey());
@@ -39,7 +69,7 @@ class ApiBloc extends Bloc<ApiEvents, ApiState> {
         //_getHomeState.add(StreamProgress.DataRetrieved);
       }).catchError((err)=>add(ApiKeyError(err)));
     }
-  }
+  }*/
 }
 /*
 class ApiBloc implements bloc_provider.BlocBase {

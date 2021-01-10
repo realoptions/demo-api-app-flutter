@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+enum ApiEvents { RequestApiKey, GoogleSignIn, FacebookSignIn }
+
+/*
 abstract class ApiEvents {}
 
 class FetchingApiKey extends ApiEvents {}
@@ -12,6 +15,7 @@ class RetrievedApiKey extends ApiEvents {
 }
 
 class ApiKeyError extends ApiEvents {
-   final Error apiError;
-   ApiKeyError({@required this.apiError})
+  final Error apiError;
+  ApiKeyError({@required this.apiError});
 }
+*/
