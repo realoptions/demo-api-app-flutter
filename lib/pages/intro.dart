@@ -1,7 +1,7 @@
 import 'package:realoptions/components/CustomPadding.dart';
 import 'package:flutter/material.dart';
 import 'package:realoptions/blocs/bloc_provider.dart';
-import 'package:realoptions/blocs/api_bloc.dart';
+import 'package:realoptions/blocs/api/api_bloc.dart';
 import 'package:realoptions/components/SocialMediaButton.dart';
 import 'package:realoptions/services/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';

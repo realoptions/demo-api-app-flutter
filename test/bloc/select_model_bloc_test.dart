@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:realoptions/blocs/select_model_bloc.dart';
+import 'package:realoptions/blocs/select_model/select_model_bloc.dart';
 import 'package:realoptions/models/models.dart';
 
 void main() {

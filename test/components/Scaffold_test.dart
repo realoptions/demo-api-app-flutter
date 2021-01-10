@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:realoptions/blocs/bloc_provider.dart';
-import 'package:realoptions/blocs/constraints_bloc.dart';
+import 'package:realoptions/blocs/constraints/constraints_bloc.dart';
 import 'package:realoptions/services/finside_service.dart';
 import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/models/response.dart';

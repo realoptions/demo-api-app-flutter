@@ -1,7 +1,7 @@
 import 'package:realoptions/components/CustomTextFields.dart';
 import 'package:realoptions/models/forms.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:realoptions/blocs/constraints_bloc.dart';
+import 'package:realoptions/blocs/constraints/constraints_bloc.dart';
 import 'package:realoptions/models/progress.dart';
 import 'package:realoptions/services/finside_service.dart';
 import 'package:mockito/mockito.dart';

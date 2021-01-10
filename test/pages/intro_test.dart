@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:realoptions/blocs/bloc_provider.dart';
-import 'package:realoptions/blocs/api_bloc.dart';
+import 'package:realoptions/blocs/api/api_bloc.dart';
 import 'package:realoptions/pages/intro.dart';
 
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';

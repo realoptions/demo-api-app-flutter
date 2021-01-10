@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:realoptions/blocs/api_bloc.dart';
+import 'package:realoptions/blocs/api/api_bloc.dart';
 import 'package:realoptions/models/progress.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 

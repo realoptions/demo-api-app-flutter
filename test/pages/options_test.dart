@@ -4,7 +4,7 @@ import 'package:realoptions/pages/options.dart';
 import 'package:realoptions/components/CustomPadding.dart';
 import 'package:mockito/mockito.dart';
 import 'package:realoptions/blocs/bloc_provider.dart';
-import 'package:realoptions/blocs/options_bloc.dart';
+import 'file:///home/daniel/Documents/code/finside/demo-api-app-flutter/test/components/options_bloc.dart';
 import 'package:realoptions/services/finside_service.dart';
 import 'package:realoptions/models/response.dart';
 import 'package:realoptions/models/forms.dart';

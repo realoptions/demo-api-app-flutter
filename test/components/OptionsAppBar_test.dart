@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:realoptions/blocs/bloc_provider.dart';
-import 'package:realoptions/blocs/select_model_bloc.dart';
+import 'package:realoptions/blocs/select_model/select_model_bloc.dart';
 import 'package:realoptions/components/OptionsAppBar.dart';
 import 'package:realoptions/models/models.dart';
 

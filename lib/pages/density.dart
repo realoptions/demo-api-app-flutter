@@ -1,4 +1,4 @@
-import 'package:realoptions/blocs/density_bloc.dart';
+import 'package:realoptions/blocs/density/density_bloc.dart';
 import 'package:realoptions/models/progress.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';

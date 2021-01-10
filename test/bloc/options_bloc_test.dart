@@ -1,7 +1,7 @@
 import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/models/response.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:realoptions/blocs/options_bloc.dart';
+import 'file:///home/daniel/Documents/code/finside/demo-api-app-flutter/test/components/options_bloc.dart';
 import 'package:realoptions/models/progress.dart';
 import 'package:realoptions/services/finside_service.dart';
 import 'package:mockito/mockito.dart';

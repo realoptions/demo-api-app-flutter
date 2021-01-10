@@ -4,9 +4,44 @@ import 'package:rxdart/rxdart.dart';
 import 'package:realoptions/models/progress.dart';
 import 'package:meta/meta.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:bloc/bloc.dart';
+import './api_events.dart';
+import './api_state.dart';
 
 final String apiKeyId = "apiKey";
 
+class ApiBloc extends Bloc<ApiEvents, ApiState> {
+  final FirebaseAuth firebaseAuth;
+  final StreamSubscription _keyController;
+  /final StreamSubscription _stateController;
+  ApiBloc({@required this.firebaseAuth}),super(ApiIsFetching());
+  @override
+  Stream<ApiState> mapEventToState(ApiEvents event) async* {
+    if (event is FetchingApiKey) {
+      yield* _keyController.add(ApiIsFetching());
+    } else if (event is NoApiKey) {
+      yield* _keyController.add(ApiNoData());
+    } else if (event is RetrievedApiKey) {
+      yield* _keyController.add(ApiToken(event.apiToken));
+    } else if (event is ApiKeyError) {
+      yield* _keyController.addError(event.apiError);
+    }
+  }
+  Future<void> setKeyFromUser(FirebaseUser user) {
+    if (user == null) {
+      //_getHomeState.add(StreamProgress.NoData);
+      add(NoApiKey());
+      //return Future.value();
+    } else {
+      return user.getIdToken().then((idToken) {
+        add(RetrievedApiKey(idToken.token);
+        //_getApiKey.add(idToken.token);
+        //_getHomeState.add(StreamProgress.DataRetrieved);
+      }).catchError((err)=>add(ApiKeyError(err)));
+    }
+  }
+}
+/*
 class ApiBloc implements bloc_provider.BlocBase {
   final StreamController<String> _keyController = BehaviorSubject();
   final StreamController<FirebaseAuth> _authController = BehaviorSubject();
@@ -50,4 +85,4 @@ class ApiBloc implements bloc_provider.BlocBase {
     _authController.close();
     _stateController.close();
   }
-}
+}*/

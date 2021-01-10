@@ -2,8 +2,8 @@ import 'package:realoptions/models/progress.dart';
 import 'package:flutter/material.dart';
 import 'package:realoptions/components/AppScaffold.dart';
 import 'package:realoptions/blocs/bloc_provider.dart';
-import 'package:realoptions/blocs/select_model_bloc.dart';
-import 'package:realoptions/blocs/api_bloc.dart';
+import 'package:realoptions/blocs/select_model/select_model_bloc.dart';
+import 'package:realoptions/blocs/api/api_bloc.dart';
 import 'package:realoptions/pages/intro.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 

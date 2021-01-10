@@ -1,13 +1,13 @@
-import 'package:realoptions/blocs/options_bloc.dart';
-import 'package:realoptions/blocs/select_page_bloc.dart';
+import 'file:///home/daniel/Documents/code/finside/demo-api-app-flutter/test/components/options_bloc.dart';
+import 'package:realoptions/blocs/select_page/select_page_bloc.dart';
 import 'package:realoptions/models/pages.dart';
 import 'package:flutter/material.dart';
 import 'package:realoptions/components/CustomPadding.dart';
 import 'package:realoptions/components/CustomTextFields.dart';
 import 'package:realoptions/models/forms.dart';
-import 'package:realoptions/blocs/form_bloc.dart';
+import 'package:realoptions/blocs/form/form_bloc.dart';
 import 'package:realoptions/blocs/bloc_provider.dart';
-import 'package:realoptions/blocs/density_bloc.dart';
+import 'package:realoptions/blocs/density/density_bloc.dart';
 import 'package:realoptions/models/progress.dart';
 
 Widget getField(BuildContext context, Function onSubmit,

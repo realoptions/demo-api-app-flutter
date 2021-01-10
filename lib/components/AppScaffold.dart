@@ -1,6 +1,6 @@
-import 'package:realoptions/blocs/constraints_bloc.dart';
-import 'package:realoptions/blocs/api_bloc.dart';
-import 'package:realoptions/blocs/select_model_bloc.dart';
+import 'package:realoptions/blocs/constraints/constraints_bloc.dart';
+import 'package:realoptions/blocs/api/api_bloc.dart';
+import 'package:realoptions/blocs/select_model/select_model_bloc.dart';
 import 'package:realoptions/services/finside_service.dart';
 import 'package:flutter/material.dart';
 import 'package:realoptions/models/pages.dart';
@@ -11,12 +11,12 @@ import 'package:realoptions/pages/density.dart';
 import 'package:realoptions/components/ShowBadge.dart' as badge;
 import 'package:realoptions/models/models.dart';
 import 'package:realoptions/blocs/bloc_provider.dart';
-import 'package:realoptions/blocs/select_page_bloc.dart';
-import 'package:realoptions/blocs/options_bloc.dart';
-import 'package:realoptions/blocs/density_bloc.dart';
+import 'package:realoptions/blocs/select_page/select_page_bloc.dart';
+import 'file:///home/daniel/Documents/code/finside/demo-api-app-flutter/test/components/options_bloc.dart';
+import 'package:realoptions/blocs/density/density_bloc.dart';
 import 'package:realoptions/models/progress.dart';
 import 'package:realoptions/models/forms.dart';
-import 'package:realoptions/blocs/form_bloc.dart';
+import 'package:realoptions/blocs/form/form_bloc.dart';
 
 class AppScaffold extends StatelessWidget {
   AppScaffold({

@@ -6,7 +6,7 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:realoptions/utils/chart_utils.dart' as utils;
 import 'package:realoptions/components/CustomPadding.dart' as padding;
 import 'package:realoptions/blocs/bloc_provider.dart';
-import 'package:realoptions/blocs/options_bloc.dart';
+import 'file:///home/daniel/Documents/code/finside/demo-api-app-flutter/test/components/options_bloc.dart';
 
 class ShowOptionPrices extends StatelessWidget {
   const ShowOptionPrices({
