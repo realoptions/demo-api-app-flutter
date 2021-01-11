@@ -1,5 +1,9 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:realoptions/blocs/constraints/constraints_bloc.dart';
-import 'package:realoptions/blocs/api/api_bloc.dart';
+import 'package:realoptions/blocs/constraints/constraints_events.dart';
+import 'package:realoptions/blocs/constraints/constraints_state.dart';
+import 'package:realoptions/blocs/options/options_bloc.dart';
+import 'package:realoptions/blocs/density/density_bloc.dart';
 import 'package:realoptions/blocs/select_model/select_model_bloc.dart';
 import 'package:realoptions/services/finside_service.dart';
 import 'package:flutter/material.dart';
@@ -10,57 +14,33 @@ import 'package:realoptions/pages/options.dart';
 import 'package:realoptions/pages/density.dart';
 import 'package:realoptions/components/ShowBadge.dart' as badge;
 import 'package:realoptions/models/models.dart';
-import 'package:realoptions/blocs/bloc_provider.dart';
 import 'package:realoptions/blocs/select_page/select_page_bloc.dart';
-import 'file:///home/daniel/Documents/code/finside/demo-api-app-flutter/test/components/options_bloc.dart';
-import 'package:realoptions/blocs/density/density_bloc.dart';
-import 'package:realoptions/models/progress.dart';
-import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/blocs/form/form_bloc.dart';
 
 class AppScaffold extends StatelessWidget {
-  AppScaffold({
-    Key key,
-    @required this.title,
-  });
+  AppScaffold({Key key, @required this.title, @required this.apiKey});
   final String title;
+  final String apiKey;
 
   @override
   Widget build(BuildContext context) {
-    final SelectModelBloc selectBloc =
-        BlocProvider.of<SelectModelBloc>(context);
-
-    return StreamBuilder<Model>(
-        initialData: MODEL_CHOICES[0],
-        stream: selectBloc.outSelectedModel,
-        builder: (buildContext, snapshot) {
-          final ApiBloc apiBloc = BlocProvider.of<ApiBloc>(context);
-          final Model model = snapshot.data;
-          return StreamBuilder<String>(
-              stream: apiBloc.outApiKey,
-              builder: (buildContext, snapshot) {
-                final String apiKey = snapshot.data;
-                if (apiKey == null) {
-                  return Scaffold(
-                      body: Center(child: CircularProgressIndicator()));
-                }
-                final FinsideApi finside =
-                    FinsideApi(apiKey: apiKey, model: model.value);
-                return BlocProvider<ConstraintsBloc>(
-                    bloc: ConstraintsBloc(finside: finside),
-                    child: BlocProvider<DensityBloc>(
-                        bloc: DensityBloc(
-                            finside:
-                                finside), //needed so we can get the functions "getDensity" and "getOptionPrices" in the submit function
-                        child: BlocProvider<OptionsBloc>(
-                            bloc: OptionsBloc(finside: finside),
-                            child: BlocProvider<SelectPageBloc>(
-                                bloc: SelectPageBloc(),
-                                child: WaitForConstraints(
-                                  child: _Scaffold(title: title),
-                                )))));
-              });
-        });
+    return BlocBuilder<SelectModelBloc, Model>(builder: (context, data) {
+      final FinsideApi finside = FinsideApi(apiKey: apiKey, model: data.value);
+      return MultiBlocProvider(
+          providers: [
+            BlocProvider<ConstraintsBloc>(create: (context) {
+              return ConstraintsBloc(finside: finside)
+                ..add(RequestConstraints());
+            }),
+            BlocProvider<SelectPageBloc>(create: (context) {
+              return SelectPageBloc();
+            })
+          ],
+          child: WaitForConstraints(
+            finside: finside,
+            child: _Scaffold(title: title),
+          ));
+    });
   }
 }
 
@@ -68,12 +48,39 @@ class WaitForConstraints extends StatelessWidget {
   const WaitForConstraints({
     Key key,
     @required this.child,
+    @required this.finside,
   }) : super(key: key);
   final Widget child;
+  final FinsideApi finside;
   @override
   Widget build(BuildContext context) {
-    ConstraintsBloc bloc = BlocProvider.of<ConstraintsBloc>(context);
-    return StreamBuilder<StreamProgress>(
+    final selectPageBloc = context.read<SelectPageBloc>();
+    return BlocBuilder<ConstraintsBloc, ConstraintsState>(
+      builder: (context, data) {
+        if (data is ConstraintsIsFetching) {
+          return Scaffold(body: Center(child: CircularProgressIndicator()));
+        } else if (data is ConstraintsError) {
+          return Scaffold(
+              body: Center(child: Text(data.constraintsError.toString())));
+        } else if (data is ConstraintsData) {
+          return MultiBlocProvider(providers: [
+            BlocProvider<OptionsBloc>(create: (context) {
+              return OptionsBloc(
+                  finside: finside, selectPageBloc: selectPageBloc);
+            }),
+            BlocProvider<DensityBloc>(create: (context) {
+              return DensityBloc(
+                  finside: finside, selectPageBloc: selectPageBloc);
+            }),
+            BlocProvider<FormBloc>(create: (context) {
+              return FormBloc(constraints: data.constraints);
+            }),
+          ], child: child);
+        }
+      },
+    );
+
+    /*StreamBuilder<StreamProgress>(
         stream: bloc.outConstraintsProgress,
         builder: (buildContext, snapshot) {
           switch (snapshot.data) {
@@ -98,7 +105,7 @@ class WaitForConstraints extends StatelessWidget {
             default: //should never get here
               return Scaffold(body: Center(child: CircularProgressIndicator()));
           }
-        });
+        });*/
   }
 }
 
@@ -129,6 +136,29 @@ class _Scaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return BlocBuilder<SelectPageBloc, PageState>(
+      builder: (context, data) {
+        final selectedIndex = data.index;
+        final showBadges = data.showBadges;
+        final pages = _getPages(showBadges);
+        return Scaffold(
+            appBar: OptionsAppBar(
+              title: this.title,
+              choices: MODEL_CHOICES,
+            ),
+            body: PageStorage(
+                child: pages[selectedIndex].widget, bucket: _bucket),
+            bottomNavigationBar: BottomNavigationBar(
+              items: pages.map((PageEntry entry) {
+                return BottomNavigationBarItem(
+                    icon: entry.icon, label: entry.text);
+              }).toList(),
+              currentIndex: selectedIndex,
+              onTap: context.read<SelectPageBloc>().setPage,
+            ));
+      },
+    );
+/*
     final SelectPageBloc pageBloc = BlocProvider.of<SelectPageBloc>(context);
     return StreamBuilder<PageState>(
         stream: pageBloc.outPageController,
@@ -147,11 +177,11 @@ class _Scaffold extends StatelessWidget {
               bottomNavigationBar: BottomNavigationBar(
                 items: pages.map((PageEntry entry) {
                   return BottomNavigationBarItem(
-                      icon: entry.icon, title: Text(entry.text));
+                      icon: entry.icon, label: entry.text);
                 }).toList(),
                 currentIndex: selectedIndex,
                 onTap: pageBloc.setPage,
               ));
-        });
+        });*/
   }
 }

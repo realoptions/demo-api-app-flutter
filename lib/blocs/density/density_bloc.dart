@@ -1,41 +1,35 @@
-import 'package:realoptions/blocs/bloc_provider.dart' as bloc_provider;
+import 'package:bloc/bloc.dart';
+import 'package:realoptions/blocs/select_page/select_page_bloc.dart';
+import 'package:realoptions/models/forms.dart';
+import 'package:realoptions/models/pages.dart';
 import 'dart:async';
 import 'package:realoptions/services/finside_service.dart';
-import 'package:realoptions/models/response.dart';
-import 'package:realoptions/models/forms.dart';
-import 'package:rxdart/rxdart.dart';
-import 'package:realoptions/models/progress.dart';
 import 'package:meta/meta.dart';
+import 'density_events.dart';
+import 'density_state.dart';
+//import '../select_page/select_page_bloc.dart';
 
-class DensityBloc implements bloc_provider.BlocBase {
-  final StreamController<DensityAndVaR> _densityController = BehaviorSubject();
-  final StreamController<StreamProgress> _connectionController =
-      BehaviorSubject();
+class DensityBloc extends Bloc<DensityEvents, DensityState> {
   final FinsideApi finside;
-  Stream<DensityAndVaR> get outDensityController => _densityController.stream;
-  StreamSink get _inDensityController => _densityController.sink;
+  final SelectPageBloc selectPageBloc;
+  DensityBloc({@required this.finside, @required this.selectPageBloc})
+      : super(NoData());
 
-  Stream<StreamProgress> get outDensityProgress => _connectionController.stream;
-  StreamSink get inDensityProgress => _connectionController.sink;
-
-  DensityBloc({@required this.finside}) {
-    inDensityProgress.add(StreamProgress.NoData);
+  void getDensity(Map<String, SubmitItems> body) {
+    add(RequestDensity(body: body));
   }
 
-  Future<void> getDensity(Map<String, SubmitItems> submittedBody) {
-    SubmitBody body = SubmitBody(formBody: submittedBody);
-    inDensityProgress.add(StreamProgress.Busy);
-    return finside.fetchDensityAndVaR(body.convertSubmission()).then((result) {
-      _inDensityController.add(result);
-      inDensityProgress.add(StreamProgress.DataRetrieved);
-    }).catchError((error) {
-      _inDensityController.addError(error);
-      inDensityProgress.add(StreamProgress.DataRetrieved);
-    });
-  }
-
-  void dispose() {
-    _densityController.close();
-    _connectionController.close();
+  @override
+  Stream<DensityState> mapEventToState(DensityEvents event) async* {
+    if (event is RequestDensity) {
+      yield IsDensityFetching();
+      try {
+        final result = await finside.fetchDensityAndVaR(event.body);
+        yield DensityData(density: result);
+        selectPageBloc.setBadge(DENSITY_PAGE);
+      } catch (err) {
+        yield DensityError(densityError: err);
+      }
+    }
   }
 }
