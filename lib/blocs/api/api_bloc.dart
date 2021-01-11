@@ -10,10 +10,10 @@ final String apiKeyId = "apiKey";
 
 class ApiBloc extends Bloc<ApiEvents, ApiState> {
   final FirebaseAuth _firebaseAuth;
-  final ApiRepository _apiRepository;
+  final AuthRepository _apiRepository;
   ApiBloc(
       {@required FirebaseAuth firebaseAuth,
-      @required ApiRepository apiRepository})
+      @required AuthRepository apiRepository})
       : assert(firebaseAuth != null),
         _firebaseAuth = firebaseAuth,
         _apiRepository = apiRepository,
@@ -49,13 +49,12 @@ class ApiBloc extends Bloc<ApiEvents, ApiState> {
         add(ApiEvents.RequestApiKey);
         break;
       case ApiEvents.FacebookSignIn:
-        final facebookLogin =
+        final authCredential =
             await _apiRepository.handleFacebookSignIn(_firebaseAuth);
         yield ApiIsFetching();
-        if (facebookLogin != null) {
-          await _apiRepository.convertFacebookToUser(
-              _firebaseAuth, facebookLogin);
-        }
+        await _apiRepository.convertCredentialToUser(
+            _firebaseAuth, authCredential);
+
         add(ApiEvents.RequestApiKey);
         break;
     }
