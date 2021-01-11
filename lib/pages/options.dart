@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:realoptions/blocs/options/options_bloc.dart';
 import 'package:realoptions/blocs/options/options_state.dart';
-import 'package:realoptions/models/progress.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:realoptions/models/response.dart';
