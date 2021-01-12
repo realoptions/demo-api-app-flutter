@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:realoptions/blocs/constraints/constraints_bloc.dart';
 import 'package:realoptions/blocs/constraints/constraints_events.dart';
+import 'package:realoptions/blocs/select_model/select_model_bloc.dart';
 import 'package:realoptions/blocs/select_page/select_page_bloc.dart';
 import 'package:realoptions/services/finside_service.dart';
 import 'package:realoptions/models/forms.dart';
@@ -59,15 +60,23 @@ void main() {
 
   testWidgets('Error if error is returned', (WidgetTester tester) async {
     stubRetrieveDataWithError();
+    final bloc = SelectPageBloc();
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: BlocProvider<ConstraintsBloc>(
-            create: (_) =>
-                ConstraintsBloc(finside: finside)..add(RequestConstraints()),
+        body: MultiBlocProvider(
+            providers: [
+              BlocProvider<SelectModelBloc>(
+                create: (_) => SelectModelBloc(),
+              ),
+              BlocProvider<ConstraintsBloc>(
+                  create: (_) => ConstraintsBloc(finside: finside)
+                    ..add(RequestConstraints())),
+              BlocProvider<SelectPageBloc>(create: (_) => bloc)
+            ],
             child: WaitForConstraints(
               title: "Hello",
               finside: finside,
-              selectPageBloc: SelectPageBloc(),
+              selectPageBloc: bloc,
             )),
       ),
     ));
@@ -79,20 +88,27 @@ void main() {
     stubRetrieveData();
     stubRetrieveOptions();
     stubRetrieveDensity();
+    final bloc = SelectPageBloc();
     await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: BlocProvider<ConstraintsBloc>(
-            create: (_) =>
-                ConstraintsBloc(finside: finside)..add(RequestConstraints()),
-            child: WaitForConstraints(
-                title: "Hello",
-                selectPageBloc: SelectPageBloc(),
-                finside: finside)),
-      ),
-    ));
+        home: Scaffold(
+            body: MultiBlocProvider(
+                providers: [
+          BlocProvider<SelectModelBloc>(
+            create: (_) => SelectModelBloc(),
+          ),
+          BlocProvider<ConstraintsBloc>(
+              create: (_) =>
+                  ConstraintsBloc(finside: finside)..add(RequestConstraints())),
+          BlocProvider<SelectPageBloc>(create: (_) => bloc)
+        ],
+                child: WaitForConstraints(
+                  title: "Hello",
+                  finside: finside,
+                  selectPageBloc: bloc,
+                )))));
     await tester.pumpAndSettle();
     expect(find.text("Big error!"), findsNothing);
     expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(find.text("Hello"), findsOneWidget);
+    expect(find.text("Hello: Heston"), findsOneWidget);
   });
 }

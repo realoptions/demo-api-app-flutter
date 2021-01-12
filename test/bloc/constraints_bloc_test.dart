@@ -21,25 +21,25 @@ void main() {
         name: "somename",
         inputType: InputType.Market)
   ];
-  ConstraintsBloc bloc;
-
   setUp(() {
     finside = MockFinsideService();
-    when(finside.fetchConstraints())
-        .thenAnswer((_) => Future.value(constraints));
-    bloc = ConstraintsBloc(finside: finside);
   });
   tearDown(() {
     finside = null;
-    bloc.close();
   });
 
   test('gets correct initial state', () async {
+    final bloc = ConstraintsBloc(finside: finside);
     expect(bloc.state, ConstraintsIsFetching());
+    bloc.close();
   });
   blocTest(
     'emits [data] when RequestConstraints is added',
-    build: () => bloc,
+    build: () {
+      when(finside.fetchConstraints())
+          .thenAnswer((_) => Future.value(constraints));
+      return ConstraintsBloc(finside: finside);
+    },
     act: (bloc) => bloc.add(RequestConstraints()),
     expect: [
       ConstraintsIsFetching(),
@@ -49,9 +49,9 @@ void main() {
   blocTest(
     'emits [error] when error is returned',
     build: () {
-      when(finside.fetchDensityAndVaR(any))
+      when(finside.fetchConstraints())
           .thenAnswer((_) => Future.error("Some Error"));
-      return bloc;
+      return ConstraintsBloc(finside: finside);
     },
     act: (bloc) => bloc.add(RequestConstraints()),
     expect: [

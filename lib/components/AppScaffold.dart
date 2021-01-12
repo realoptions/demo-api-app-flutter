@@ -133,7 +133,7 @@ class _Scaffold extends StatelessWidget {
                     icon: entry.icon, label: entry.text);
               }).toList(),
               currentIndex: selectedIndex,
-              onTap: context.read<SelectPageBloc>().setPage,
+              onTap: (index) => context.read<SelectPageBloc>().setPage(index),
             ));
       },
     );
