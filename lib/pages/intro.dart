@@ -43,25 +43,3 @@ class Introduction extends StatelessWidget {
         ]));
   }
 }
-/*
-Widget signInSheet(BuildContext context) {
-  return Column(key: Key("SignIn"), children: [
-    SocialSignInButton(
-      key: Key("google"),
-      assetName: 'assets/go-logo.png',
-      text: "Sign in with Google",
-      onPressed: () => context.read<ApiBloc>().handleGoogleSignIn(),
-      color: Colors.white,
-    ),
-    SizedBox(height: 8),
-    SocialSignInButton(
-      key: Key("facebook"),
-      assetName: 'assets/fb-logo.png',
-      text: "Sign in with Facebook",
-      textColor: Colors.white,
-      onPressed: () => context.read<ApiBloc>().handleFacebookSignIn(),
-      color: Color(0xFF334D92),
-    ),
-  ]);
-}
-*/
