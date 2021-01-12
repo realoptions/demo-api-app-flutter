@@ -1,8 +1,6 @@
 # Name of your workflow.
 name: test
-on: 
-  push:
-    branches: '*'
+on: [push, pull_request]
     
 jobs:
   test:
