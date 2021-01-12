@@ -26,6 +26,7 @@ class AppScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<SelectModelBloc, Model>(builder: (context, data) {
       final FinsideApi finside = FinsideApi(apiKey: apiKey, model: data.value);
+      final selectPageBloc = SelectPageBloc();
       return MultiBlocProvider(
           providers: [
             BlocProvider<ConstraintsBloc>(create: (context) {
@@ -33,13 +34,13 @@ class AppScaffold extends StatelessWidget {
                 ..add(RequestConstraints());
             }),
             BlocProvider<SelectPageBloc>(create: (context) {
-              return SelectPageBloc();
+              return selectPageBloc;
             })
           ],
           child: WaitForConstraints(
-            finside: finside,
-            child: _Scaffold(title: title),
-          ));
+              finside: finside, title: title, selectPageBloc: selectPageBloc
+              //child: _Scaffold(title: title),
+              ));
     });
   }
 }
@@ -47,11 +48,14 @@ class AppScaffold extends StatelessWidget {
 class WaitForConstraints extends StatelessWidget {
   const WaitForConstraints({
     Key key,
-    @required this.child,
+    @required this.title,
+    @required this.selectPageBloc,
     @required this.finside,
   }) : super(key: key);
-  final Widget child;
+  //final Widget child;
+  final String title;
   final FinsideApi finside;
+  final SelectPageBloc selectPageBloc;
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ConstraintsBloc, ConstraintsState>(
@@ -63,50 +67,24 @@ class WaitForConstraints extends StatelessWidget {
               body: Center(child: Text(data.constraintsError.toString())));
         } else if (data is ConstraintsData) {
           return MultiBlocProvider(providers: [
-            BlocProvider<OptionsBloc>(create: (context) {
+            BlocProvider<OptionsBloc>(create: (_) {
               return OptionsBloc(
-                  finside: finside,
-                  selectPageBloc: context.read<SelectPageBloc>());
+                  finside: finside, selectPageBloc: selectPageBloc);
             }),
-            BlocProvider<DensityBloc>(create: (context) {
+            BlocProvider<DensityBloc>(create: (_) {
               return DensityBloc(
-                  finside: finside,
-                  selectPageBloc: context.read<SelectPageBloc>());
+                  finside: finside, selectPageBloc: selectPageBloc);
             }),
             BlocProvider<FormBloc>(create: (context) {
               return FormBloc(constraints: data.constraints);
             }),
-          ], child: child);
+          ], child: _Scaffold(title: title));
+        } else {
+          //should never get here
+          return Scaffold(body: Center(child: CircularProgressIndicator()));
         }
       },
     );
-
-    /*StreamBuilder<StreamProgress>(
-        stream: bloc.outConstraintsProgress,
-        builder: (buildContext, snapshot) {
-          switch (snapshot.data) {
-            case StreamProgress.Busy:
-              return Scaffold(body: Center(child: CircularProgressIndicator()));
-            case StreamProgress.DataRetrieved:
-              return StreamBuilder<List<InputConstraint>>(
-                  stream: bloc.outConstraintsController,
-                  builder: (buildContext, snapshot) {
-                    if (snapshot.hasError) {
-                      return Scaffold(
-                          body: Center(child: Text(snapshot.error.toString())));
-                    }
-                    if (snapshot.data == null) {
-                      return Scaffold(
-                          body: Center(child: CircularProgressIndicator()));
-                    }
-                    return BlocProvider<FormBloc>(
-                        bloc: FormBloc(constraints: snapshot.data),
-                        child: child);
-                  });
-            default: //should never get here
-              return Scaffold(body: Center(child: CircularProgressIndicator()));
-          }
-        });*/
   }
 }
 

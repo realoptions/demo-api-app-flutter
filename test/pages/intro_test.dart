@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:realoptions/blocs/bloc_provider.dart';
 import 'package:realoptions/blocs/api/api_bloc.dart';
 import 'package:realoptions/pages/intro.dart';
-
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
+import '../../mocks/api_repository_mock.dart';
 
 void main() {
   MockFirebaseAuth auth;
@@ -18,10 +18,11 @@ void main() {
 
   testWidgets('Updates api key on change', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    var bloc = ApiBloc(firebaseAuth: auth);
+    var bloc = ApiBloc(firebaseAuth: auth, apiRepository: MockApiRepository());
     await tester.pumpWidget(MaterialApp(
       home: Directionality(
-        child: BlocProvider<ApiBloc>(bloc: bloc, child: Introduction()),
+        child:
+            BlocProvider<ApiBloc>(create: (_) => bloc, child: Introduction()),
         textDirection: TextDirection.ltr,
       ),
       theme: ThemeData(
@@ -37,5 +38,6 @@ void main() {
           )),
     ));
     await tester.pumpAndSettle();
+    bloc.close();
   });
 }

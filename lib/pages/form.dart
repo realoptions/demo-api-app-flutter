@@ -9,8 +9,8 @@ import 'package:realoptions/components/CustomTextFields.dart';
 import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/blocs/form/form_bloc.dart';
 
-Widget getField(BuildContext context, Function onSaved,
-    String valueAtLastSubmit, InputConstraint constraint) {
+Widget getField(BuildContext context, String valueAtLastSubmit,
+    InputConstraint constraint) {
   final ThemeData themeData = Theme.of(context);
   return PaddingForm(
       child: Row(children: [
@@ -22,7 +22,7 @@ Widget getField(BuildContext context, Function onSaved,
       lowValue: constraint.lower,
       highValue: constraint.upper,
       onSaved: (String key, num value) =>
-          onSaved(constraint.inputType, key, value),
+          context.read<FormBloc>().onSave(constraint.inputType, key, value),
     )),
     IconButton(
       color: themeData.primaryColor,
@@ -42,11 +42,11 @@ class InputForm extends StatelessWidget {
   const InputForm({Key key}) : super(key: key);
   static final _formKey = GlobalKey<FormState>();
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext _) {
     return BlocBuilder<FormBloc, Iterable<FormItem>>(builder: (context, data) {
       List<Widget> formFields = data.map<Widget>((FormItem formItem) {
-        return getField(context, context.read<FormBloc>().onSave,
-            formItem.valueAtLastSubmit, formItem.constraint);
+        return getField(
+            context, formItem.valueAtLastSubmit, formItem.constraint);
       }).toList();
       formFields.add(PaddingForm(child: FormButton(formKey: _formKey)));
       return SingleChildScrollView(
@@ -80,7 +80,7 @@ class FormButton extends StatelessWidget {
             // otherwise.
             if (formKey.currentState.validate()) {
               formKey.currentState.save();
-              var submittedBody = context.read<FormBloc>().getCurrentForm();
+              final submittedBody = context.read<FormBloc>().getCurrentForm();
               context.read<DensityBloc>().getDensity(submittedBody);
               context.read<OptionsBloc>().getOptions(submittedBody);
             }

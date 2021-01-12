@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:realoptions/pages/options.dart';
 import 'package:realoptions/components/CustomPadding.dart';
 import 'package:mockito/mockito.dart';
-import 'package:realoptions/blocs/bloc_provider.dart';
-import 'file:///home/daniel/Documents/code/finside/demo-api-app-flutter/test/components/options_bloc.dart';
 import 'package:realoptions/services/finside_service.dart';
 import 'package:realoptions/models/response.dart';
 import 'package:realoptions/models/forms.dart';
+
+import 'package:realoptions/blocs/select_page/select_page_bloc.dart';
+import 'package:realoptions/blocs/options/options_bloc.dart';
 
 class MockFinsideService extends Mock implements FinsideApi {}
 
@@ -47,10 +49,11 @@ void main() {
   testWidgets('Density shows error if error', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     stubRetrieveDataWithError();
-    var bloc = OptionsBloc(finside: finside);
+    var bloc = OptionsBloc(finside: finside, selectPageBloc: SelectPageBloc());
     await tester.pumpWidget(MaterialApp(
       home: Directionality(
-        child: BlocProvider<OptionsBloc>(bloc: bloc, child: ShowOptionPrices()),
+        child: BlocProvider<OptionsBloc>(
+            create: (_) => bloc, child: ShowOptionPrices()),
         textDirection: TextDirection.ltr,
       ),
       theme: ThemeData(
@@ -67,11 +70,10 @@ void main() {
     ));
     await tester.pumpAndSettle();
     expect(find.text("Please submit parameters!"), findsOneWidget);
-    await bloc.getOptionPrices(body);
-    await tester.pump(Duration.zero);
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    bloc.getOptions(body);
     await tester.pumpAndSettle();
     expect(find.text("Big error!"), findsOneWidget);
+    bloc.close();
   });
   testWidgets('Input no error or progress when data is returned',
       (WidgetTester tester) async {
@@ -79,7 +81,9 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: Directionality(
       child: BlocProvider<OptionsBloc>(
-          bloc: OptionsBloc(finside: finside), child: ShowOptionPrices()),
+          create: (_) =>
+              OptionsBloc(finside: finside, selectPageBloc: SelectPageBloc()),
+          child: ShowOptionPrices()),
       textDirection: TextDirection.ltr,
     )));
     await tester.pumpAndSettle();
@@ -91,16 +95,18 @@ void main() {
       (WidgetTester tester) async {
     stubRetrieveData();
 
-    var bloc = OptionsBloc(finside: finside);
+    var bloc = OptionsBloc(finside: finside, selectPageBloc: SelectPageBloc());
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
-      body: BlocProvider<OptionsBloc>(bloc: bloc, child: ShowOptionPrices()),
+      body: BlocProvider<OptionsBloc>(
+          create: (_) => bloc, child: ShowOptionPrices()),
     )));
     await tester.pumpAndSettle();
-    await bloc.getOptionPrices(
+    bloc.getOptions(
         {"asset": SubmitItems(inputType: InputType.Market, value: 3.0)});
     await tester.pumpAndSettle();
     expect(find.text("Please submit parameters!"), findsNothing);
     expect(find.byType(PaddingForm), findsNWidgets(2));
+    bloc.close();
   });
 }

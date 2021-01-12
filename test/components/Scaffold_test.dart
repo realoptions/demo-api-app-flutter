@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:realoptions/blocs/bloc_provider.dart';
 import 'package:realoptions/blocs/constraints/constraints_bloc.dart';
+import 'package:realoptions/blocs/constraints/constraints_events.dart';
+import 'package:realoptions/blocs/select_page/select_page_bloc.dart';
 import 'package:realoptions/services/finside_service.dart';
 import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/models/response.dart';
@@ -60,8 +62,13 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: BlocProvider<ConstraintsBloc>(
-            bloc: ConstraintsBloc(finside: finside),
-            child: WaitForConstraints(child: Text("Hello"))),
+            create: (_) =>
+                ConstraintsBloc(finside: finside)..add(RequestConstraints()),
+            child: WaitForConstraints(
+              title: "Hello",
+              finside: finside,
+              selectPageBloc: SelectPageBloc(),
+            )),
       ),
     ));
     await tester.pumpAndSettle();
@@ -75,8 +82,12 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: BlocProvider<ConstraintsBloc>(
-            bloc: ConstraintsBloc(finside: finside),
-            child: WaitForConstraints(child: Text("Hello"))),
+            create: (_) =>
+                ConstraintsBloc(finside: finside)..add(RequestConstraints()),
+            child: WaitForConstraints(
+                title: "Hello",
+                selectPageBloc: SelectPageBloc(),
+                finside: finside)),
       ),
     ));
     await tester.pumpAndSettle();

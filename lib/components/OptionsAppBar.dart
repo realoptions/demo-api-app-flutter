@@ -45,7 +45,7 @@ class OptionsAppBar extends StatelessWidget with PreferredSizeWidget {
             onPressed: () {
               showModalBottomSheet<void>(
                   context: context,
-                  builder: (BuildContext context) {
+                  builder: (BuildContext modalContext) {
                     return ListView(
                         shrinkWrap: true,
                         children: this
@@ -58,7 +58,7 @@ class OptionsAppBar extends StatelessWidget with PreferredSizeWidget {
                                   context
                                       .read<SelectModelBloc>()
                                       .setModel(choice);
-                                  Navigator.pop(context);
+                                  Navigator.pop(modalContext);
                                 }))
                             .toList());
                   });

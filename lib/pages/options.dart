@@ -21,6 +21,8 @@ class ShowOptionPrices extends StatelessWidget {
         return Center(child: CircularProgressIndicator());
       } else if (data is OptionsData) {
         return _OptionPrices(options: data.options);
+      } else if (data is OptionsError) {
+        return Center(child: Text(data.optionsError));
       } else {
         return Center(child: CircularProgressIndicator());
       }

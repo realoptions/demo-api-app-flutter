@@ -21,6 +21,8 @@ class ShowDensity extends StatelessWidget {
         return Center(child: CircularProgressIndicator());
       } else if (data is DensityData) {
         return _Density(density: data.density);
+      } else if (data is DensityError) {
+        return Center(child: Text(data.densityError));
       } else {
         return Center(child: CircularProgressIndicator());
       }
