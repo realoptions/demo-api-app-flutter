@@ -7,7 +7,6 @@ import 'package:realoptions/services/finside_service.dart';
 import 'package:meta/meta.dart';
 import 'density_events.dart';
 import 'density_state.dart';
-//import '../select_page/select_page_bloc.dart';
 
 class DensityBloc extends Bloc<DensityEvents, DensityState> {
   final FinsideApi finside;
@@ -28,7 +27,7 @@ class DensityBloc extends Bloc<DensityEvents, DensityState> {
         yield DensityData(density: result);
         selectPageBloc.setBadge(DENSITY_PAGE);
       } catch (err) {
-        yield DensityError(densityError: err);
+        yield DensityError(densityError: err.toString());
       }
     }
   }

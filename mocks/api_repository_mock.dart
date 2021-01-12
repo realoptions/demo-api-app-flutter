@@ -2,11 +2,6 @@ import 'package:realoptions/repositories/api_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in_mocks/google_sign_in_mocks.dart';
 
-/*
-class MockAuthCredential extends AuthCredential {
-  MockAuthCredential();
-}*/
-
 class MockApiRepository extends AuthRepository {
   @override
   Future<AuthCredential> handleGoogleSignIn(FirebaseAuth auth) async {

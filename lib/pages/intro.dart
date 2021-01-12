@@ -7,7 +7,6 @@ import 'package:realoptions/components/SocialMediaButton.dart';
 class Introduction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final apiBloc = context.read<ApiBloc>();
     return Scaffold(
         key: Key("Intro"),
         body: Column(children: <Widget>[
@@ -22,7 +21,7 @@ class Introduction extends StatelessWidget {
               ))),
           SizedBox(height: 32.0),
           PaddingForm(
-            child: signInSheet(apiBloc),
+            child: signInSheet(context.read<ApiBloc>()),
           )
         ]));
   }

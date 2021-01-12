@@ -54,7 +54,6 @@ class WaitForConstraints extends StatelessWidget {
   final FinsideApi finside;
   @override
   Widget build(BuildContext context) {
-    final selectPageBloc = context.read<SelectPageBloc>();
     return BlocBuilder<ConstraintsBloc, ConstraintsState>(
       builder: (context, data) {
         if (data is ConstraintsIsFetching) {
@@ -66,11 +65,13 @@ class WaitForConstraints extends StatelessWidget {
           return MultiBlocProvider(providers: [
             BlocProvider<OptionsBloc>(create: (context) {
               return OptionsBloc(
-                  finside: finside, selectPageBloc: selectPageBloc);
+                  finside: finside,
+                  selectPageBloc: context.read<SelectPageBloc>());
             }),
             BlocProvider<DensityBloc>(create: (context) {
               return DensityBloc(
-                  finside: finside, selectPageBloc: selectPageBloc);
+                  finside: finside,
+                  selectPageBloc: context.read<SelectPageBloc>());
             }),
             BlocProvider<FormBloc>(create: (context) {
               return FormBloc(constraints: data.constraints);
@@ -158,30 +159,5 @@ class _Scaffold extends StatelessWidget {
             ));
       },
     );
-/*
-    final SelectPageBloc pageBloc = BlocProvider.of<SelectPageBloc>(context);
-    return StreamBuilder<PageState>(
-        stream: pageBloc.outPageController,
-        initialData: PageState(index: 0, showBadges: [false, false, false]),
-        builder: (buildContext, snapshots) {
-          int selectedIndex = snapshots.data.index;
-          List<bool> showBadges = snapshots.data.showBadges;
-          var pages = _getPages(showBadges);
-          return Scaffold(
-              appBar: OptionsAppBar(
-                title: this.title,
-                choices: MODEL_CHOICES,
-              ),
-              body: PageStorage(
-                  child: pages[selectedIndex].widget, bucket: _bucket),
-              bottomNavigationBar: BottomNavigationBar(
-                items: pages.map((PageEntry entry) {
-                  return BottomNavigationBarItem(
-                      icon: entry.icon, label: entry.text);
-                }).toList(),
-                currentIndex: selectedIndex,
-                onTap: pageBloc.setPage,
-              ));
-        });*/
   }
 }

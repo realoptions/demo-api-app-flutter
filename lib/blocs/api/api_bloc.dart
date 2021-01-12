@@ -9,14 +9,10 @@ import '../../repositories/api_repository.dart';
 final String apiKeyId = "apiKey";
 
 class ApiBloc extends Bloc<ApiEvents, ApiState> {
-  final FirebaseAuth _firebaseAuth;
-  final AuthRepository _apiRepository;
-  ApiBloc(
-      {@required FirebaseAuth firebaseAuth,
-      @required AuthRepository apiRepository})
+  final FirebaseAuth firebaseAuth;
+  final AuthRepository apiRepository;
+  ApiBloc({@required this.firebaseAuth, @required this.apiRepository})
       : assert(firebaseAuth != null),
-        _firebaseAuth = firebaseAuth,
-        _apiRepository = apiRepository,
         super(ApiIsFetching());
 
   void handleGoogleSignIn() {
@@ -33,27 +29,32 @@ class ApiBloc extends Bloc<ApiEvents, ApiState> {
       case ApiEvents.RequestApiKey:
         yield ApiIsFetching();
         try {
-          final user = await _firebaseAuth.currentUser();
-          final token = await _apiRepository.getToken(user);
-          yield ApiToken(token: token);
+          final user = await firebaseAuth.currentUser();
+          if (user != null) {
+            final token = await apiRepository.getToken(user);
+            print(token);
+            yield ApiToken(token: token);
+          } else {
+            yield ApiNoData();
+          }
         } catch (err) {
           yield ApiError(apiError: err);
         }
         break;
       case ApiEvents.GoogleSignIn:
         final authCredential =
-            await _apiRepository.handleGoogleSignIn(_firebaseAuth);
+            await apiRepository.handleGoogleSignIn(firebaseAuth);
         yield ApiIsFetching();
-        await _apiRepository.convertCredentialToUser(
-            _firebaseAuth, authCredential);
+        await apiRepository.convertCredentialToUser(
+            firebaseAuth, authCredential);
         add(ApiEvents.RequestApiKey);
         break;
       case ApiEvents.FacebookSignIn:
         final authCredential =
-            await _apiRepository.handleFacebookSignIn(_firebaseAuth);
+            await apiRepository.handleFacebookSignIn(firebaseAuth);
         yield ApiIsFetching();
-        await _apiRepository.convertCredentialToUser(
-            _firebaseAuth, authCredential);
+        await apiRepository.convertCredentialToUser(
+            firebaseAuth, authCredential);
 
         add(ApiEvents.RequestApiKey);
         break;

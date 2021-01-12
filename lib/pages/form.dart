@@ -9,7 +9,7 @@ import 'package:realoptions/components/CustomTextFields.dart';
 import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/blocs/form/form_bloc.dart';
 
-Widget getField(BuildContext context, Function onSubmit,
+Widget getField(BuildContext context, Function onSaved,
     String valueAtLastSubmit, InputConstraint constraint) {
   final ThemeData themeData = Theme.of(context);
   return PaddingForm(
@@ -21,8 +21,8 @@ Widget getField(BuildContext context, Function onSubmit,
       type: constraint.fieldType,
       lowValue: constraint.lower,
       highValue: constraint.upper,
-      onSubmit: (String key, num value) =>
-          onSubmit(constraint.inputType, key, value),
+      onSaved: (String key, num value) =>
+          onSaved(constraint.inputType, key, value),
     )),
     IconButton(
       color: themeData.primaryColor,
@@ -44,10 +44,9 @@ class InputForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<FormBloc, Iterable<FormItem>>(builder: (context, data) {
-      final onSave = context.read<FormBloc>().onSave;
       List<Widget> formFields = data.map<Widget>((FormItem formItem) {
-        return getField(
-            context, onSave, formItem.valueAtLastSubmit, formItem.constraint);
+        return getField(context, context.read<FormBloc>().onSave,
+            formItem.valueAtLastSubmit, formItem.constraint);
       }).toList();
       formFields.add(PaddingForm(child: FormButton(formKey: _formKey)));
       return SingleChildScrollView(
@@ -67,9 +66,6 @@ class FormButton extends StatelessWidget {
   final GlobalKey<FormState> formKey;
   @override
   Widget build(BuildContext context) {
-    final formBloc = context.read<FormBloc>();
-    final optionsBloc = context.read<OptionsBloc>();
-    final densityBloc = context.read<DensityBloc>();
     return BlocBuilder<DensityBloc, DensityState>(
         builder: (context, densityData) {
       return BlocBuilder<OptionsBloc, OptionsState>(
@@ -84,9 +80,9 @@ class FormButton extends StatelessWidget {
             // otherwise.
             if (formKey.currentState.validate()) {
               formKey.currentState.save();
-              var submittedBody = formBloc.getCurrentForm();
-              densityBloc.getDensity(submittedBody);
-              optionsBloc.getOptions(submittedBody);
+              var submittedBody = context.read<FormBloc>().getCurrentForm();
+              context.read<DensityBloc>().getDensity(submittedBody);
+              context.read<OptionsBloc>().getOptions(submittedBody);
             }
           },
           child: Text('Submit'),

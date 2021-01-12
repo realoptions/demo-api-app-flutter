@@ -29,7 +29,6 @@ class FormItem {
 
 final StringUtils stringUtils = StringUtils();
 
-//this is essneitally useless from a cubit perspective; I don't listen to it at all
 class FormBloc extends Cubit<Iterable<FormItem>> {
   final List<InputConstraint> constraints;
   Map<String, SubmitItems> _formValues = {};
@@ -61,60 +60,7 @@ class FormBloc extends Cubit<Iterable<FormItem>> {
     _formValues[key] = SubmitItems(inputType: inputType, value: value);
   }
 
-  /*void onSubmit() {
-    emit(_onSubmit(_formValues, constraints));
-  }*/
-
   Map<String, SubmitItems> getCurrentForm() {
     return _formValues;
   }
 }
-/*
-class FormBloc implements BlocBase {
-  Map<String, SubmitItems> _formValues = {};
-  final List<InputConstraint> constraints;
-  final StreamController<Iterable<FormItem>> _formController =
-      BehaviorSubject();
-
-  Stream<Iterable<FormItem>> get outFormController => _formController.stream;
-
-  StreamSink get _inFormController => _formController.sink;
-
-  FormBloc({@required this.constraints}) {
-    onSubmit();
-  }
-
-  static String _getValueAtLastSubmit(
-    Map<String, SubmitItems> formValues, //can be empty
-    InputConstraint constraint, //can't be null
-  ) {
-    //formValues take precedence
-    SubmitItems formValue = formValues[constraint.name];
-    if (formValue != null) {
-      return formValue.value.toString();
-    }
-    return stringUtils.getStringFromValue(
-        constraint.fieldType, constraint.defaultValue);
-  }
-
-  void onSave(InputType inputType, String key, num value) {
-    _formValues[key] = SubmitItems(inputType: inputType, value: value);
-  }
-
-  void onSubmit() {
-    var formItems = constraints.map<FormItem>((constraint) {
-      return FormItem(
-          constraint: constraint,
-          valueAtLastSubmit: _getValueAtLastSubmit(_formValues, constraint));
-    }).toList();
-    _inFormController.add(formItems);
-  }
-
-  Map<String, SubmitItems> getCurrentForm() {
-    return _formValues;
-  }
-
-  void dispose() {
-    _formController.close();
-  }
-}*/

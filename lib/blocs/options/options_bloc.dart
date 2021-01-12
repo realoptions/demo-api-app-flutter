@@ -27,7 +27,7 @@ class OptionsBloc extends Bloc<OptionsEvents, OptionsState> {
         yield OptionsData(options: result);
         selectPageBloc.setBadge(OPTIONS_PAGE);
       } catch (err) {
-        yield OptionsError(optionsError: err);
+        yield OptionsError(optionsError: err.toString());
       }
     }
   }

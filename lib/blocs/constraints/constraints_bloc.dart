@@ -17,7 +17,7 @@ class ConstraintsBloc extends Bloc<ConstraintsEvents, ConstraintsState> {
         final result = await finside.fetchConstraints();
         yield ConstraintsData(constraints: result);
       } catch (err) {
-        yield ConstraintsError(constraintsError: err);
+        yield ConstraintsError(constraintsError: err.toString());
       }
     }
   }
