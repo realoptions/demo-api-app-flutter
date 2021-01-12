@@ -29,7 +29,7 @@ class ApiBloc extends Bloc<ApiEvents, ApiState> {
       case ApiEvents.RequestApiKey:
         yield ApiIsFetching();
         try {
-          final user = await firebaseAuth.currentUser();
+          final user = firebaseAuth.currentUser;
           if (user != null) {
             final token = await apiRepository.getToken(user);
             print(token);

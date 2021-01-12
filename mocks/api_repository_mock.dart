@@ -8,7 +8,7 @@ class MockApiRepository extends AuthRepository {
     final googleSignIn = MockGoogleSignIn();
     final signinAccount = await googleSignIn.signIn();
     final googleAuth = await signinAccount.authentication;
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
+    final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
@@ -21,7 +21,7 @@ class MockApiRepository extends AuthRepository {
     final googleSignIn = MockGoogleSignIn();
     final signinAccount = await googleSignIn.signIn();
     final googleAuth = await signinAccount.authentication;
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
+    final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
@@ -29,15 +29,15 @@ class MockApiRepository extends AuthRepository {
   }
 
   @override
-  Future<FirebaseUser> convertCredentialToUser(
+  Future<User> convertCredentialToUser(
       FirebaseAuth auth, AuthCredential credential) async {
     return (await auth.signInWithCredential(credential)).user;
   }
 
   @override
-  Future<String> getToken(FirebaseUser user) {
-    return user.getIdToken().then((idToken) {
-      return idToken.token;
+  Future<String> getToken(User user) {
+    return user.getIdToken().then((token) {
+      return token;
     });
   }
 }

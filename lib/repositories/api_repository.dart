@@ -5,10 +5,10 @@ import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 
 abstract class AuthRepository {
   Future<AuthCredential> handleGoogleSignIn(FirebaseAuth auth);
-  Future<FirebaseUser> convertCredentialToUser(
+  Future<User> convertCredentialToUser(
       FirebaseAuth auth, AuthCredential credential);
   Future<AuthCredential> handleFacebookSignIn(FirebaseAuth auth);
-  Future<String> getToken(FirebaseUser user);
+  Future<String> getToken(User user);
 }
 
 class ApiRepository extends AuthRepository {
@@ -19,7 +19,7 @@ class ApiRepository extends AuthRepository {
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
 
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
+    final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
@@ -33,21 +33,21 @@ class ApiRepository extends AuthRepository {
     facebookLogin.loginBehavior = FacebookLoginBehavior.webViewOnly;
     final FacebookLoginResult result =
         await facebookLogin.logIn(<String>['public_profile']);
-    final AuthCredential credential = FacebookAuthProvider.getCredential(
-        accessToken: result.accessToken.token);
+    final AuthCredential credential =
+        FacebookAuthProvider.credential(result.accessToken.token);
     return credential;
   }
 
   @override
-  Future<FirebaseUser> convertCredentialToUser(
+  Future<User> convertCredentialToUser(
       FirebaseAuth auth, AuthCredential credential) async {
     return (await auth.signInWithCredential(credential)).user;
   }
 
   @override
-  Future<String> getToken(FirebaseUser user) {
-    return user.getIdToken().then((idToken) {
-      return idToken.token;
+  Future<String> getToken(User user) {
+    return user.getIdToken().then((token) {
+      return token;
     });
   }
 }
