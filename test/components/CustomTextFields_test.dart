@@ -46,7 +46,7 @@ void main() {
                 child: NumberTextField(
                   defaultValue: "value",
                   type: FieldType.Float,
-                  onSubmit: (String v, num r) {},
+                  onSaved: (String v, num r) {},
                 )))));
     expect(find.text('value'), findsOneWidget);
     expect(find.text("Please enter some text"), findsNothing);
@@ -67,7 +67,7 @@ void main() {
                 child: NumberTextField(
                   defaultValue: "value",
                   type: FieldType.Float,
-                  onSubmit: (String v, num r) {},
+                  onSaved: (String v, num r) {},
                   lowValue: 0.0,
                   highValue: 1.0,
                 )))));
@@ -90,7 +90,7 @@ void main() {
                 child: NumberTextField(
                   defaultValue: "value",
                   type: FieldType.Float,
-                  onSubmit: (String v, num r) {},
+                  onSaved: (String v, num r) {},
                   lowValue: 0.0,
                   highValue: 1.0,
                 )))));
@@ -114,7 +114,7 @@ void main() {
                 child: NumberTextField(
                   defaultValue: "value",
                   type: FieldType.Integer,
-                  onSubmit: (String v, num r) {},
+                  onSaved: (String v, num r) {},
                   lowValue: 0,
                   highValue: 1,
                 )))));

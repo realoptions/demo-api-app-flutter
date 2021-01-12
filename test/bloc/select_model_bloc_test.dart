@@ -10,6 +10,6 @@ void main() {
   });
   blocTest('emits other model when setting model',
       build: () => SelectModelBloc(),
-      act: (bloc) => bloc.emit(Model(label: "CGMY", value: "cgmy")),
+      act: (bloc) => bloc.setModel(Model(label: "CGMY", value: "cgmy")),
       expect: [Model(label: "CGMY", value: "cgmy")]);
 }
