@@ -14,7 +14,7 @@ jobs:
     # https://github.com/marketplace/actions/flutter-action
     - uses: subosito/flutter-action@v1
       with:
-        flutter-version: '1.25.0'
+        flutter-version: '1.26.0'
         channel: 'beta' # or: 'dev' or 'beta'
     - name: "Run Flutter Driver tests"
       run: |
@@ -24,6 +24,7 @@ jobs:
         bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
     - name: build apk
       run: |
+        flutter clean
         flutter build apk --split-per-abi
     
     - name: set flutter version
