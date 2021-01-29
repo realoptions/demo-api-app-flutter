@@ -24,15 +24,20 @@ jobs:
         bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
     
     - name: set flutter version
-      run: echo ::set-env name=FLUTTER_VERSION::$(grep 'version:' pubspec.yaml | tail -n1 | cut -c 10-)
+      run: echo "FLUTTER_VERSION=$(grep 'version:' pubspec.yaml | tail -n1 | cut -c 10-)" >> $GITHUB_ENV
+      #run: echo ::set-env name=FLUTTER_VERSION::$(grep 'version:' pubspec.yaml | tail -n1 | cut -c 10-)
     - name: get branch name
-      run: echo ::set-env name=BRANCH_NAME::${GITHUB_REF##*/}
+      run: echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
+      #run: echo ::set-env name=BRANCH_NAME::${GITHUB_REF##*/}
     - name: get branch tag
-      run: echo ::set-env name=RELEASE_TAG::$([ ${{ env.BRANCH_NAME }} == master ] && echo "release" || echo "beta")
+      run: echo "RELEASE_TAG=$([ ${{ env.BRANCH_NAME }} == master ] && echo "release" || echo "beta")" >> $GITHUB_ENV
+      #run: echo ::set-env name=RELEASE_TAG::$([ ${{ env.BRANCH_NAME }} == master ] && echo "release" || echo "beta")
     - name: get tag
-      run: echo ::set-env name=CUSTOM_TAG::${{ env.RELEASE_TAG }}-${{ env.FLUTTER_VERSION }} 
+      run: echo "CUSTOM_TAG=${{ env.RELEASE_TAG }}-${{ env.FLUTTER_VERSION }} " >> $GITHUB_ENV
+      #run: echo ::set-env name=CUSTOM_TAG::${{ env.RELEASE_TAG }}-${{ env.FLUTTER_VERSION }} 
     - name: does tag exist
-      run: echo ::set-env name=TAG_DOES_NOT_EXIST::$(git tag | grep -q ${{ env.CUSTOM_TAG }} ; echo $?)
+      run: echo "TAG_DOES_NOT_EXIST=$(git tag | grep -q ${{ env.CUSTOM_TAG }} ; echo $?)" >> $GITHUB_ENV
+      #run: echo ::set-env name=TAG_DOES_NOT_EXIST::$(git tag | grep -q ${{ env.CUSTOM_TAG }} ; echo $?)
         
     - name: Bump version and push tag
       uses: anothrNick/github-tag-action@1.17.2
