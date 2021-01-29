@@ -28,7 +28,7 @@ jobs:
     - name: get branch name
       run: echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
     - name: get branch tag
-      run: echo "RELEASE_TAG=$([ ${{ env.BRANCH_NAME }} == master ] && echo "release" || echo "beta")" >> $GITHUB_ENV
+      run: echo "RELEASE_TAG=$([ ${{ env.BRANCH_NAME }} == master ] && echo \"release\" || echo \"beta\")" >> $GITHUB_ENV
     - name: get tag
       run: echo "CUSTOM_TAG=${{ env.RELEASE_TAG }}-${{ env.FLUTTER_VERSION }} " >> $GITHUB_ENV
     - name: does tag exist
