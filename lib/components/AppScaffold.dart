@@ -38,9 +38,7 @@ class AppScaffold extends StatelessWidget {
             })
           ],
           child: WaitForConstraints(
-              finside: finside, title: title, selectPageBloc: selectPageBloc
-              //child: _Scaffold(title: title),
-              ));
+              finside: finside, title: title, selectPageBloc: selectPageBloc));
     });
   }
 }
