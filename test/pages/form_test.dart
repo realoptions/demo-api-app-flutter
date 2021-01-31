@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:realoptions/blocs/constraints/constraints_events.dart';
+import 'package:realoptions/blocs/options/options_bloc.dart';
 import 'package:realoptions/pages/form.dart';
 import 'package:mockito/mockito.dart';
-import 'package:realoptions/blocs/bloc_provider.dart';
-import 'package:realoptions/blocs/constraints_bloc.dart';
-import 'package:realoptions/blocs/form_bloc.dart';
-import 'package:realoptions/blocs/options_bloc.dart';
-import 'package:realoptions/blocs/density_bloc.dart';
-import 'package:realoptions/blocs/select_page_bloc.dart';
+import 'package:realoptions/blocs/constraints/constraints_bloc.dart';
+import 'package:realoptions/blocs/form/form_bloc.dart';
+import 'package:realoptions/blocs/density/density_bloc.dart';
+import 'package:realoptions/blocs/select_page/select_page_bloc.dart';
 import 'package:realoptions/services/finside_service.dart';
 import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/models/response.dart';
@@ -57,26 +58,32 @@ void main() {
   testWidgets('Input no error or progress when data is returned',
       (WidgetTester tester) async {
     stubRetrieveData();
-    //var bloc = ConstraintsBloc(finside: finside);
+    final bloc = SelectPageBloc();
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
             body: Directionality(
-      child: BlocProvider<FormBloc>(
-        child: BlocProvider<DensityBloc>(
-          child: BlocProvider<OptionsBloc>(
-            child: BlocProvider<SelectPageBloc>(
-              child: BlocProvider<ConstraintsBloc>(
-                  bloc: ConstraintsBloc(finside: finside), child: InputForm()),
-              bloc: SelectPageBloc(),
-            ),
-            bloc: OptionsBloc(finside: finside),
-          ),
-          bloc: DensityBloc(finside: finside),
-        ),
-        bloc: FormBloc(constraints: constraints),
-      ),
-      textDirection: TextDirection.ltr,
-    ))));
+                textDirection: TextDirection.ltr,
+                child: MultiBlocProvider(
+                    providers: [
+                      BlocProvider<ConstraintsBloc>(create: (context) {
+                        return ConstraintsBloc(finside: finside)
+                          ..add(RequestConstraints());
+                      }),
+                      BlocProvider<SelectPageBloc>(create: (context) {
+                        return bloc;
+                      }),
+                    ],
+                    child: MultiBlocProvider(providers: [
+                      BlocProvider<DensityBloc>(
+                          create: (context) => DensityBloc(
+                              finside: finside, selectPageBloc: bloc)),
+                      BlocProvider<OptionsBloc>(
+                          create: (context) => OptionsBloc(
+                              finside: finside, selectPageBloc: bloc)),
+                      BlocProvider<FormBloc>(
+                          create: (context) =>
+                              FormBloc(constraints: constraints))
+                    ], child: InputForm()))))));
     await tester.pumpAndSettle();
     expect(find.text("Big error!"), findsNothing);
     expect(find.byType(CircularProgressIndicator), findsNothing);
@@ -86,24 +93,32 @@ void main() {
     stubRetrieveOptions();
     stubRetrieveDensity();
     var bloc = FormBloc(constraints: constraints);
+    final selectPageBloc = SelectPageBloc();
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
             body: Directionality(
-      child: BlocProvider<ConstraintsBloc>(
-        child: BlocProvider<DensityBloc>(
-          child: BlocProvider<OptionsBloc>(
-            child: BlocProvider<SelectPageBloc>(
-              child: BlocProvider<FormBloc>(bloc: bloc, child: InputForm()),
-              bloc: SelectPageBloc(),
-            ),
-            bloc: OptionsBloc(finside: finside),
-          ),
-          bloc: DensityBloc(finside: finside),
-        ),
-        bloc: ConstraintsBloc(finside: finside),
-      ),
-      textDirection: TextDirection.ltr,
-    ))));
+                textDirection: TextDirection.ltr,
+                child: MultiBlocProvider(
+                    providers: [
+                      BlocProvider<ConstraintsBloc>(create: (context) {
+                        return ConstraintsBloc(finside: finside)
+                          ..add(RequestConstraints());
+                      }),
+                      BlocProvider<SelectPageBloc>(create: (context) {
+                        return SelectPageBloc();
+                      }),
+                    ],
+                    child: MultiBlocProvider(providers: [
+                      BlocProvider<DensityBloc>(
+                          create: (context) => DensityBloc(
+                              finside: finside,
+                              selectPageBloc: selectPageBloc)),
+                      BlocProvider<OptionsBloc>(
+                          create: (context) => OptionsBloc(
+                              finside: finside,
+                              selectPageBloc: selectPageBloc)),
+                      BlocProvider<FormBloc>(create: (context) => bloc)
+                    ], child: InputForm()))))));
     await tester.pumpAndSettle();
     expect(find.text("Big error!"), findsNothing);
     expect(find.byType(CircularProgressIndicator), findsNothing);

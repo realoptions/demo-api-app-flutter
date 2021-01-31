@@ -1,63 +1,37 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:realoptions/blocs/select_page_bloc.dart';
+import 'package:realoptions/blocs/select_page/select_page_bloc.dart';
 import 'package:realoptions/models/pages.dart';
+import 'package:bloc_test/bloc_test.dart';
 
 void main() {
-  test('emits first page on instantiation', () {
+  test('correct initial state', () {
     SelectPageBloc bloc = SelectPageBloc();
-    expect(
-        bloc.outPageController,
-        emitsInOrder([
-          PageState(index: 0, showBadges: [false, false, false])
-        ]));
+    expect(bloc.state, PageState(index: 0, showBadges: [false, false, false]));
   });
-  test('emits new page when updating index', () {
-    SelectPageBloc bloc = SelectPageBloc();
-    expect(
-        bloc.outPageController,
-        emitsInOrder([
-          PageState(index: 1, showBadges: [
-            false,
-            false,
-            false
-          ]), //since _pageState is a reference, the initial value is updated
-          PageState(index: 1, showBadges: [false, false, false]),
-        ]));
-    bloc.setPage(1);
-  });
-  test('emits update to badge when badge set', () {
-    SelectPageBloc bloc = SelectPageBloc();
-
-    expect(
-        bloc.outPageController,
-        emitsInOrder([
-          PageState(index: 0, showBadges: [
-            false,
-            true,
-            false
-          ]), //since _pageState is a reference, the initial value is updated
-          PageState(index: 0, showBadges: [false, true, false]),
-        ]));
-    bloc.setBadge(1);
-  });
-  test('emits update to badge when badge set and then removes badge', () {
-    SelectPageBloc bloc = SelectPageBloc();
-    expect(
-        bloc.outPageController,
-        emitsInOrder([
-          PageState(index: 1, showBadges: [
-            false,
-            false,
-            false
-          ]), //since _pageState is a reference, the initial value is updated
-          PageState(index: 1, showBadges: [
-            false,
-            false,
-            false
-          ]), //since _pageState is a reference, the initial value is updated
-          PageState(index: 1, showBadges: [false, false, false]),
-        ]));
-    bloc.setBadge(1);
-    bloc.setPage(1);
-  });
+  blocTest('emits new page when updating index',
+      build: () => SelectPageBloc(),
+      act: (bloc) => bloc.setPage(1),
+      expect: [
+        PageState(index: 1, showBadges: [false, false, false])
+      ]);
+  blocTest('emits new badge when updating index',
+      build: () => SelectPageBloc(),
+      act: (bloc) => bloc.setBadge(1),
+      expect: [
+        PageState(index: 0, showBadges: [false, true, false])
+      ]);
+  blocTest('emits new page and then adjusts badge',
+      build: () => SelectPageBloc(),
+      act: (bloc) {
+        bloc.setPage(1);
+        bloc.setPage(0);
+        bloc.setBadge(1);
+        bloc.setPage(1);
+      },
+      expect: [
+        PageState(index: 1, showBadges: [false, false, false]),
+        PageState(index: 0, showBadges: [false, false, false]),
+        PageState(index: 0, showBadges: [false, true, false]),
+        PageState(index: 1, showBadges: [false, false, false])
+      ]);
 }

@@ -36,13 +36,13 @@ class NumberTextField extends StatelessWidget {
       this.lowValue = double.negativeInfinity,
       this.highValue = double.infinity,
       @required this.type,
-      @required this.onSubmit})
+      @required this.onSaved})
       : super(key: key);
   final String hintText;
   final String labelText;
   final String defaultValue;
   final FieldType type;
-  final void Function(String, num) onSubmit;
+  final void Function(String, num) onSaved;
   final StringUtils strUtils = StringUtils();
   final num lowValue;
   final num highValue;
@@ -79,7 +79,7 @@ class NumberTextField extends StatelessWidget {
           LengthLimitingTextInputFormatter(12),
         ],
         textAlign: TextAlign.right,
-        onSaved: (value) => onSubmit(
+        onSaved: (value) => onSaved(
             this.labelText, strUtils.getValueFromString(this.type, value)));
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:realoptions/blocs/bloc_provider.dart';
-import 'package:realoptions/blocs/select_model_bloc.dart';
+import 'package:realoptions/blocs/select_model/select_model_bloc.dart';
 import 'package:realoptions/components/OptionsAppBar.dart';
 import 'package:realoptions/models/models.dart';
 
@@ -10,7 +10,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: Material(
             child: BlocProvider<SelectModelBloc>(
-                bloc: SelectModelBloc(),
+                create: (context) => SelectModelBloc(),
                 child: Scaffold(
                     appBar: OptionsAppBar(
                         choices: MODEL_CHOICES, title: "SomeTitle"))))));
@@ -22,7 +22,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: Material(
             child: BlocProvider<SelectModelBloc>(
-                bloc: SelectModelBloc(),
+                create: (context) => SelectModelBloc(),
                 child: Scaffold(
                     appBar: OptionsAppBar(
                         choices: MODEL_CHOICES, title: "SomeTitle"))))));

@@ -2,5 +2,5 @@
 <resources>
     <string name="app_name">Demo API App</string>
     <string name="facebook_app_id">1672160866222878</string>
-    <!--<string name="fb_login_protocol_scheme">fb321653788549507</string>-->
+    <string name="fb_login_protocol_scheme">fb321653788549507</string>
 </resources>

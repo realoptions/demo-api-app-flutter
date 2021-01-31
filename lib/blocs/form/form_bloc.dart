@@ -1,10 +1,8 @@
-import 'package:realoptions/blocs/bloc_provider.dart';
-import 'dart:async';
 import 'package:realoptions/models/forms.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:quiver/core.dart' show hash2;
 import 'package:meta/meta.dart';
 import 'package:realoptions/components/CustomTextFields.dart';
+import 'package:bloc/bloc.dart';
 
 class FormItem {
   final String valueAtLastSubmit;
@@ -31,19 +29,10 @@ class FormItem {
 
 final StringUtils stringUtils = StringUtils();
 
-class FormBloc implements BlocBase {
-  Map<String, SubmitItems> _formValues = {};
+class FormBloc extends Cubit<Iterable<FormItem>> {
   final List<InputConstraint> constraints;
-  final StreamController<Iterable<FormItem>> _formController =
-      BehaviorSubject();
-
-  Stream<Iterable<FormItem>> get outFormController => _formController.stream;
-
-  StreamSink get _inFormController => _formController.sink;
-
-  FormBloc({@required this.constraints}) {
-    onSubmit();
-  }
+  Map<String, SubmitItems> _formValues = {};
+  FormBloc({@required this.constraints}) : super(_onSubmit({}, constraints));
 
   static String _getValueAtLastSubmit(
     Map<String, SubmitItems> formValues, //can be empty
@@ -58,24 +47,20 @@ class FormBloc implements BlocBase {
         constraint.fieldType, constraint.defaultValue);
   }
 
+  static List<FormItem> _onSubmit(
+      Map<String, SubmitItems> formValues, List<InputConstraint> constraints) {
+    return constraints.map<FormItem>((constraint) {
+      return FormItem(
+          constraint: constraint,
+          valueAtLastSubmit: _getValueAtLastSubmit(formValues, constraint));
+    }).toList();
+  }
+
   void onSave(InputType inputType, String key, num value) {
     _formValues[key] = SubmitItems(inputType: inputType, value: value);
   }
 
-  void onSubmit() {
-    var formItems = constraints.map<FormItem>((constraint) {
-      return FormItem(
-          constraint: constraint,
-          valueAtLastSubmit: _getValueAtLastSubmit(_formValues, constraint));
-    }).toList();
-    _inFormController.add(formItems);
-  }
-
   Map<String, SubmitItems> getCurrentForm() {
     return _formValues;
-  }
-
-  void dispose() {
-    _formController.close();
   }
 }
