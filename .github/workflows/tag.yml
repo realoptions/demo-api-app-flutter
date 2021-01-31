@@ -39,7 +39,8 @@ jobs:
       run: echo "CUSTOM_TAG=${{ env.RELEASE_TAG }}-${{ env.FLUTTER_VERSION }} " >> $GITHUB_ENV
     - name: does tag exist
       run: echo "TAG_DOES_NOT_EXIST=$(git tag | grep -q ${{ env.CUSTOM_TAG }} ; echo $?)" >> $GITHUB_ENV
-        
+    - name: test commit
+      run: git rev-parse HEAD
     - name: Bump version and push tag
       uses: anothrNick/github-tag-action@1.34.0
       if: env.TAG_DOES_NOT_EXIST=='1'
