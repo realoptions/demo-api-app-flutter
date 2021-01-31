@@ -1,6 +1,9 @@
 # Name of your workflow.
 name: tagtest
-on: [push]
+on: 
+  push:
+    tags-ignore:
+      - '**'
     
 jobs:
   tag:
