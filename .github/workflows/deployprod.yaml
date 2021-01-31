@@ -74,5 +74,5 @@ jobs:
       with:
         serviceAccountJson: ${{ steps.write_json.outputs.filePath }} # access_key.json
         packageName: com.finside.realoptions
-        releaseFile: build/app/outputs/bundle/release/app.aab
+        releaseFiles: build/app/outputs/bundle/release/app.aab
         whatsNewDirectory: assets/whatsnew
