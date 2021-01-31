@@ -3,6 +3,8 @@ name: tagtest
 on: 
   push:
     tags-ignore:
+      - '*.*'
+    branches:
       - '**'
     
 jobs:
