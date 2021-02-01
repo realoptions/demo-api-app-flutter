@@ -32,7 +32,6 @@ class ApiBloc extends Bloc<ApiEvents, ApiState> {
           final user = firebaseAuth.currentUser;
           if (user != null) {
             final token = await apiRepository.getToken(user);
-            print(token);
             yield ApiToken(token: token);
           } else {
             yield ApiNoData();
