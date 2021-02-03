@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
 import 'package:realoptions/blocs/select_page/select_page_bloc.dart';
-import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/models/pages.dart';
 import 'dart:async';
 import 'package:realoptions/services/finside_service.dart';
@@ -14,7 +13,7 @@ class DensityBloc extends Bloc<DensityEvents, DensityState> {
   DensityBloc({@required this.finside, @required this.selectPageBloc})
       : super(NoData());
 
-  void getDensity(Map<String, SubmitItems> body) {
+  void getDensity(Map<String, dynamic> body) {
     add(RequestDensity(body: body));
   }
 

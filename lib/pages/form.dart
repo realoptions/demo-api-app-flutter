@@ -81,8 +81,10 @@ class FormButton extends StatelessWidget {
             if (formKey.currentState.validate()) {
               formKey.currentState.save();
               final submittedBody = context.read<FormBloc>().getCurrentForm();
-              context.read<DensityBloc>().getDensity(submittedBody);
-              context.read<OptionsBloc>().getOptions(submittedBody);
+              final SubmitBody body = SubmitBody(formBody: submittedBody);
+              final jsonBody = body.convertSubmission();
+              context.read<DensityBloc>().getDensity(jsonBody);
+              context.read<OptionsBloc>().getOptions(jsonBody);
             }
           },
           child: Text('Submit'),
