@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "117231459701-423r9o27dh7nck6b8vpnt28ukvfiuul4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.finside.realoptions",
+            "certificate_hash": "f3a3edf7643d67d9a2a1cb3c144875b81955a971"
+          }
+        },
+        {
           "client_id": "117231459701-932i2imdgttdoi7jcvrks3kshtedttmk.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -23,11 +31,11 @@
           }
         },
         {
-          "client_id": "117231459701-423r9o27dh7nck6b8vpnt28ukvfiuul4.apps.googleusercontent.com",
+          "client_id": "117231459701-ii0inh870euq18nbb89n5j9f1jo031me.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.finside.realoptions",
-            "certificate_hash": "f3a3edf7643d67d9a2a1cb3c144875b81955a971"
+            "certificate_hash": "9a6ac5cf67ddd62a8cac678916ac611f77bc264a"
           }
         },
         {
@@ -37,14 +45,14 @@
       ],
       "api_key": [
         {
-          "current_key": "API_KEY"
+          "current_key": "AIzaSyCNMugQ6OBLqmlJVJNVGDmmcgkW61Ha7lE"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "117231459701-t0t85k3egn6f6770e1kt5a4uh0gk693b.apps.googleusercontent.com",
+              "client_id": "117231459701-omruogcepkcm1kfanp39g94n5qjptcc9.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

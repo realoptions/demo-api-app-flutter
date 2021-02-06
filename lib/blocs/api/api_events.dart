@@ -1,1 +1,1 @@
-enum ApiEvents { RequestApiKey, GoogleSignIn, FacebookSignIn }
+enum ApiEvents { RequestApiKey, GoogleSignIn, FacebookSignIn, SignOut }

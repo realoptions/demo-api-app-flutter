@@ -4,5 +4,6 @@ abstract class OptionsEvents {}
 
 class RequestOptions extends OptionsEvents {
   final Map<String, dynamic> body;
-  RequestOptions({@required this.body});
+  final String model;
+  RequestOptions({@required this.body, @required this.model});
 }

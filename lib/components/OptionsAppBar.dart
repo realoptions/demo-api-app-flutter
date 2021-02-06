@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:realoptions/blocs/constraints/constraints_bloc.dart';
 import 'package:realoptions/blocs/select_model/select_model_bloc.dart';
 import 'package:realoptions/models/models.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -58,6 +59,9 @@ class OptionsAppBar extends StatelessWidget with PreferredSizeWidget {
                                   context
                                       .read<SelectModelBloc>()
                                       .setModel(choice);
+                                  context
+                                      .read<ConstraintsBloc>()
+                                      .getConstraints(choice);
                                   Navigator.pop(modalContext);
                                 }))
                             .toList());

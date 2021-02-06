@@ -35,12 +35,10 @@ class MyApp extends StatelessWidget {
               ),
             )),
         home: BlocProvider<ApiBloc>(
-            create: (context) {
-              return ApiBloc(
-                  firebaseAuth: FirebaseAuth.instance,
-                  apiRepository: ApiRepository())
-                ..add(ApiEvents.RequestApiKey);
-            },
+            create: (context) => ApiBloc(
+                firebaseAuth: FirebaseAuth.instance,
+                apiRepository: ApiRepository())
+              ..add(ApiEvents.RequestApiKey),
             child: StartupPage()));
   }
 }
@@ -58,9 +56,7 @@ class StartupPage extends StatelessWidget {
           return Introduction();
         } else if (data is ApiToken) {
           return BlocProvider<SelectModelBloc>(
-              create: (context) {
-                return SelectModelBloc();
-              },
+              create: (context) => SelectModelBloc(),
               child: AppScaffold(title: title, apiKey: data.token));
         } else {
           return Center(child: CircularProgressIndicator());

@@ -1,8 +1,12 @@
+import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:realoptions/blocs/api/api_bloc.dart';
 import 'package:realoptions/blocs/constraints/constraints_events.dart';
 import 'package:realoptions/blocs/options/options_bloc.dart';
+import 'package:realoptions/blocs/select_model/select_model_bloc.dart';
+import 'package:realoptions/models/models.dart';
 import 'package:realoptions/pages/form.dart';
 import 'package:mockito/mockito.dart';
 import 'package:realoptions/blocs/constraints/constraints_bloc.dart';
@@ -13,12 +17,16 @@ import 'package:realoptions/services/finside_service.dart';
 import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/models/response.dart';
 import 'package:realoptions/components/CustomTextFields.dart';
+import '../../mocks/api_repository_mock.dart';
 
 class MockFinsideService extends Mock implements FinsideApi {}
 
 void main() {
   MockFinsideService finside;
   List<InputConstraint> constraints;
+  MockFirebaseAuth auth;
+  MockApiRepository apiRepository;
+  ApiBloc apiBloc;
   setUp(() {
     finside = MockFinsideService();
     constraints = [
@@ -30,18 +38,22 @@ void main() {
           name: "asset",
           inputType: InputType.Market)
     ];
+    auth = MockFirebaseAuth(signedIn: true);
+    apiRepository = MockApiRepository();
+    apiBloc = ApiBloc(firebaseAuth: auth, apiRepository: apiRepository);
   });
   tearDown(() {
     finside = null;
     constraints = null;
+    apiBloc.close();
   });
   void stubRetrieveData() {
-    when(finside.fetchConstraints())
+    when(finside.fetchConstraints("heston"))
         .thenAnswer((_) => Future.value(constraints));
   }
 
   void stubRetrieveOptions() {
-    when(finside.fetchOptionPrices(any)).thenAnswer((_) => Future.value({
+    when(finside.fetchOptionPrices(any, any)).thenAnswer((_) => Future.value({
           "call": [ModelResult(value: 4, atPoint: 4)],
           "put": [ModelResult(value: 4, atPoint: 4)]
         }));
@@ -51,7 +63,7 @@ void main() {
     var results = DensityAndVaR(
         density: [ModelResult(atPoint: 4, value: 3)],
         riskMetrics: VaRResult(valueAtRisk: 0.3, expectedShortfall: 0.4));
-    when(finside.fetchDensityAndVaR(any))
+    when(finside.fetchDensityAndVaR(any, any))
         .thenAnswer((_) => Future.value(results));
   }
 
@@ -66,11 +78,16 @@ void main() {
                 child: MultiBlocProvider(
                     providers: [
                       BlocProvider<ConstraintsBloc>(create: (context) {
-                        return ConstraintsBloc(finside: finside)
-                          ..add(RequestConstraints());
+                        return ConstraintsBloc(
+                            finside: finside, apiBloc: apiBloc)
+                          ..add(RequestConstraints(
+                              model: Model(label: "Heston", value: "heston")));
                       }),
                       BlocProvider<SelectPageBloc>(create: (context) {
                         return bloc;
+                      }),
+                      BlocProvider<SelectModelBloc>(create: (context) {
+                        return SelectModelBloc();
                       }),
                     ],
                     child: MultiBlocProvider(providers: [
@@ -93,7 +110,7 @@ void main() {
     stubRetrieveOptions();
     stubRetrieveDensity();
     var bloc = FormBloc(constraints: constraints);
-    final selectPageBloc = SelectPageBloc();
+    //final selectPageBloc = SelectPageBloc();
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
             body: Directionality(
@@ -101,22 +118,27 @@ void main() {
                 child: MultiBlocProvider(
                     providers: [
                       BlocProvider<ConstraintsBloc>(create: (context) {
-                        return ConstraintsBloc(finside: finside)
-                          ..add(RequestConstraints());
+                        return ConstraintsBloc(
+                            finside: finside, apiBloc: apiBloc)
+                          ..add(RequestConstraints(
+                              model: Model(label: "Heston", value: "heston")));
                       }),
                       BlocProvider<SelectPageBloc>(create: (context) {
                         return SelectPageBloc();
+                      }),
+                      BlocProvider<SelectModelBloc>(create: (context) {
+                        return SelectModelBloc();
                       }),
                     ],
                     child: MultiBlocProvider(providers: [
                       BlocProvider<DensityBloc>(
                           create: (context) => DensityBloc(
                               finside: finside,
-                              selectPageBloc: selectPageBloc)),
+                              selectPageBloc: context.read<SelectPageBloc>())),
                       BlocProvider<OptionsBloc>(
                           create: (context) => OptionsBloc(
                               finside: finside,
-                              selectPageBloc: selectPageBloc)),
+                              selectPageBloc: context.read<SelectPageBloc>())),
                       BlocProvider<FormBloc>(create: (context) => bloc)
                     ], child: InputForm()))))));
     await tester.pumpAndSettle();

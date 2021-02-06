@@ -23,9 +23,16 @@ class ApiBloc extends Bloc<ApiEvents, ApiState> {
     add(ApiEvents.FacebookSignIn);
   }
 
+  void setNoData() {
+    add(ApiEvents.SignOut);
+  }
+
   @override
   Stream<ApiState> mapEventToState(ApiEvents event) async* {
     switch (event) {
+      case ApiEvents.SignOut:
+        yield ApiNoData();
+        break;
       case ApiEvents.RequestApiKey:
         yield ApiIsFetching();
         try {

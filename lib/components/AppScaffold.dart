@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:realoptions/blocs/api/api_bloc.dart';
 import 'package:realoptions/blocs/constraints/constraints_bloc.dart';
 import 'package:realoptions/blocs/constraints/constraints_events.dart';
 import 'package:realoptions/blocs/constraints/constraints_state.dart';
@@ -25,35 +26,28 @@ class AppScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SelectModelBloc, Model>(builder: (context, data) {
-      final FinsideApi finside = FinsideApi(apiKey: apiKey, model: data.value);
-      final selectPageBloc = SelectPageBloc();
-      return MultiBlocProvider(
-          providers: [
-            BlocProvider<ConstraintsBloc>(create: (context) {
-              return ConstraintsBloc(finside: finside)
-                ..add(RequestConstraints());
-            }),
-            BlocProvider<SelectPageBloc>(create: (context) {
-              return selectPageBloc;
-            })
-          ],
-          child: WaitForConstraints(
-              finside: finside, title: title, selectPageBloc: selectPageBloc));
+      final FinsideApi finside = FinsideApi(apiKey: apiKey);
+      return MultiBlocProvider(providers: [
+        BlocProvider<ConstraintsBloc>(
+            create: (context) => ConstraintsBloc(
+                finside: finside, apiBloc: context.read<ApiBloc>())
+              ..add(RequestConstraints(model: data))),
+        BlocProvider<SelectPageBloc>(create: (context) => SelectPageBloc())
+      ], child: WaitForConstraints(finside: finside, title: title));
     });
   }
 }
 
 class WaitForConstraints extends StatelessWidget {
-  const WaitForConstraints({
-    Key key,
-    @required this.title,
-    @required this.selectPageBloc,
-    @required this.finside,
-  }) : super(key: key);
-  //final Widget child;
+  const WaitForConstraints(
+      {Key key,
+      @required this.title,
+      //@required this.selectPageBloc,
+      @required this.finside})
+      : super(key: key);
   final String title;
   final FinsideApi finside;
-  final SelectPageBloc selectPageBloc;
+  //final SelectPageBloc selectPageBloc;
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ConstraintsBloc, ConstraintsState>(
@@ -67,11 +61,13 @@ class WaitForConstraints extends StatelessWidget {
           return MultiBlocProvider(providers: [
             BlocProvider<OptionsBloc>(create: (_) {
               return OptionsBloc(
-                  finside: finside, selectPageBloc: selectPageBloc);
+                  finside: finside,
+                  selectPageBloc: context.read<SelectPageBloc>());
             }),
             BlocProvider<DensityBloc>(create: (_) {
               return DensityBloc(
-                  finside: finside, selectPageBloc: selectPageBloc);
+                  finside: finside,
+                  selectPageBloc: context.read<SelectPageBloc>());
             }),
             BlocProvider<FormBloc>(create: (context) {
               return FormBloc(constraints: data.constraints);

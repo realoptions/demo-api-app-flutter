@@ -10,8 +10,8 @@ const String API_VERSION = "v2";
 const String BASE_ENDPOINT = "https://api2.finside.org";
 
 class FinsideApi {
-  FinsideApi({@required this.model, @required this.apiKey});
-  final String model;
+  FinsideApi({@required this.apiKey});
+  //final String model;
   final String apiKey;
   Map<String, String> _getHeaders() {
     return {
@@ -55,7 +55,7 @@ class FinsideApi {
     }
   }
 
-  Future<List<InputConstraint>> fetchConstraints() {
+  Future<List<InputConstraint>> fetchConstraints(String model) {
     return Future.wait([
       http
           .get(
@@ -75,7 +75,7 @@ class FinsideApi {
     });
   }
 
-  Future<List<ModelResult>> _fetchModelCalculator(
+  Future<List<ModelResult>> _fetchModelCalculator(String model,
       String optionType, String sensitivity, bool includeIV, Map body) {
     return http
         .post(
@@ -88,30 +88,33 @@ class FinsideApi {
         .then(_parseResult);
   }
 
-  Future<List<ModelResult>> _fetchModelDensity(Map body) {
+  Future<List<ModelResult>> _fetchModelDensity(String model, Map body) {
     return http
         .post(p.join(BASE_ENDPOINT, API_VERSION, model, "density"),
             headers: _getHeaders(), body: jsonEncode(body))
         .then(_parseResult);
   }
 
-  Future<VaRResult> _fetchModelValueAtRisk(Map body) {
+  Future<VaRResult> _fetchModelValueAtRisk(String model, Map body) {
     return http
         .post(p.join(BASE_ENDPOINT, API_VERSION, model, "riskmetric"),
             headers: _getHeaders(), body: jsonEncode(body))
         .then(_parseMetric);
   }
 
-  Future<DensityAndVaR> fetchDensityAndVaR(Map body) {
-    return Future.wait([_fetchModelDensity(body), _fetchModelValueAtRisk(body)])
-        .then((results) =>
-            DensityAndVaR(density: results[0], riskMetrics: results[1]));
+  Future<DensityAndVaR> fetchDensityAndVaR(String model, Map body) {
+    return Future.wait([
+      _fetchModelDensity(model, body),
+      _fetchModelValueAtRisk(model, body)
+    ]).then((results) =>
+        DensityAndVaR(density: results[0], riskMetrics: results[1]));
   }
 
-  Future<Map<String, List<ModelResult>>> fetchOptionPrices(Map body) {
+  Future<Map<String, List<ModelResult>>> fetchOptionPrices(
+      String model, Map body) {
     return Future.wait([
-      _fetchModelCalculator("call", "price", true, body),
-      _fetchModelCalculator("put", "price", false, body),
+      _fetchModelCalculator(model, "call", "price", true, body),
+      _fetchModelCalculator(model, "put", "price", false, body),
     ]).then((results) => {
           "call": results[0],
           "put": results[1],

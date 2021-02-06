@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:realoptions/blocs/density/density_state.dart';
 import 'package:realoptions/blocs/select_page/select_page_bloc.dart';
 import 'package:realoptions/pages/density.dart';
 import 'package:mockito/mockito.dart';
@@ -26,16 +27,16 @@ void main() {
     results = null;
   });
   void stubRetrieveData() {
-    when(finside.fetchDensityAndVaR(any))
+    when(finside.fetchDensityAndVaR(any, any))
         .thenAnswer((_) => Future.value(results));
   }
 
   void stubRetrieveDataWithError() {
-    when(finside.fetchDensityAndVaR(any))
+    when(finside.fetchDensityAndVaR(any, any))
         .thenAnswer((_) => Future.error("Big error!"));
   }
 
-  /*testWidgets('Density shows progress', (WidgetTester tester) async {
+  testWidgets('Density shows parameter message', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     stubRetrieveDataWithError();
     var bloc = DensityBloc(finside: finside, selectPageBloc: SelectPageBloc());
@@ -59,11 +60,8 @@ void main() {
     ));
     await tester.pumpAndSettle();
     expect(find.text("Please submit parameters!"), findsOneWidget);
-    bloc.emit(IsDensityFetching());
-    await tester.pump(); //AndSettle();
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
     bloc.close();
-  });*/
+  });
   testWidgets('Density shows error if error', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     stubRetrieveDataWithError();
@@ -88,7 +86,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
     expect(find.text("Please submit parameters!"), findsOneWidget);
-    bloc.getDensity(
+    bloc.getDensity("heston",
         {"asset": SubmitItems(value: 40.0, inputType: InputType.Market)});
     await tester.pumpAndSettle();
     expect(find.text("Big error!"), findsOneWidget);
@@ -121,7 +119,7 @@ void main() {
     )));
     await tester.pumpAndSettle();
 
-    bloc.getDensity(
+    bloc.getDensity("heston",
         {"asset": SubmitItems(inputType: InputType.Market, value: 3.0)});
     await tester.pumpAndSettle();
     expect(find.text("Please submit parameters!"), findsNothing);

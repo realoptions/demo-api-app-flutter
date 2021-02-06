@@ -4,5 +4,6 @@ abstract class DensityEvents {}
 
 class RequestDensity extends DensityEvents {
   final Map<String, dynamic> body;
-  RequestDensity({@required this.body});
+  String model;
+  RequestDensity({@required this.body, @required this.model});
 }

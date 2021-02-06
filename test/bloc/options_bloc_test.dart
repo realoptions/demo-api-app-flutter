@@ -22,7 +22,7 @@ void main() {
   };
   setUp(() {
     finside = MockFinsideService();
-    when(finside.fetchOptionPrices(any))
+    when(finside.fetchOptionPrices(any, any))
         .thenAnswer((_) => Future.value(results));
     bloc = OptionsBloc(finside: finside, selectPageBloc: SelectPageBloc());
   });
@@ -37,17 +37,17 @@ void main() {
   blocTest(
     'emits [data] when RequestDensity is added',
     build: () => bloc,
-    act: (bloc) => bloc.add(RequestOptions(body: body)),
+    act: (bloc) => bloc.add(RequestOptions(body: body, model: "heston")),
     expect: [IsOptionsFetching(), OptionsData(options: results)],
   );
   blocTest(
     'emits [error] when error is returned',
     build: () {
-      when(finside.fetchOptionPrices(any))
+      when(finside.fetchOptionPrices(any, any))
           .thenAnswer((_) => Future.error("Some Error"));
       return bloc;
     },
-    act: (bloc) => bloc.add(RequestOptions(body: body)),
+    act: (bloc) => bloc.add(RequestOptions(body: body, model: "heston")),
     expect: [IsOptionsFetching(), OptionsError(optionsError: "Some Error")],
   );
 }

@@ -13,8 +13,8 @@ class DensityBloc extends Bloc<DensityEvents, DensityState> {
   DensityBloc({@required this.finside, @required this.selectPageBloc})
       : super(NoData());
 
-  void getDensity(Map<String, dynamic> body) {
-    add(RequestDensity(body: body));
+  void getDensity(String model, Map<String, dynamic> body) {
+    add(RequestDensity(model: model, body: body));
   }
 
   @override
@@ -22,9 +22,10 @@ class DensityBloc extends Bloc<DensityEvents, DensityState> {
     if (event is RequestDensity) {
       yield IsDensityFetching();
       try {
-        final result = await finside.fetchDensityAndVaR(event.body);
-        yield DensityData(density: result);
+        final result =
+            await finside.fetchDensityAndVaR(event.model, event.body);
         selectPageBloc.setBadge(DENSITY_PAGE);
+        yield DensityData(density: result);
       } catch (err) {
         yield DensityError(densityError: err.toString());
       }
