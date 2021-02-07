@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:realoptions/models/forms.dart';
 
 abstract class OptionsEvents {}
 
 class RequestOptions extends OptionsEvents {
-  final Map<String, SubmitItems> body;
-  RequestOptions({@required this.body});
+  final Map<String, dynamic> body;
+  final String model;
+  RequestOptions({@required this.body, @required this.model});
 }

@@ -22,7 +22,7 @@ void main() {
   };
   setUp(() {
     finside = MockFinsideService();
-    when(finside.fetchDensityAndVaR(any))
+    when(finside.fetchDensityAndVaR(any, any))
         .thenAnswer((_) => Future.value(results));
     bloc = DensityBloc(finside: finside, selectPageBloc: SelectPageBloc());
   });
@@ -37,17 +37,17 @@ void main() {
   blocTest(
     'emits [data] when RequestDensity is added',
     build: () => bloc,
-    act: (bloc) => bloc.add(RequestDensity(body: body)),
+    act: (bloc) => bloc.add(RequestDensity(body: body, model: "heston")),
     expect: [IsDensityFetching(), DensityData(density: results)],
   );
   blocTest(
     'emits [error] when error is returned',
     build: () {
-      when(finside.fetchDensityAndVaR(any))
+      when(finside.fetchDensityAndVaR(any, any))
           .thenAnswer((_) => Future.error("Some Error"));
       return bloc;
     },
-    act: (bloc) => bloc.add(RequestDensity(body: body)),
+    act: (bloc) => bloc.add(RequestDensity(body: body, model: "heston")),
     expect: [IsDensityFetching(), DensityError(densityError: "Some Error")],
   );
 }

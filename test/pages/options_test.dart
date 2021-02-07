@@ -37,16 +37,16 @@ void main() {
     results = null;
   });
   void stubRetrieveData() {
-    when(finside.fetchOptionPrices(any))
+    when(finside.fetchOptionPrices(any, any))
         .thenAnswer((_) => Future.value(results));
   }
 
   void stubRetrieveDataWithError() {
-    when(finside.fetchOptionPrices(any))
+    when(finside.fetchOptionPrices(any, any))
         .thenAnswer((_) => Future.error("Big error!"));
   }
 
-  testWidgets('Density shows error if error', (WidgetTester tester) async {
+  testWidgets('Options shows error if error', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     stubRetrieveDataWithError();
     var bloc = OptionsBloc(finside: finside, selectPageBloc: SelectPageBloc());
@@ -70,7 +70,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
     expect(find.text("Please submit parameters!"), findsOneWidget);
-    bloc.getOptions(body);
+    bloc.getOptions("heston", body);
     await tester.pumpAndSettle();
     expect(find.text("Big error!"), findsOneWidget);
     bloc.close();
@@ -102,7 +102,7 @@ void main() {
           create: (_) => bloc, child: ShowOptionPrices()),
     )));
     await tester.pumpAndSettle();
-    bloc.getOptions(
+    bloc.getOptions("heston",
         {"asset": SubmitItems(inputType: InputType.Market, value: 3.0)});
     await tester.pumpAndSettle();
     expect(find.text("Please submit parameters!"), findsNothing);

@@ -7,13 +7,12 @@ import 'package:realoptions/blocs/api/api_bloc.dart';
 import 'package:realoptions/pages/intro.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:bloc/bloc.dart';
 import 'package:realoptions/repositories/api_repository.dart';
-import 'blocs/simple_bloc_observer.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
-  Bloc.observer = SimpleBlocObserver();
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -36,12 +35,10 @@ class MyApp extends StatelessWidget {
               ),
             )),
         home: BlocProvider<ApiBloc>(
-            create: (context) {
-              return ApiBloc(
-                  firebaseAuth: FirebaseAuth.instance,
-                  apiRepository: ApiRepository())
-                ..add(ApiEvents.RequestApiKey);
-            },
+            create: (context) => ApiBloc(
+                firebaseAuth: FirebaseAuth.instance,
+                apiRepository: ApiRepository())
+              ..add(ApiEvents.RequestApiKey),
             child: StartupPage()));
   }
 }
@@ -59,9 +56,7 @@ class StartupPage extends StatelessWidget {
           return Introduction();
         } else if (data is ApiToken) {
           return BlocProvider<SelectModelBloc>(
-              create: (context) {
-                return SelectModelBloc();
-              },
+              create: (context) => SelectModelBloc(),
               child: AppScaffold(title: title, apiKey: data.token));
         } else {
           return Center(child: CircularProgressIndicator());

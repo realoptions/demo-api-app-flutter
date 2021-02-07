@@ -23,16 +23,22 @@ class ApiBloc extends Bloc<ApiEvents, ApiState> {
     add(ApiEvents.FacebookSignIn);
   }
 
+  void setNoData() {
+    add(ApiEvents.SignOut);
+  }
+
   @override
   Stream<ApiState> mapEventToState(ApiEvents event) async* {
     switch (event) {
+      case ApiEvents.SignOut:
+        yield ApiNoData();
+        break;
       case ApiEvents.RequestApiKey:
         yield ApiIsFetching();
         try {
           final user = firebaseAuth.currentUser;
           if (user != null) {
             final token = await apiRepository.getToken(user);
-            print(token);
             yield ApiToken(token: token);
           } else {
             yield ApiNoData();

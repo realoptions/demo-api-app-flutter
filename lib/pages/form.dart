@@ -4,10 +4,12 @@ import 'package:realoptions/blocs/density/density_state.dart';
 import 'package:realoptions/blocs/options/options_bloc.dart';
 import 'package:realoptions/blocs/options/options_state.dart';
 import 'package:flutter/material.dart';
+import 'package:realoptions/blocs/select_model/select_model_bloc.dart';
 import 'package:realoptions/components/CustomPadding.dart';
 import 'package:realoptions/components/CustomTextFields.dart';
 import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/blocs/form/form_bloc.dart';
+import 'package:realoptions/models/models.dart';
 
 Widget getField(BuildContext context, String valueAtLastSubmit,
     InputConstraint constraint) {
@@ -74,19 +76,23 @@ class FormButton extends StatelessWidget {
             optionsData is IsOptionsFetching) {
           return CircularProgressIndicator();
         }
-        return RaisedButton(
-          onPressed: () {
-            // Validate returns true if the form is valid, or false
-            // otherwise.
-            if (formKey.currentState.validate()) {
-              formKey.currentState.save();
-              final submittedBody = context.read<FormBloc>().getCurrentForm();
-              context.read<DensityBloc>().getDensity(submittedBody);
-              context.read<OptionsBloc>().getOptions(submittedBody);
-            }
-          },
-          child: Text('Submit'),
-        );
+        return BlocBuilder<SelectModelBloc, Model>(builder: (context, model) {
+          return RaisedButton(
+            onPressed: () {
+              // Validate returns true if the form is valid, or false
+              // otherwise.
+              if (formKey.currentState.validate()) {
+                formKey.currentState.save();
+                final submittedBody = context.read<FormBloc>().getCurrentForm();
+                final SubmitBody body = SubmitBody(formBody: submittedBody);
+                final jsonBody = body.convertSubmission();
+                context.read<DensityBloc>().getDensity(model.value, jsonBody);
+                context.read<OptionsBloc>().getOptions(model.value, jsonBody);
+              }
+            },
+            child: Text('Submit'),
+          );
+        });
       });
     });
   }

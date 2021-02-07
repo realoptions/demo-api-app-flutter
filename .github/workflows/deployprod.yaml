@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     # A name for your step to display on GitHub.
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: insert api key
       run: |
         sed -i "s/API_KEY/${{ secrets.ANDROID_API_KEY }}/g" ./android/app/google-services.json
@@ -74,5 +74,5 @@ jobs:
       with:
         serviceAccountJson: ${{ steps.write_json.outputs.filePath }} # access_key.json
         packageName: com.finside.realoptions
-        releaseFile: build/app/outputs/bundle/release/app.aab
+        releaseFiles: build/app/outputs/bundle/release/app.aab
         whatsNewDirectory: assets/whatsnew

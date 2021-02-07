@@ -1,5 +1,4 @@
 import 'package:bloc/bloc.dart';
-import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/models/pages.dart';
 import 'dart:async';
 import 'package:realoptions/services/finside_service.dart';
@@ -14,8 +13,8 @@ class OptionsBloc extends Bloc<OptionsEvents, OptionsState> {
   OptionsBloc({@required this.finside, @required this.selectPageBloc})
       : super(NoData());
 
-  void getOptions(Map<String, SubmitItems> body) {
-    add(RequestOptions(body: body));
+  void getOptions(String model, Map<String, dynamic> body) {
+    add(RequestOptions(model: model, body: body));
   }
 
   @override
@@ -23,9 +22,9 @@ class OptionsBloc extends Bloc<OptionsEvents, OptionsState> {
     if (event is RequestOptions) {
       yield IsOptionsFetching();
       try {
-        final result = await finside.fetchOptionPrices(event.body);
-        yield OptionsData(options: result);
+        final result = await finside.fetchOptionPrices(event.model, event.body);
         selectPageBloc.setBadge(OPTIONS_PAGE);
+        yield OptionsData(options: result);
       } catch (err) {
         yield OptionsError(optionsError: err.toString());
       }

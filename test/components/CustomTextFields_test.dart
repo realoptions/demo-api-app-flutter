@@ -41,7 +41,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: Material(
             child: Form(
-                autovalidate: true,
+                autovalidateMode: AutovalidateMode.always,
                 key: formKey,
                 child: NumberTextField(
                   defaultValue: "value",
@@ -62,7 +62,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: Material(
             child: Form(
-                autovalidate: true,
+                autovalidateMode: AutovalidateMode.always,
                 key: formKey,
                 child: NumberTextField(
                   defaultValue: "value",
@@ -85,7 +85,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: Material(
             child: Form(
-                autovalidate: true,
+                autovalidateMode: AutovalidateMode.always,
                 key: formKey,
                 child: NumberTextField(
                   defaultValue: "value",
@@ -109,7 +109,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: Material(
             child: Form(
-                autovalidate: true,
+                autovalidateMode: AutovalidateMode.always,
                 key: formKey,
                 child: NumberTextField(
                   defaultValue: "value",
