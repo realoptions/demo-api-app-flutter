@@ -30,7 +30,7 @@ class ConstraintsBloc extends Bloc<ConstraintsEvents, ConstraintsState> {
           apiBloc.setNoData();
           yield ConstraintsIsFetching();
         } else {
-          yield ConstraintsError(constraintsError: err.toString());
+          yield ConstraintsError(constraintsError: strError);
         }
       }
     }

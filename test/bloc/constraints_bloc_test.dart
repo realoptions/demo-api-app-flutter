@@ -10,15 +10,14 @@ import 'package:mockito/mockito.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:realoptions/blocs/constraints/constraints_events.dart';
 import 'package:realoptions/blocs/constraints/constraints_state.dart';
-import '../../mocks/api_repository_mock.dart';
 
 class MockFinsideService extends Mock implements FinsideApi {}
 
+class MockApiBloc extends Mock implements ApiBloc {}
+
 void main() {
   MockFinsideService finside;
-  MockFirebaseAuth auth;
-  MockApiRepository apiRepository;
-  ApiBloc apiBloc;
+  MockApiBloc apiBloc;
   List<InputConstraint> constraints = [
     InputConstraint(
         defaultValue: 2,
@@ -30,9 +29,7 @@ void main() {
   ];
   setUp(() {
     finside = MockFinsideService();
-    auth = MockFirebaseAuth(signedIn: true);
-    apiRepository = MockApiRepository();
-    apiBloc = ApiBloc(firebaseAuth: auth, apiRepository: apiRepository);
+    apiBloc = MockApiBloc();
   });
   tearDown(() {
     finside = null;
@@ -72,4 +69,16 @@ void main() {
       ConstraintsError(constraintsError: "Some Error")
     ],
   );
+  blocTest('emits ConstraintsFetching when JWT expires',
+      build: () {
+        when(finside.fetchConstraints("heston"))
+            .thenAnswer((_) => Future.error("Exception: Jwt is expired"));
+        return ConstraintsBloc(finside: finside, apiBloc: apiBloc);
+      },
+      act: (bloc) => bloc.add(
+          RequestConstraints(model: Model(label: "Heston", value: "heston"))),
+      expect: [ConstraintsIsFetching()],
+      verify: (_) {
+        verify(apiBloc.setNoData()).called(1);
+      });
 }
