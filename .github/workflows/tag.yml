@@ -21,8 +21,8 @@ jobs:
     # https://github.com/marketplace/actions/flutter-action
     - uses: subosito/flutter-action@v1
       with:
-        flutter-version: '1.25.0'
-        channel: 'beta' # or: 'dev' or 'beta'
+        flutter-version: '2.0.0'
+        channel: 'stable' # or: 'dev' or 'beta'
     - name: "Run Flutter Driver tests"
       run: |
         flutter pub get
