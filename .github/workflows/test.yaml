@@ -21,4 +21,3 @@ jobs:
         flutter pub get
         flutter clean
         flutter test --coverage
-        bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
