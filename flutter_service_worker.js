@@ -3,18 +3,18 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
-  "CNAME": "b2cd94db69bce16ff461fcd684cb9d5f",
-"version.json": "eaccbf4d60c5161afb18c69c94344223",
-"assets/FontManifest.json": "dc3d03800ccca4601324923c0b1d6d57",
-"assets/AssetManifest.json": "bcff30b9418b7b7cf5cd6c7175bf7545",
+  "main.dart.js": "4da0c9b321547ed66d6f8437f1b76dbd",
+"version.json": "d497dbc19f05300084a9ae8aa3eff2c1",
+"index.html": "08795db9f7320b49f73653c93f0b2d34",
+"/": "08795db9f7320b49f73653c93f0b2d34",
+"assets/NOTICES": "4561901434a5687783eba84e6b59f8c1",
 "assets/fonts/MaterialIcons-Regular.otf": "1288c9e28052e028aba623321f7826ac",
-"assets/NOTICES": "f5a870d13bcee3976c6f0d501a593fe9",
+"assets/AssetManifest.json": "bcff30b9418b7b7cf5cd6c7175bf7545",
+"assets/FontManifest.json": "dc3d03800ccca4601324923c0b1d6d57",
 "assets/assets/go-logo.png": "2c67a2d05993442e19041b7baa43868c",
 "assets/assets/fb-logo.png": "93ee119598a19421b156937f50e9598b",
 "assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "9a62a954b81a1ad45a58b9bcea89b50b",
-"main.dart.js": "a8ccd5e1e54d5fbab624651e6faeaff5",
-"index.html": "08795db9f7320b49f73653c93f0b2d34",
-"/": "08795db9f7320b49f73653c93f0b2d34"
+"CNAME": "b2cd94db69bce16ff461fcd684cb9d5f"
 };
 
 // The application shell files that are downloaded before a service worker can
@@ -158,7 +158,7 @@ async function downloadOffline() {
     }
     currentContent[key] = true;
   }
-  for (var resourceKey in Object.keys(RESOURCES)) {
+  for (var resourceKey of Object.keys(RESOURCES)) {
     if (!currentContent[resourceKey]) {
       resources.push(resourceKey);
     }
