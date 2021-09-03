@@ -13,7 +13,7 @@ description: An app for interacting with Finside RealOption apis.
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
 #the "+n" has to increment...even if semantic version is bumped
-version: 1.6.10+20
+version: 1.6.10+21
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
