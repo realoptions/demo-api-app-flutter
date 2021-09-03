@@ -32,7 +32,7 @@ class OptionsAppBar extends StatelessWidget with PreferredSizeWidget {
                               children: <Widget>[
                                 Text(
                                     '''This app calculates option prices for three models: Heston, CGMY with a diffusion and a stochastic clock, and Merton jump-diffusion with stochastic clock.  It uses Fang and Oosterlee's algorithm for efficient pricing across many strikes.'''),
-                                RaisedButton(
+                                ElevatedButton(
                                   onPressed: _launchDocs,
                                   child: Text('References'),
                                 ),

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 const List<Model> MODEL_CHOICES = const <Model>[
   const Model(label: "Heston", value: "heston"),
   const Model(label: "CGMY", value: "cgmy"),
+  const Model(label: "CGMYSE", value: "cgmyse"),
   const Model(label: "Merton", value: "merton")
 ];
 
@@ -25,6 +26,16 @@ const Map<String, Map<String, double>> DEFAULT_VALUES = {
     "speed": 1.5,
     "eta_v": 1.5,
     "rho": -0.2,
+  },
+  "cgmyse": {
+    "c": 0.5,
+    "g": 10.0,
+    "m": 10.0,
+    "y": 0.5,
+    "sigma": 0.35,
+    "v0": 0.98,
+    "speed": 0.5,
+    "eta_v": 0.2,
   },
   "merton": {
     "lambda": 1.0,

@@ -68,6 +68,14 @@ class FormButton extends StatelessWidget {
   final GlobalKey<FormState> formKey;
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final ButtonStyle style = ElevatedButton.styleFrom(
+      textStyle: TextStyle(
+        color: Colors.black,
+      ),
+      onPrimary: Colors.black,
+      primary: theme.accentColor,
+    );
     return BlocBuilder<DensityBloc, DensityState>(
         builder: (context, densityData) {
       return BlocBuilder<OptionsBloc, OptionsState>(
@@ -77,7 +85,8 @@ class FormButton extends StatelessWidget {
           return CircularProgressIndicator();
         }
         return BlocBuilder<SelectModelBloc, Model>(builder: (context, model) {
-          return RaisedButton(
+          return ElevatedButton(
+            style: style,
             onPressed: () {
               // Validate returns true if the form is valid, or false
               // otherwise.

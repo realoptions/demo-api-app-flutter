@@ -146,7 +146,7 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsNothing);
     await tester.enterText(find.byType(TextFormField), "2.5");
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(RaisedButton));
+    await tester.tap(find.byType(ElevatedButton));
     await tester.pumpAndSettle();
     expect(find.text("Big error!"), findsNothing);
     expect(find.byType(CircularProgressIndicator), findsNothing);

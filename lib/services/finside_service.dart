@@ -11,7 +11,6 @@ const String BASE_ENDPOINT = "https://api2.finside.org";
 
 class FinsideApi {
   FinsideApi({@required this.apiKey});
-  //final String model;
   final String apiKey;
   Map<String, String> _getHeaders() {
     return {
