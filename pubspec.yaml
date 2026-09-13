@@ -12,8 +12,22 @@ description: An app for interacting with Finside RealOption apis.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-#the "+n" has to increment...even if semantic version is bumped
-version: 1.6.11+22
+# Version authority.
+#
+# This line is the single source of the app's *semantic* version. It is read
+# by .github/workflows/tag.yml, which turns it into the `release-<version>` /
+# `beta-<version>` tag that drives deployment; the release build then takes
+# its version name from that tag rather than re-reading this file, so the tag
+# that triggered a deploy is what the shipped artifact is versioned with.
+#
+# There is deliberately no `+<build>` suffix here. The build number (Android
+# versionCode / iOS CFBundleVersion) is assigned by CI from the Actions run
+# number, which only ever increases, so a release needs no hand-incrementing.
+# The previous `version: 1.6.11+22` carried a comment saying the `+n` had to
+# be bumped by hand on every release even when the semantic version moved - a
+# ritual that was easy to forget and that failed late, at the Play upload.
+# See docs/release-flow.md.
+version: 1.6.11
 
 # Dart 3 / sound null safety. Every pin below comes out of a resolution that
 # actually works on Dart >=3.0: the previous pins (charts_flutter, the old

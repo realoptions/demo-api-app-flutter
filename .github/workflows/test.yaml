@@ -18,8 +18,16 @@ jobs:
         # .github/workflows/deploy-reusable.yml) and .metadata. The previous 2.x
         # pin has been out of support for years and cannot resolve this project's
         # Dart 3 dependency set.
+        #
+        # `cache: true` caches both the Flutter SDK and the pub dependencies.
+        # That is not an assumption: the action's own step guard is
+        # `(pub-cache == '' && cache == 'true') || pub-cache == 'true'`, so an
+        # unset `pub-cache` with `cache: true` takes the pub branch. `pub-cache`
+        # is left unset rather than written out because actionlint's bundled
+        # action metadata predates that input and reports it as unknown.
         flutter-version: '3.47.4'
         channel: 'stable'
+        cache: true
     - name: "Run Flutter Driver tests"
       run: |
         flutter pub get

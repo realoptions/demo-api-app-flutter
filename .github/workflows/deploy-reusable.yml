@@ -45,6 +45,41 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Version authority.
+      #
+      # The tag that triggered this run decides the version name, and the
+      # Actions run number - which only ever increases - decides the build
+      # number (Android versionCode / iOS CFBundleVersion). Neither is read
+      # back out of pubspec.yaml here, so the artifact carries the version of
+      # the tag that caused it to be built, and no one has to hand-increment a
+      # `+build` suffix before releasing. pubspec.yaml owns the semantic
+      # version and feeds tag creation; this owns what ships. See
+      # docs/release-flow.md.
+      - name: Resolve release version
+        env:
+          # The tag name is text someone pushed, so it comes in through a
+          # mapping and is validated before it reaches any build flag.
+          REF_NAME: ${{ github.ref_name }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          APP_VERSION="${REF_NAME#*-}"
+          case "$APP_VERSION" in
+            # Anything outside digits and dots is refused first, so a tag cannot
+            # smuggle shell metacharacters or a stray `+build` into a flag.
+            *[!0-9.]*)
+              echo "::error::tag '$REF_NAME' has a version with characters outside [0-9.]"
+              exit 1
+              ;;
+            [0-9]*.[0-9]*.[0-9]*) ;;
+            *)
+              echo "::error::tag '$REF_NAME' does not carry an x.y.z version"
+              exit 1
+              ;;
+          esac
+          echo "APP_VERSION=$APP_VERSION" >> "$GITHUB_ENV"
+          echo "BUILD_NUMBER=$RUN_NUMBER" >> "$GITHUB_ENV"
+          echo "Building version $APP_VERSION (build $RUN_NUMBER)"
+
       # Credentials are never substituted into a tracked file. The tracked
       # artifacts are `*.template` files with no live value in them; this renders
       # the real config into the (gitignored) path the build reads. The secret is
@@ -63,7 +98,13 @@ jobs:
         # back from that file by the build below rather than passed as an argument.
         run: scripts/generate_build_config.sh web
 
-      # Cache the pub cache before `flutter pub get` so repeat releases reuse it.
+      # `cache: true` caches both the Flutter SDK install and the pub
+      # dependency set, so a release that does not change pubspec.lock reuses
+      # both instead of re-downloading them. The action's step guard is
+      # `(pub-cache == '' && cache == 'true') || pub-cache == 'true'`, so the
+      # pub branch is taken with `pub-cache` left unset; it is not written out
+      # because actionlint's bundled action metadata predates that input and
+      # reports it as unknown.
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -104,19 +145,21 @@ jobs:
           encodedString: ${{ secrets.SERVICE_ACCOUNT_JSON }}
 
       - name: bundle
-        run: |
-          scripts/generate_build_config.sh keystore
-          flutter clean
-          flutter pub get
-          dart run flutter_launcher_icons:main
-          flutter build appbundle
-          rm ./android/key.properties
         env:
+          APP_VERSION: ${{ env.APP_VERSION }}
+          BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
           ANDROID_KEYSTORE_PATH: ${{ steps.write_jks.outputs.filePath }}
           ANDROID_KEY_STORE_PASSWORD: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           CI: true
+        run: |
+          scripts/generate_build_config.sh keystore
+          flutter clean
+          flutter pub get
+          dart run flutter_launcher_icons:main
+          flutter build appbundle --build-name="$APP_VERSION" --build-number="$BUILD_NUMBER"
+          rm ./android/key.properties
 
       - name: Build web release
         if: inputs.publish-web
@@ -124,8 +167,11 @@ jobs:
         # default in current Flutter, and the `web/` runner directory is committed
         # to this repo, so there is nothing left for such a flag to do. (The flag
         # is still accepted by the CLI, which is why the redundancy was silent.)
+        env:
+          APP_VERSION: ${{ env.APP_VERSION }}
+          BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
         run: |
-          flutter build web --release --dart-define-from-file=config/firebase_config.json
+          flutter build web --release --build-name="$APP_VERSION" --build-number="$BUILD_NUMBER" --dart-define-from-file=config/firebase_config.json
 
       # NOTE: v4 renamed the v3 inputs (ACCESS_TOKEN/BRANCH/FOLDER -> lowercase,
       # and the credential input is `token`, NOT `github-token`). The classic PAT

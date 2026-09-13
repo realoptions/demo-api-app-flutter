@@ -25,15 +25,54 @@ push to a branch
 Runs on every push to any branch except tags (`tags-ignore: '*.*'`).
 
 1. Runs the test suite with coverage and uploads it to Codecov.
-2. Reads the app version out of `pubspec.yaml` into `FLUTTER_VERSION`
-   (the name is historic — it is the *app* version, not the SDK version).
+2. Reads the app version out of `pubspec.yaml` into `APP_VERSION` with a
+   pattern anchored at column 0, so it matches the top-level `version:` key
+   and cannot pick up an indented `version:` belonging to a dependency. An
+   unreadable version fails the job — an empty value would otherwise produce a
+   tag like `release-`, which still matches `release-*`.
 3. Picks a prefix from the branch: `release` for `master`, `beta` otherwise.
 4. Builds `CUSTOM_TAG` = `<prefix>-<version>`.
 5. If that tag does not already exist locally, pushes it via
-   `anothrNick/github-tag-action`.
+   `anothrNick/github-tag-action@1.75.0`.
 
-So merging to `master` yields `release-1.2.3`, and a feature-branch push yields
-`beta-1.2.3`.
+So merging to `master` yields `release-1.6.11`, and a feature-branch push
+yields `beta-1.6.11`.
+
+## Version authority
+
+Two numbers travel with a Flutter release and they are owned in different
+places. Before this change both were hand-maintained and the second was a
+ritual; now exactly one thing is edited by a human.
+
+| Number | Owner | Where it is set |
+| --- | --- | --- |
+| Semantic version (`1.6.11`) | `pubspec.yaml` `version:` | edited by a human, read by `tag.yml` |
+| Build number (Android `versionCode`, iOS `CFBundleVersion`) | CI | `github.run_number`, applied by `deploy-reusable.yml` |
+
+`pubspec.yaml` deliberately carries **no `+<build>` suffix**. The previous
+`version: 1.6.11+22` came with a comment saying the `+n` had to be
+incremented by hand on every release even when the semantic version moved —
+easy to forget, and it failed late, at the Play upload, because Play rejects
+a `versionCode` that has already been published.
+
+The release build now takes both numbers from the run rather than from the
+file:
+
+```sh
+flutter build appbundle --build-name="$APP_VERSION" --build-number="$BUILD_NUMBER"
+```
+
+* `APP_VERSION` is parsed out of the tag that triggered the workflow
+  (`release-1.6.11` → `1.6.11`), so the artifact is versioned with the tag
+  that caused it to be built rather than whatever the file happened to say at
+  checkout time. A tag that does not carry a clean `x.y.z` fails the job.
+* `BUILD_NUMBER` is `github.run_number`, which is unique per repository and
+  only ever increases, so it satisfies Play's strictly-increasing
+  `versionCode` rule with no human in the loop. Re-running the same tag
+  yields a new build number, which is what you want from a retry.
+
+The chain is therefore `pubspec.yaml` → tag → build, with one authority per
+number and no step that requires remembering anything.
 
 ## 2. Deployment entrypoints
 
@@ -57,26 +96,61 @@ Inputs: `flutter-version` (default `3.47.4`), `flutter-channel` (default
 Steps, in order:
 
 1. **Checkout.**
-2. **Generate Android Firebase config** — `scripts/generate_build_config.sh
+2. **Resolve release version** — parses `APP_VERSION` from the triggering tag
+   and sets `BUILD_NUMBER` from `github.run_number`; refuses to continue on a
+   tag that does not carry a clean `x.y.z`.
+3. **Generate Android Firebase config** — `scripts/generate_build_config.sh
    android`, fed by `ANDROID_API_KEY` from the step's `env:` mapping.
-3. **Generate web Firebase config** — *only when `publish-web`* —
+4. **Generate web Firebase config** — *only when `publish-web`* —
    `scripts/generate_build_config.sh web`, fed by `WEB_API_KEY`.
-4. **Setup Flutter** with the pub cache enabled.
-5. **Run tests** — `flutter pub get`, `flutter clean`, `flutter test`.
-6. **Cache Gradle** keyed on the Android Gradle files plus `pubspec.lock`.
-7. **Write JKS / Write json** — decode the base64 signing keystore and service
+5. **Setup Flutter** with the Flutter SDK and pub caches enabled.
+6. **Run tests** — `flutter pub get`, `flutter clean`, `flutter test`.
+7. **Cache Gradle** keyed on the Android Gradle files plus `pubspec.lock`.
+8. **Write JKS / Write json** — decode the base64 signing keystore and service
    account into workspace files.
-8. **bundle** — `scripts/generate_build_config.sh keystore` renders
-   `android/key.properties`, then generates launcher icons, builds the AAB and
-   deletes `key.properties`.
-9. **Build web release** — *only when `publish-web`* — `flutter build web
-   --release`, which emits into `build/web`. Verified against Flutter 3.47.4:
-   the tool prints `✓ Built build/web`, and that is the same folder step 10
-   publishes. No web-enabling `flutter config` call is needed (web is on by
-   default and the `web/` runner directory is committed here).
-10. **Deploy pages** — *only when `publish-web`* — publishes `build/web` to
+9. **bundle** — `scripts/generate_build_config.sh keystore` renders
+   `android/key.properties`, then generates launcher icons, builds the AAB
+   with `--build-name` / `--build-number` from step 2, and deletes
+   `key.properties`.
+10. **Build web release** — *only when `publish-web`* — `flutter build web
+    --release`, also carrying `--build-name` / `--build-number`, which emits
+    into `build/web`. Verified against Flutter 3.47.4: the tool prints
+    `✓ Built build/web`, and that is the same folder step 11 publishes. No
+    web-enabling `flutter config` call is needed (web is on by default and
+    the `web/` runner directory is committed here).
+11. **Deploy pages** — *only when `publish-web`* — publishes `build/web` to
     `gh-pages`, which serves the live demo at `https://demo.finside.org`.
-11. **Deploy google play store** — uploads the AAB to `google-play-track`.
+12. **Deploy google play store** — uploads the AAB to `google-play-track`.
+
+## Caching
+
+Every workflow that installs Flutter now caches, so a run that does not touch
+`pubspec.lock` re-downloads nothing:
+
+| Workflow | What is cached | How |
+| --- | --- | --- |
+| `deploy-reusable.yml` | Flutter SDK + pub cache | `subosito/flutter-action` `cache: true` |
+| `deploy-reusable.yml` | Gradle caches and wrapper | `actions/cache@v4` keyed on `android/**/*.gradle`, `gradle-wrapper.properties`, `pubspec.lock` |
+| `tag.yml` | Flutter SDK + pub cache | `subosito/flutter-action` `cache: true` |
+| `test.yaml` | Flutter SDK + pub cache | `subosito/flutter-action` `cache: true` |
+
+`cache: true` covers the pub dependencies as well as the SDK. That is not an
+assumption read off the README — the action's own step guard is:
+
+```yaml
+if: ${{ (inputs.pub-cache == '' && inputs.cache == 'true') || inputs.pub-cache == 'true' }}
+```
+
+so an unset `pub-cache` with `cache: 'true'` takes the pub branch. There *is*
+a separate `pub-cache` input, but it is deliberately not written out:
+`actionlint` 1.7.7 ships a snapshot of action metadata that predates it and
+reports it as an unknown input, so spelling it out would break an otherwise
+clean lint for no behavioural gain. Revisit once the lint metadata catches up
+— and do not "fix" that warning by removing something that works.
+
+`flutter clean` does not undo any of this: it clears `build/` and
+`.dart_tool/`, not `~/.pub-cache`, so the cache survives the clean that runs
+before `flutter pub get`.
 
 ## Generated config (`scripts/generate_build_config.sh`)
 
@@ -150,25 +224,42 @@ consolidation:
   `flutter-version` default, `tag.yml` and `test.yaml`. All three now sit at
   `3.47.4` (with `.metadata` pointing at the matching stable revision), but
   they are still independent literals rather than one value, so a bump has to
-  touch all three. Sharing a single source (a repo variable or reading
-  `.metadata`) is the eventual fix.
-- `anothrNick/github-tag-action` is pinned at `1.34.0`, behind the current
-  release. It is left alone deliberately: this is the action that *creates* the
-  `release-*` / `beta-*` tags, so a regression here silently halts every
-  deployment, and a reusable-workflow tag run cannot be exercised locally.
-  Bump it on a runner where tag creation can actually be observed.
+  touch all three. Sharing a single source (a repo variable, or a
+  `.fvmrc` read through the action's `flutter-version-file` input) is the
+  eventual fix.
+
+Two things worth recording that are *not* defects here, because both look like
+unfinished version bumps and neither is:
+
+- **`subosito/flutter-action` has no `v4` to upgrade to.** The pipeline uses
+  `@v2`, which is the current major line (latest release `v2.23.0`); the
+  action has only ever shipped `v1` and `v2`. `@v4` would not resolve. It is
+  a current pin, not a stale one.
+- **`anothrNick/github-tag-action` was moved `1.34.0` → `1.75.0`.** The
+  upgrade is safe for how this repo uses it: `CUSTOM_TAG` is still honoured,
+  and the README states that setting it "will invalidate any other settings
+  set", which is why the old `RELEASE_BRANCHES: '.*'` entry is gone — it was
+  already dead config under `CUSTOM_TAG`, not a behaviour change. This is the
+  action that creates the `release-*` / `beta-*` tags, so the first run after
+  merging should be watched for the tag actually appearing.
 
 ## Verifying the workflows
 
-`actionlint` (v1.7.7) passes clean on the whole deploy set:
+`actionlint` (v1.7.7) passes clean over every file in `.github/workflows`:
 
 ```sh
-actionlint .github/workflows/deploy-reusable.yml \
-           .github/workflows/deploybeta.yaml \
-           .github/workflows/deployprod.yaml
+actionlint .github/workflows/*.yml .github/workflows/*.yaml
 ```
 
 A reusable workflow cannot be exercised without a real tag, so the change is
 guarded by lint plus a differential check that every step and every secret from
-the two original files still exists somewhere in the new set. The first
-production run after merging this change should be watched end to end.
+the two original files still exists somewhere in the new set. The shell logic
+that does not need a runner — the tag-to-version parse, the `release`/`beta`
+prefix selection, and the rejection of malformed tags — was exercised
+separately, because a workflow that first fails at release time is a bad place
+to discover a quoting mistake.
+
+`actionlint`'s bundled action metadata is a snapshot and can lag the actions it
+checks — see *Caching* for a case where it reports a real input as unknown.
+The first production run after merging this change should be watched end to
+end.
