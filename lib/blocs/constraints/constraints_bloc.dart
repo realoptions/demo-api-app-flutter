@@ -18,7 +18,6 @@ class ConstraintsBloc extends Bloc<ConstraintsEvents, ConstraintsState> {
 
   @override
   Stream<ConstraintsState> mapEventToState(ConstraintsEvents event) async* {
-    print(event);
     if (event is RequestConstraints) {
       yield ConstraintsIsFetching();
       try {
