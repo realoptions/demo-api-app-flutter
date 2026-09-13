@@ -1,11 +1,108 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <!-- Without an explicit viewport the hosted demo renders at desktop width on a
+       phone and the visitor has to pinch-zoom to use a mobile app. -->
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=yes, minimum-scale=1.0">
+  <meta name="color-scheme" content="light">
+
+  <title>Real Options &mdash; European Option Pricing Calculator</title>
+  <meta name="description" content="European option pricing calculator for the Heston, CGMY and Merton jump-diffusion models, with density, implied volatility and value-at-risk plots.">
+
+  <!-- Matches the app's Material teal / orange theme (see ThemeData in lib/main.dart). -->
+  <meta name="theme-color" content="#009688">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Real Options &mdash; European Option Pricing Calculator">
+  <meta property="og:description" content="Price European options under the Heston, CGMY and Merton models and inspect the density, implied volatility and value-at-risk.">
   <meta name="google-signin-client_id" content="117231459701-t0t85k3egn6f6770e1kt5a4uh0gk693b.apps.googleusercontent.com" />
-  <title>Real Options</title>
+
+  <style>
+    /* Boot spinner: main.dart.js is multi-megabyte, so without this the page is
+       plain white while it downloads. Removed on Flutter's first-frame event. */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #fafafa;
+    }
+    #boot-loader {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      background: #fafafa;
+      font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      color: #5f6368;
+      z-index: 9999;
+    }
+    #boot-loader .boot-spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid rgba(0, 150, 136, 0.18);
+      border-top-color: #ff9800;
+      border-radius: 50%;
+      animation: boot-spin 900ms linear infinite;
+    }
+    #boot-loader .boot-label {
+      font-size: 15px;
+      letter-spacing: 0.2px;
+    }
+    #boot-loader .boot-error { color: #b3261e; }
+    @keyframes boot-spin { to { transform: rotate(360deg); } }
+    /* Honour a reduced-motion preference: show a static indicator instead. */
+    @media (prefers-reduced-motion: reduce) {
+      #boot-loader .boot-spinner {
+        animation: none;
+        border-top-color: rgba(255, 152, 0, 0.85);
+      }
+    }
+    /* Keep the loader visible if JS is off rather than showing an empty page. */
+    noscript #boot-noscript {
+      display: block;
+      text-align: center;
+      padding: 40px 24px;
+      font-family: Roboto, -apple-system, sans-serif;
+      color: #b3261e;
+    }
+  </style>
 </head>
 <body>
+  <div id="boot-loader" role="status" aria-live="polite">
+    <div class="boot-spinner" aria-hidden="true"></div>
+    <div class="boot-label" id="boot-label">Loading the option calculator&hellip;</div>
+  </div>
+  <noscript>
+    <div id="boot-noscript">This calculator needs JavaScript enabled.</div>
+  </noscript>
+
+  <script>
+    // Flutter web fires `flutter-first-frame` on the document once it has painted.
+    // Registered before main.dart.js loads so the event cannot be missed.
+    (function () {
+      function dismissBootLoader() {
+        var loader = document.getElementById('boot-loader');
+        if (loader && loader.parentNode) {
+          loader.parentNode.removeChild(loader);
+        }
+      }
+      window.addEventListener('flutter-first-frame', dismissBootLoader);
+
+      // Soft signal only: if the bundle is very slow, say so instead of leaving the
+      // visitor wondering whether the page is broken. Never removes the spinner.
+      window.setTimeout(function () {
+        var label = document.getElementById('boot-label');
+        if (label) {
+          label.textContent = 'Still loading \u2014 the first download is a few megabytes.';
+        }
+      }, 15000);
+    })();
+  </script>
+
   <script src="https://www.gstatic.com/firebasejs/7.9.3/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.9.3/firebase-auth.js"></script>
   <script>
