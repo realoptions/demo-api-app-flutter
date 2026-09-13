@@ -14,8 +14,12 @@ jobs:
     # https://github.com/marketplace/actions/flutter-action
     - uses: subosito/flutter-action@v2
       with:
-        flutter-version: '2.0.0'
-        channel: 'stable' # or: 'dev' or 'beta'
+        # Kept in step with the release pipeline's default (see
+        # .github/workflows/deploy-reusable.yml) and .metadata. The previous 2.x
+        # pin has been out of support for years and cannot resolve this project's
+        # Dart 3 dependency set.
+        flutter-version: '3.47.4'
+        channel: 'stable'
     - name: "Run Flutter Driver tests"
       run: |
         flutter pub get

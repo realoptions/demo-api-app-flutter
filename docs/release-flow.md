@@ -50,7 +50,7 @@ Both call the reusable workflow with `secrets: inherit`.
 
 ## 3. The shared pipeline — `deploy-reusable.yml`
 
-Inputs: `flutter-version` (default `2.0.0`), `flutter-channel` (default
+Inputs: `flutter-version` (default `3.47.4`), `flutter-channel` (default
 `stable`), `publish-web` (default `false`), `google-play-track` (default
 `production`).
 
@@ -69,7 +69,11 @@ Steps, in order:
 8. **bundle** — `scripts/generate_build_config.sh keystore` renders
    `android/key.properties`, then generates launcher icons, builds the AAB and
    deletes `key.properties`.
-9. **Create web app** — *only when `publish-web`*.
+9. **Build web release** — *only when `publish-web`* — `flutter build web
+   --release`, which emits into `build/web`. Verified against Flutter 3.47.4:
+   the tool prints `✓ Built build/web`, and that is the same folder step 10
+   publishes. No web-enabling `flutter config` call is needed (web is on by
+   default and the `web/` runner directory is committed here).
 10. **Deploy pages** — *only when `publish-web`* — publishes `build/web` to
     `gh-pages`, which serves the live demo at `https://demo.finside.org`.
 11. **Deploy google play store** — uploads the AAB to `google-play-track`.
@@ -142,8 +146,12 @@ consolidation:
   template stops new leaks; it does not remove the old value. Rotating that key
   in the Firebase console is the actual fix and has to be done by a project
   owner.
-- `tag.yml` and `test.yaml` still pin Flutter `2.0.0` independently of the
-  reusable workflow's `flutter-version` input.
+- The Flutter version is written in three places — the reusable workflow's
+  `flutter-version` default, `tag.yml` and `test.yaml`. All three now sit at
+  `3.47.4` (with `.metadata` pointing at the matching stable revision), but
+  they are still independent literals rather than one value, so a bump has to
+  touch all three. Sharing a single source (a repo variable or reading
+  `.metadata`) is the eventual fix.
 - `anothrNick/github-tag-action` is pinned at `1.34.0`, behind the current
   release. It is left alone deliberately: this is the action that *creates* the
   `release-*` / `beta-*` tags, so a regression here silently halts every

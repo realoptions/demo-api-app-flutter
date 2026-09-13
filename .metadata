@@ -4,7 +4,16 @@
 # This file should be version controlled and should not be manually edited.
 
 version:
-  revision: 68587a0916366e9512a78df22c44163d041dd5f3
-  channel: stable
+  revision: "9584c6713b324636289d067944a46fd6b49df14b"
+  channel: "stable"
 
 project_type: app
+
+# Deliberately no `migration:` block. Current Flutter writes one whose
+# base_revision asserts that android/, ios/ and web/ already sit at that
+# revision's template baseline. They do not - those directories are still
+# Flutter 2.x-era and hand-customised, and the actual template migration has
+# not been run. Recording a new baseline here would tell future `flutter
+# upgrade`/`flutter create .` runs that nothing needs migrating and quietly
+# hide the real template diff. Add the block by running the template migration
+# for real, not by editing this file.

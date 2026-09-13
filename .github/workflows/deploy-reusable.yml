@@ -18,7 +18,7 @@ on:
         description: "Flutter SDK version used to build and test the release."
         type: string
         required: false
-        default: "2.0.0"
+        default: "3.47.4"
       flutter-channel:
         description: "Flutter release channel."
         type: string
@@ -106,7 +106,7 @@ jobs:
           scripts/generate_build_config.sh keystore
           flutter clean
           flutter pub get
-          flutter packages pub run flutter_launcher_icons:main
+          dart run flutter_launcher_icons:main
           flutter build appbundle
           rm ./android/key.properties
         env:
@@ -116,10 +116,13 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           CI: true
 
-      - name: Create web app
+      - name: Build web release
         if: inputs.publish-web
+        # No web-enabling `flutter config` call here. Web support is on by
+        # default in current Flutter, and the `web/` runner directory is committed
+        # to this repo, so there is nothing left for such a flag to do. (The flag
+        # is still accepted by the CLI, which is why the redundancy was silent.)
         run: |
-          flutter config --enable-web
           flutter build web --release
 
       # NOTE: v4 renamed the v3 inputs (ACCESS_TOKEN/BRANCH/FOLDER -> lowercase,
