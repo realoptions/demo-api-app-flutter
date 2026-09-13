@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:realoptions/models/response.dart';
 import 'package:equatable/equatable.dart';
 
@@ -16,14 +15,14 @@ class IsDensityFetching extends DensityState {
 
 class DensityError extends DensityState {
   final String densityError;
-  DensityError({@required this.densityError});
+  DensityError({required this.densityError});
   @override
   List<Object> get props => [densityError];
 }
 
 class DensityData extends DensityState {
   final DensityAndVaR density;
-  DensityData({@required this.density});
+  DensityData({required this.density});
   @override
   List<Object> get props => [density];
 }

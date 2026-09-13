@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:realoptions/blocs/select_model/select_model_bloc.dart';
 import 'package:realoptions/components/CustomPadding.dart';
 import 'package:realoptions/components/CustomTextFields.dart';
+import 'package:realoptions/models/api_request.dart';
 import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/blocs/form/form_bloc.dart';
 import 'package:realoptions/models/models.dart';
@@ -92,11 +93,12 @@ class FormButton extends StatelessWidget {
               // otherwise.
               if (formKey.currentState.validate()) {
                 formKey.currentState.save();
-                final submittedBody = context.read<FormBloc>().getCurrentForm();
-                final SubmitBody body = SubmitBody(formBody: submittedBody);
-                final jsonBody = body.convertSubmission();
-                context.read<DensityBloc>().getDensity(model.value, jsonBody);
-                context.read<OptionsBloc>().getOptions(model.value, jsonBody);
+                final CalculationRequest request = SubmitBody(
+                  model: model,
+                  formBody: context.read<FormBloc>().getCurrentForm(),
+                ).toRequest();
+                context.read<DensityBloc>().getDensity(request);
+                context.read<OptionsBloc>().getOptions(request);
               }
             },
             child: Text('Submit'),

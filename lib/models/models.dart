@@ -1,5 +1,4 @@
 import 'package:quiver/core.dart' show hash2;
-import 'package:flutter/foundation.dart';
 
 const List<Model> MODEL_CHOICES = const <Model>[
   const Model(label: "Heston", value: "heston"),
@@ -59,7 +58,7 @@ const Map<String, Map<String, double>> DEFAULT_VALUES = {
 class Model {
   final String value;
   final String label;
-  const Model({@required this.value, @required this.label});
+  const Model({required this.value, required this.label});
   @override
   bool operator ==(other) {
     if (other is! Model) {

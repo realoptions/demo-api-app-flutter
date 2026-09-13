@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:realoptions/models/response.dart';
 import 'package:equatable/equatable.dart';
 
@@ -16,14 +15,14 @@ class IsOptionsFetching extends OptionsState {
 
 class OptionsError extends OptionsState {
   final String optionsError;
-  OptionsError({@required this.optionsError});
+  OptionsError({required this.optionsError});
   @override
   List<Object> get props => [optionsError];
 }
 
 class OptionsData extends OptionsState {
-  final Map<String, List<ModelResult>> options;
-  OptionsData({@required this.options});
+  final OptionPrices options;
+  OptionsData({required this.options});
   @override
   List<Object> get props => [options];
 }

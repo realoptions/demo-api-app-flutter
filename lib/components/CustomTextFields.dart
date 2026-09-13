@@ -10,8 +10,6 @@ class StringUtils {
         return double.parse(value);
       case FieldType.Integer:
         return int.parse(value);
-      default:
-        return null; //can never get here.  I miss rust...
     }
   }
 
@@ -21,26 +19,24 @@ class StringUtils {
         return val.toStringAsFixed(2);
       case FieldType.Integer:
         return val.toStringAsFixed(0);
-      default:
-        return "";
     }
   }
 }
 
 class NumberTextField extends StatelessWidget {
   NumberTextField(
-      {Key key,
+      {Key? key,
       this.hintText,
       this.labelText,
       this.defaultValue,
       this.lowValue = double.negativeInfinity,
       this.highValue = double.infinity,
-      @required this.type,
-      @required this.onSaved})
+      required this.type,
+      required this.onSaved})
       : super(key: key);
-  final String hintText;
-  final String labelText;
-  final String defaultValue;
+  final String? hintText;
+  final String? labelText;
+  final String? defaultValue;
   final FieldType type;
   final void Function(String, num) onSaved;
   final StringUtils strUtils = StringUtils();
@@ -56,7 +52,7 @@ class NumberTextField extends StatelessWidget {
           labelText: this.labelText,
         ),
         validator: (value) {
-          if (value.isEmpty) {
+          if (value == null || value.isEmpty) {
             return 'Please enter some text';
           }
           num currentValue;
@@ -79,7 +75,7 @@ class NumberTextField extends StatelessWidget {
           LengthLimitingTextInputFormatter(12),
         ],
         textAlign: TextAlign.right,
-        onSaved: (value) => onSaved(
-            this.labelText, strUtils.getValueFromString(this.type, value)));
+        onSaved: (value) => onSaved(this.labelText ?? '',
+            strUtils.getValueFromString(this.type, value ?? '')));
   }
 }

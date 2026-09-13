@@ -13,20 +13,18 @@ import 'package:realoptions/blocs/constraints/constraints_bloc.dart';
 import 'package:realoptions/blocs/form/form_bloc.dart';
 import 'package:realoptions/blocs/density/density_bloc.dart';
 import 'package:realoptions/blocs/select_page/select_page_bloc.dart';
-import 'package:realoptions/services/finside_service.dart';
 import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/models/response.dart';
 import 'package:realoptions/components/CustomTextFields.dart';
 import '../mocks/api_repository_mock.dart';
-
-class MockFinsideService extends Mock implements FinsideApi {}
+import '../mocks/finside_api_mock.dart';
 
 void main() {
-  MockFinsideService finside;
-  List<InputConstraint> constraints;
-  MockFirebaseAuth auth;
-  MockApiRepository apiRepository;
-  ApiBloc apiBloc;
+  late MockFinsideService finside;
+  late List<InputConstraint> constraints;
+  late MockFirebaseAuth auth;
+  late MockApiRepository apiRepository;
+  late ApiBloc apiBloc;
   setUp(() {
     finside = MockFinsideService();
     constraints = [
@@ -43,8 +41,6 @@ void main() {
     apiBloc = ApiBloc(firebaseAuth: auth, apiRepository: apiRepository);
   });
   tearDown(() {
-    finside = null;
-    constraints = null;
     apiBloc.close();
   });
   void stubRetrieveData() {
@@ -53,17 +49,19 @@ void main() {
   }
 
   void stubRetrieveOptions() {
-    when(finside.fetchOptionPrices(any, any)).thenAnswer((_) => Future.value({
-          "call": [ModelResult(value: 4, atPoint: 4)],
-          "put": [ModelResult(value: 4, atPoint: 4)]
-        }));
+    when(finside.fetchOptionPrices(any)).thenAnswer((_) => Future.value(
+        OptionPrices(calls: [
+          ModelResult(value: 4, atPoint: 4)
+        ], puts: [
+          ModelResult(value: 4, atPoint: 4)
+        ])));
   }
 
   void stubRetrieveDensity() {
     var results = DensityAndVaR(
         density: [ModelResult(atPoint: 4, value: 3)],
         riskMetrics: VaRResult(valueAtRisk: 0.3, expectedShortfall: 0.4));
-    when(finside.fetchDensityAndVaR(any, any))
+    when(finside.fetchDensityAndVaR(any))
         .thenAnswer((_) => Future.value(results));
   }
 

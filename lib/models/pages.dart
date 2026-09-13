@@ -4,9 +4,9 @@ import 'package:quiver/core.dart' show hash2;
 
 class PageEntry {
   PageEntry({
-    @required this.widget,
-    @required this.icon,
-    @required this.text,
+    required this.widget,
+    required this.icon,
+    required this.text,
   });
   final Widget widget;
   final Widget icon;
@@ -14,7 +14,7 @@ class PageEntry {
 }
 
 class PageState {
-  PageState({@required this.index, @required this.showBadges});
+  PageState({required this.index, required this.showBadges});
   int index;
   final List<bool> showBadges;
   @override

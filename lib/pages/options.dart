@@ -31,16 +31,16 @@ class ShowOptionPrices extends StatelessWidget {
 }
 
 class _OptionPrices extends StatelessWidget {
-  final Map<String, List<ModelResult>> options;
-  _OptionPrices({@required this.options});
+  final OptionPrices options;
+  _OptionPrices({required this.options});
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     final charts.Color callColor = utils.convertColor(themeData.primaryColor);
     final charts.Color putColor = utils.convertColor(themeData.accentColor);
 
-    final callPrices = options["call"];
-    final putPrices = options["put"];
+    final List<ModelResult> callPrices = options.calls;
+    final List<ModelResult> putPrices = options.puts;
     var optionSeries = [
       charts.Series(
         id: 'Call Prices',

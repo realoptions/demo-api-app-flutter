@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:realoptions/models/models.dart';
 
-abstract class ConstraintsEvents {}
+abstract class ConstraintsEvents {
+  const ConstraintsEvents();
+}
 
 class RequestConstraints extends ConstraintsEvents {
-  Model model;
-  RequestConstraints({@required this.model});
+  final Model model;
+  const RequestConstraints({required this.model});
 }

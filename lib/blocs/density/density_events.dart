@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:realoptions/models/api_request.dart';
 
-abstract class DensityEvents {}
+abstract class DensityEvents {
+  const DensityEvents();
+}
 
 class RequestDensity extends DensityEvents {
-  final Map<String, dynamic> body;
-  String model;
-  RequestDensity({@required this.body, @required this.model});
+  const RequestDensity({required this.request});
+
+  final CalculationRequest request;
 }

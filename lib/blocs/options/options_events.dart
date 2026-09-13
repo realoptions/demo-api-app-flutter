@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:realoptions/models/api_request.dart';
 
-abstract class OptionsEvents {}
+abstract class OptionsEvents {
+  const OptionsEvents();
+}
 
 class RequestOptions extends OptionsEvents {
-  final Map<String, dynamic> body;
-  final String model;
-  RequestOptions({@required this.body, @required this.model});
+  const RequestOptions({required this.request});
+
+  final CalculationRequest request;
 }
