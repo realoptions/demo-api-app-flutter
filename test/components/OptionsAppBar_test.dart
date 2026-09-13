@@ -7,7 +7,7 @@ import 'package:realoptions/blocs/constraints/constraints_bloc.dart';
 import 'package:realoptions/blocs/select_model/select_model_bloc.dart';
 import 'package:realoptions/components/OptionsAppBar.dart';
 import 'package:realoptions/models/models.dart';
-import '../../mocks/api_repository_mock.dart';
+import '../mocks/api_repository_mock.dart';
 import 'Scaffold_test.dart';
 
 void main() {

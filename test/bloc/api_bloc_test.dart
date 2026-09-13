@@ -3,7 +3,7 @@ import 'package:realoptions/blocs/api/api_bloc.dart';
 import 'package:realoptions/blocs/api/api_state.dart';
 import 'package:realoptions/blocs/api/api_events.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
-import '../../mocks/api_repository_mock.dart';
+import '../mocks/api_repository_mock.dart';
 import 'package:bloc_test/bloc_test.dart';
 
 void main() {

@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:realoptions/blocs/api/api_bloc.dart';
 import 'package:realoptions/pages/intro.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
-import '../../mocks/api_repository_mock.dart';
+import '../mocks/api_repository_mock.dart';
 
 void main() {
   MockFirebaseAuth auth;

@@ -14,7 +14,7 @@ import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/models/response.dart';
 import 'package:realoptions/components/AppScaffold.dart';
 import 'package:realoptions/components/CustomTextFields.dart';
-import '../../mocks/api_repository_mock.dart';
+import '../mocks/api_repository_mock.dart';
 
 class MockFinsideService extends Mock implements FinsideApi {}
 
