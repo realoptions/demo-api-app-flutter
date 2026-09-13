@@ -45,7 +45,7 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCNMugQ6OBLqmlJVJNVGDmmcgkW61Ha7lE"
+          "current_key": "${ANDROID_API_KEY}"
         }
       ],
       "services": {

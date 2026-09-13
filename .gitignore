@@ -72,6 +72,14 @@
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 
+# Generated build config. These are rendered from the committed
+# **/*.template files by scripts/generate_build_config.sh, which substitutes the
+# credentials from the environment. The rendered files must stay untracked so a
+# live key can never be committed (and never needs to be sed'ed into a tracked
+# file by CI).
+android/app/google-services.json
+web/index.html
+
 node_modules
 *.xz
 apisprout

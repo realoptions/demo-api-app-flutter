@@ -24,21 +24,43 @@ jobs:
         flutter-version: '2.0.0'
         channel: 'stable' # or: 'dev' or 'beta'
     - name: "Run Flutter Driver tests"
+      # The Codecov token is exposed as an environment variable only. The uploader
+      # reads CODECOV_TOKEN itself, so the value never has to appear in the
+      # command line (where it would sit in the script text and in `ps` output).
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       run: |
         flutter pub get
         flutter clean
         flutter test --coverage
-        bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
+        bash <(curl -s https://codecov.io/bash)
     - name: set flutter version
-      run: echo "FLUTTER_VERSION=$(grep 'version:' pubspec.yaml | tail -n1 | cut -c 10- | sed 's/+.*//')" >> $GITHUB_ENV
+      run: echo "FLUTTER_VERSION=$(grep 'version:' pubspec.yaml | tail -n1 | cut -c 10- | sed 's/+.*//')" >> "$GITHUB_ENV"
     - name: get branch name
-      run: echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
+      run: echo "BRANCH_NAME=${GITHUB_REF##*/}" >> "$GITHUB_ENV"
+    # The branch name is attacker-influenced text (a branch can be named almost
+    # anything), so it reaches the shell through an env mapping and is quoted
+    # everywhere it is used - never interpolated into the script body.
     - name: get branch tag
-      run: echo "RELEASE_TAG=$([ ${{ env.BRANCH_NAME }} == master ] && echo \"release\" || echo \"beta\")" >> $GITHUB_ENV
+      env:
+        BRANCH_NAME: ${{ env.BRANCH_NAME }}
+      run: echo "RELEASE_TAG=$([ "$BRANCH_NAME" = master ] && echo release || echo beta)" >> "$GITHUB_ENV"
     - name: get tag
-      run: echo "CUSTOM_TAG=${{ env.RELEASE_TAG }}-${{ env.FLUTTER_VERSION }}" >> $GITHUB_ENV
+      env:
+        RELEASE_TAG: ${{ env.RELEASE_TAG }}
+        FLUTTER_VERSION: ${{ env.FLUTTER_VERSION }}
+      run: echo "CUSTOM_TAG=${RELEASE_TAG}-${FLUTTER_VERSION}" >> "$GITHUB_ENV"
+    # `git tag | grep -q $TAG` treated the tag as a regex and let its contents
+    # steer the command; an exact ref lookup answers the same question safely.
     - name: does tag exist
-      run: echo "TAG_DOES_NOT_EXIST=$(git tag | grep -q ${{ env.CUSTOM_TAG }} ; echo $?)" >> $GITHUB_ENV    
+      env:
+        CUSTOM_TAG: ${{ env.CUSTOM_TAG }}
+      run: |
+        if [ -n "$(git tag --list "$CUSTOM_TAG")" ]; then
+          echo "TAG_DOES_NOT_EXIST=0" >> "$GITHUB_ENV"
+        else
+          echo "TAG_DOES_NOT_EXIST=1" >> "$GITHUB_ENV"
+        fi
     - name: Bump version and push tag
       uses: anothrNick/github-tag-action@1.34.0
       if: env.TAG_DOES_NOT_EXIST=='1'

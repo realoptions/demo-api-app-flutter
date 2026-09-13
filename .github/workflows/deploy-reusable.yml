@@ -45,14 +45,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Insert Android API key
-        run: |
-          sed -i "s/API_KEY/${{ secrets.ANDROID_API_KEY }}/g" ./android/app/google-services.json
+      # Credentials are never substituted into a tracked file. The tracked
+      # artifacts are `*.template` files with no live value in them; this renders
+      # the real config into the (gitignored) path the build reads. The secret is
+      # only ever referenced from this `env:` mapping, never inside the script
+      # body, and the script keeps the value out of any child process argv.
+      - name: Generate Android Firebase config
+        env:
+          ANDROID_API_KEY: ${{ secrets.ANDROID_API_KEY }}
+        run: scripts/generate_build_config.sh android
 
-      - name: Insert web API key
+      - name: Generate web Firebase config
         if: inputs.publish-web
-        run: |
-          sed -i "s/API_KEY/${{ secrets.WEB_API_KEY }}/g" ./web/index.html
+        env:
+          WEB_API_KEY: ${{ secrets.WEB_API_KEY }}
+        run: scripts/generate_build_config.sh web
 
       # Cache the pub cache before `flutter pub get` so repeat releases reuse it.
       - name: Setup Flutter
@@ -96,10 +103,7 @@ jobs:
 
       - name: bundle
         run: |
-          echo "storePassword=$ANDROID_KEY_STORE_PASSWORD" > ./android/key.properties
-          echo "keyPassword=$ANDROID_KEY_PASSWORD" >> ./android/key.properties
-          echo "keyAlias=$ANDROID_KEY_ALIAS" >> ./android/key.properties
-          echo "storeFile=$ANDROID_KEYSTORE_PATH" >> ./android/key.properties
+          scripts/generate_build_config.sh keystore
           flutter clean
           flutter pub get
           flutter packages pub run flutter_launcher_icons:main

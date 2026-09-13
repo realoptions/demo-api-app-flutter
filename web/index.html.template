@@ -108,7 +108,7 @@
   <script>
     // Your web app's Firebase configuration
     var firebaseConfig = {
-      apiKey: "API_KEY",
+      apiKey: "${WEB_API_KEY}",
       authDomain: "finside.firebaseapp.com",
       databaseURL: "https://finside.firebaseio.com",
       projectId: "finside",

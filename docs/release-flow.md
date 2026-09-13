@@ -57,27 +57,68 @@ Inputs: `flutter-version` (default `2.0.0`), `flutter-channel` (default
 Steps, in order:
 
 1. **Checkout.**
-2. **Insert Android API key** — substitutes `ANDROID_API_KEY` into
-   `android/app/google-services.json`.
-3. **Insert web API key** — *only when `publish-web`* — substitutes
-   `WEB_API_KEY` into `web/index.html`.
+2. **Generate Android Firebase config** — `scripts/generate_build_config.sh
+   android`, fed by `ANDROID_API_KEY` from the step's `env:` mapping.
+3. **Generate web Firebase config** — *only when `publish-web`* —
+   `scripts/generate_build_config.sh web`, fed by `WEB_API_KEY`.
 4. **Setup Flutter** with the pub cache enabled.
 5. **Run tests** — `flutter pub get`, `flutter clean`, `flutter test`.
 6. **Cache Gradle** keyed on the Android Gradle files plus `pubspec.lock`.
 7. **Write JKS / Write json** — decode the base64 signing keystore and service
    account into workspace files.
-8. **bundle** — writes `android/key.properties` from the env vars, generates
-   launcher icons, builds the AAB, then deletes `key.properties`.
+8. **bundle** — `scripts/generate_build_config.sh keystore` renders
+   `android/key.properties`, then generates launcher icons, builds the AAB and
+   deletes `key.properties`.
 9. **Create web app** — *only when `publish-web`*.
 10. **Deploy pages** — *only when `publish-web`* — publishes `build/web` to
     `gh-pages`, which serves the live demo at `https://demo.finside.org`.
 11. **Deploy google play store** — uploads the AAB to `google-play-track`.
 
+## Generated config (`scripts/generate_build_config.sh`)
+
+Nothing that carries a credential is ever a tracked file, and no workflow mutates
+a tracked file at build time.
+
+Tracked, credential-free templates:
+
+| Template | Rendered to (gitignored) | Placeholder source |
+| --- | --- | --- |
+| `android/app/google-services.json.template` | `android/app/google-services.json` | `ANDROID_API_KEY` |
+| `web/index.html.template` | `web/index.html` | `WEB_API_KEY` |
+| `android/key.properties.template` | `android/key.properties` | `ANDROID_KEY_*`, `ANDROID_KEYSTORE_PATH` |
+
+Rules the script enforces:
+
+- Every value comes from the environment. It never takes a credential as a
+  command-line argument and never echoes one.
+- Substitution is done with shell parameter expansion, not by shelling out to
+  `sed`, so the value never appears in a child process `argv` (visible in `ps`).
+- A missing or empty variable is a hard error rather than a silently rendered
+  blank — a release fails loudly instead of shipping a config with an empty key.
+- Output is written with `umask 077` (owner-only).
+- After substitution the generated file is re-checked for the placeholder it was
+  supposed to fill, so a typo in a template cannot survive.
+
+The same script serves local development; use a throwaway value when you do not
+have the real credential:
+
+```sh
+ANDROID_API_KEY=local-dev scripts/generate_build_config.sh android
+WEB_API_KEY=local-dev     scripts/generate_build_config.sh web
+```
+
+Re-running the Android render with the real project key reproduces the file that
+used to be committed byte-for-byte (plus a trailing newline), which is what
+`apply plugin: 'com.google.gms.google-services'` needs at build time.
+
 ## Required repository secrets
+
+Every one of these is consumed through a step-level `env:` mapping; none is
+interpolated into the text of a `run:` script.
 
 | Secret | Used for |
 | --- | --- |
-| `ANDROID_API_KEY` | Android `google-services.json` |
+| `ANDROID_API_KEY` | Android `google-services.json` (rendered) |
 | `WEB_API_KEY` | web `index.html` (production only) |
 | `SIGN_KEY_JKS` | base64 signing keystore |
 | `SERVICE_ACCOUNT_JSON` | base64 Play service account |
@@ -85,22 +126,22 @@ Steps, in order:
 | `ANDROID_KEY_ALIAS` | key alias |
 | `ANDROID_KEY_PASSWORD` | key password |
 | `ACCESS_TOKEN` | PAT for pushing `gh-pages` and creating tags |
-| `CODECOV_TOKEN` | coverage upload (in `tag.yml`) |
+| `CODECOV_TOKEN` | coverage upload (in `tag.yml`), read from the environment |
 
 ## Known issues in the current design
 
 Documented here because they are deliberately *not* changed by this
 consolidation:
 
-- Steps 2, 3 and 9 mutate **tracked files** to inject secrets. That is the
-  subject of `workspace-e24.1`.
-- `flutter config --enable-web` and `flutter packages pub run` are deprecated
-  invocations kept verbatim; removing them is `workspace-b0p.2`.
-- `tag.yml` passes `CODECOV_TOKEN` as a **command-line argument** to a script
-  fetched with `curl` (`bash <(curl ...)`). Command-line arguments are visible
-  in the process table and in shell traces, so this is a weaker channel than an
-  environment variable, and piping a remote script straight into a shell is a
-  supply-chain risk. Worth migrating to the pinned `codecov/codecov-action`.
+- Piping the Codecov uploader straight from `curl` into a shell is still a
+  supply-chain risk (the token itself is now passed via `CODECOV_TOKEN` in the
+  environment instead of a command-line argument, but the *script* is still
+  unpinned). Worth migrating to a pinned `codecov/codecov-action`.
+- The live Android API key that used to sit in the committed
+  `android/app/google-services.json` is still in git history. Moving it to a
+  template stops new leaks; it does not remove the old value. Rotating that key
+  in the Firebase console is the actual fix and has to be done by a project
+  owner.
 - `tag.yml` and `test.yaml` still pin Flutter `2.0.0` independently of the
   reusable workflow's `flutter-version` input.
 - `anothrNick/github-tag-action` is pinned at `1.34.0`, behind the current
