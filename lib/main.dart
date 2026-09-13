@@ -9,10 +9,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:realoptions/repositories/api_repository.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:realoptions/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  // Web options come from the build environment (see FirebaseConfig); off the web
+  // they are null so the native SDK reads its own google-services.json.
+  if (kIsWeb && FirebaseConfig.webApiKey.isEmpty) {
+    debugPrint(
+      'WARNING: FIREBASE_WEB_API_KEY was not supplied at build time, so Firebase '
+      'sign-in will fail. Render the config and pass it to the build: '
+      'WEB_API_KEY=<key> scripts/generate_build_config.sh web, then build/run '
+      'with --dart-define-from-file=config/firebase_config.json.',
+    );
+  }
+  await Firebase.initializeApp(options: FirebaseConfig.forCurrentPlatform);
   runApp(MyApp());
 }
 

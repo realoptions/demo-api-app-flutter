@@ -18,7 +18,7 @@
 #
 # Environment variables read (never echoed):
 #   ANDROID_API_KEY              -> android/app/google-services.json
-#   WEB_API_KEY                  -> web/index.html
+#   WEB_API_KEY                  -> config/firebase_config.json
 #   ANDROID_KEYSTORE_PATH        -> android/key.properties   (release only)
 #   ANDROID_KEY_STORE_PASSWORD   -> android/key.properties   (release only)
 #   ANDROID_KEY_ALIAS            -> android/key.properties   (release only)
@@ -92,7 +92,13 @@ case "$1" in
       ANDROID_API_KEY "${ANDROID_API_KEY:-}"
     ;;
   web)
-    render web/index.html.template web/index.html \
+    # index.html no longer carries the key: it is a plain template now (no
+    # placeholders), rendered only because the build reads web/index.html and
+    # that path is gitignored. The Firebase key goes into a dart-define-from-file
+    # JSON instead, so it never appears in the shipped HTML nor in any argv.
+    render web/index.html.template web/index.html
+    render config/firebase_config.json.template \
+      config/firebase_config.json \
       WEB_API_KEY "${WEB_API_KEY:-}"
     ;;
   keystore)

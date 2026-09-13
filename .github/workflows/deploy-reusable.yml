@@ -59,6 +59,8 @@ jobs:
         if: inputs.publish-web
         env:
           WEB_API_KEY: ${{ secrets.WEB_API_KEY }}
+        # Renders web/index.html plus config/firebase_config.json; the key is read
+        # back from that file by the build below rather than passed as an argument.
         run: scripts/generate_build_config.sh web
 
       # Cache the pub cache before `flutter pub get` so repeat releases reuse it.
@@ -123,7 +125,7 @@ jobs:
         # to this repo, so there is nothing left for such a flag to do. (The flag
         # is still accepted by the CLI, which is why the redundancy was silent.)
         run: |
-          flutter build web --release
+          flutter build web --release --dart-define-from-file=config/firebase_config.json
 
       # NOTE: v4 renamed the v3 inputs (ACCESS_TOKEN/BRANCH/FOLDER -> lowercase,
       # and the credential input is `token`, NOT `github-token`). The classic PAT
