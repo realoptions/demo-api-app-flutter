@@ -49,6 +49,22 @@ class MockApiRepository extends AuthRepository {
   }
 
   @override
+  Future<User> signInAsGuest(FirebaseAuth auth) async {
+    // Mirrors the production rule: reuse whatever session exists rather than
+    // minting a new uid per visit, and never downgrade a signed-in user.
+    final User? current = auth.currentUser;
+    if (current != null) {
+      return current;
+    }
+    final UserCredential userCredential = await auth.signInAnonymously();
+    final User? user = userCredential.user;
+    if (user == null) {
+      throw StateError('Anonymous sign-in returned no user');
+    }
+    return user;
+  }
+
+  @override
   Future<User> convertCredentialToUser(
       FirebaseAuth auth, AuthCredential credential) async {
     final UserCredential userCredential =

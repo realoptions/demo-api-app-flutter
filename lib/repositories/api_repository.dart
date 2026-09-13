@@ -1,14 +1,25 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:realoptions/firebase_options.dart';
 
 abstract class AuthRepository {
   Future<AuthCredential> handleGoogleSignIn(FirebaseAuth auth);
   Future<User> convertCredentialToUser(
       FirebaseAuth auth, AuthCredential credential);
   Future<AuthCredential> handleFacebookSignIn(FirebaseAuth auth);
+
+  /// Signs in without a social identity provider, for the hosted demo.
+  ///
+  /// Returns the signed-in [User] rather than an [AuthCredential] because
+  /// anonymous auth has no external credential to exchange: `signInAnonymously`
+  /// yields the user directly, so the `convertCredentialToUser` step the social
+  /// paths need does not exist here.
+  Future<User> signInAsGuest(FirebaseAuth auth);
+
   Future<String> getToken(User user);
 }
 
@@ -35,25 +46,41 @@ class FacebookSignInException implements Exception {
 }
 
 class ApiRepository extends AuthRepository {
-  // NOTE: not migrated in this change (out of scope, tracked by the Firebase
-  // upgrade work). This is still the google_sign_in v5/6 call shape and does not
-  // compile against the v7 API that is currently pinned in pubspec.yaml
-  // (v7 has no `GoogleSignIn()` constructor and no `signIn()`; it uses
-  // `GoogleSignIn.instance.initialize()` + `authenticate()`). Migrating it here
-  // would mean picking a serverClientId/`clientId` source, which belongs with
-  // centralising the app's Firebase config rather than with the Facebook swap.
+  /// google_sign_in v7 exposes a singleton that must be initialised exactly once,
+  /// with its future awaited, before any other call on it. The v5/v6 shape this
+  /// file used — construct a `GoogleSignIn()` per sign-in — no longer exists, so
+  /// the one-shot lives here and is shared across attempts.
+  ///
+  /// Memoised rather than done in `main()` so that a build which never reaches
+  /// Google sign-in never pays for it, and so the guarantee lives next to the
+  /// only caller.
+  Future<void>? _googleSignInInit;
+
+  Future<void> _ensureGoogleSignInInitialized() {
+    return _googleSignInInit ??= GoogleSignIn.instance.initialize(
+      // The web OAuth client ID comes from the centralised Firebase web config
+      // (lib/firebase_options.dart), not from the `google-signin-client_id`
+      // meta tag it used to be read out of. Null off the web, where the
+      // platform configuration files supply it.
+      clientId: kIsWeb ? FirebaseConfig.googleWebClientId : null,
+    );
+  }
+
   @override
   Future<AuthCredential> handleGoogleSignIn(FirebaseAuth auth) async {
-    final GoogleSignIn _googleSignIn = GoogleSignIn();
-    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
-
-    final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-    return credential;
+    await _ensureGoogleSignInInitialized();
+    // v7 replaced `signIn()` with `authenticate()`, and the account's
+    // `authentication` is a synchronous getter that now carries only an
+    // `idToken` (the access token moved to a separate client-authorization
+    // call the Firebase exchange does not need).
+    final GoogleSignInAccount googleUser =
+        await GoogleSignIn.instance.authenticate();
+    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+    final String? idToken = googleAuth.idToken;
+    if (idToken == null) {
+      throw StateError('Google sign-in returned no ID token');
+    }
+    return GoogleAuthProvider.credential(idToken: idToken);
   }
 
   /// Signs the user in with Facebook and returns the matching Firebase
@@ -98,6 +125,34 @@ class ApiRepository extends AuthRepository {
     }
 
     return FacebookAuthProvider.credential(token.tokenString);
+  }
+
+  /// Signs in anonymously so the hosted demo can be used without a social
+  /// account.
+  ///
+  /// An existing session is reused rather than signed in again.
+  ///
+  /// For an anonymous user that is a correctness point: `signInAnonymously`
+  /// creates a *new* Firebase user every time it is called on a signed-out
+  /// client, so re-entering the demo would otherwise mint a fresh uid per visit
+  /// and pile up throwaway accounts on the project.
+  ///
+  /// For a non-anonymous (socially signed-in) user it is a safety point: "continue
+  /// as guest" is not a sign-out, and silently replacing a signed-in social
+  /// session with an anonymous one would be a surprising thing for that button to
+  /// do. The existing session is returned untouched.
+  @override
+  Future<User> signInAsGuest(FirebaseAuth auth) async {
+    final User? current = auth.currentUser;
+    if (current != null) {
+      return current;
+    }
+    final UserCredential userCredential = await auth.signInAnonymously();
+    final User? user = userCredential.user;
+    if (user == null) {
+      throw StateError('Anonymous sign-in returned no user');
+    }
+    return user;
   }
 
   /// Exchanges [credential] for a signed-in [User].

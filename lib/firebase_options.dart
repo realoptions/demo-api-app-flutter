@@ -28,6 +28,23 @@ class FirebaseConfig {
   /// The Firebase web API key, or `''` when it was not supplied at build time.
   static const String webApiKey = String.fromEnvironment('FIREBASE_WEB_API_KEY');
 
+  /// Google OAuth client ID for this app, used by `google_sign_in` on the web.
+  ///
+  /// Not a secret — it identifies the app to Google and authenticates nothing,
+  /// which is why the previous copy of it could sit in a public `<meta>` tag on
+  /// every page of the demo. It lives here rather than in HTML so there is one
+  /// place that knows it, and it can be overridden per build with
+  /// `--dart-define=GOOGLE_WEB_CLIENT_ID=...` (or via
+  /// `config/firebase_config.json`).
+  ///
+  /// Off the web this is not used: Android and iOS take the client ID from their
+  /// own platform configuration files.
+  static const String googleWebClientId = String.fromEnvironment(
+    'GOOGLE_WEB_CLIENT_ID',
+    defaultValue:
+        '117231459701-t0t85k3egn6f6770e1kt5a4uh0gk693b.apps.googleusercontent.com',
+  );
+
   /// Web app options; [apiKey] comes from the build environment, see above.
   static const FirebaseOptions webOptions = FirebaseOptions(
     apiKey: webApiKey,
