@@ -173,6 +173,16 @@ jobs:
         run: |
           flutter build web --release --build-name="$APP_VERSION" --build-number="$BUILD_NUMBER" --dart-define-from-file=config/firebase_config.json
 
+      # `flutter build web` emits unversioned filenames, and GitHub Pages answers
+      # them with max-age=600, so without this a visitor can keep getting the
+      # previous release's bootstrap - and through it the previous app - for as
+      # long as that cache holds. Tagging each URL with a content hash makes every
+      # deploy a cache miss for what changed and still cacheable for what did not.
+      # See scripts/cache_bust_web.sh.
+      - name: Cache-bust the web bundle
+        if: inputs.publish-web
+        run: scripts/cache_bust_web.sh build/web
+
       # NOTE: v4 renamed the v3 inputs (ACCESS_TOKEN/BRANCH/FOLDER -> lowercase,
       # and the credential input is `token`, NOT `github-token`). The classic PAT
       # is kept as the push credential to preserve the previous publish behaviour.
