@@ -12,14 +12,14 @@ void main() {
       build: () => SelectPageBloc(),
       act: (bloc) => bloc.setPage(1),
       expect: () => [
-        PageState(index: 1, showBadges: [false, false, false])
-      ]);
+            PageState(index: 1, showBadges: [false, false, false])
+          ]);
   blocTest('emits new badge when updating index',
       build: () => SelectPageBloc(),
       act: (bloc) => bloc.setBadge(1),
       expect: () => [
-        PageState(index: 0, showBadges: [false, true, false])
-      ]);
+            PageState(index: 0, showBadges: [false, true, false])
+          ]);
   blocTest('emits new page and then adjusts badge',
       build: () => SelectPageBloc(),
       act: (bloc) {
@@ -29,9 +29,9 @@ void main() {
         bloc.setPage(1);
       },
       expect: () => [
-        PageState(index: 1, showBadges: [false, false, false]),
-        PageState(index: 0, showBadges: [false, false, false]),
-        PageState(index: 0, showBadges: [false, true, false]),
-        PageState(index: 1, showBadges: [false, false, false])
-      ]);
+            PageState(index: 1, showBadges: [false, false, false]),
+            PageState(index: 0, showBadges: [false, false, false]),
+            PageState(index: 0, showBadges: [false, true, false]),
+            PageState(index: 1, showBadges: [false, false, false])
+          ]);
 }

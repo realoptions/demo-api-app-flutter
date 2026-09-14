@@ -45,11 +45,9 @@ void main() {
 
   void stubRetrieveOptions() {
     when(finside.fetchOptionPrices(any)).thenAnswer((_) => Future.value(
-        OptionPrices(calls: [
-          ModelResult(value: 4, atPoint: 4)
-        ], puts: [
-          ModelResult(value: 4, atPoint: 4)
-        ])));
+        OptionPrices(
+            calls: [ModelResult(value: 4, atPoint: 4)],
+            puts: [ModelResult(value: 4, atPoint: 4)])));
   }
 
   void stubRetrieveDensity() {
@@ -151,8 +149,7 @@ void main() {
     // Saving the form writes every rendered field, not only the edited one, so
     // the assertion is on the field that was changed rather than on the whole
     // map.
-    expect(
-        bloc.getCurrentForm()["asset"],
+    expect(bloc.getCurrentForm()["asset"],
         SubmitItems(value: 2.5, inputType: InputType.Market));
     verify(finside.fetchOptionPrices(any)).called(1);
     verify(finside.fetchDensityAndVaR(any)).called(1);

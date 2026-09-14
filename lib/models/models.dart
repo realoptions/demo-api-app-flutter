@@ -1,4 +1,3 @@
-
 const List<Model> MODEL_CHOICES = const <Model>[
   const Model(label: "Heston", value: "heston"),
   const Model(label: "CGMY", value: "cgmy"),

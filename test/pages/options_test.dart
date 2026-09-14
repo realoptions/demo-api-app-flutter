@@ -19,7 +19,10 @@ void main() {
       ModelResult(value: 4, atPoint: 4, iv: 0.3),
       ModelResult(value: 5, atPoint: 5, iv: 0.3)
     ],
-    puts: [ModelResult(value: 4, atPoint: 4), ModelResult(value: 5, atPoint: 5)],
+    puts: [
+      ModelResult(value: 4, atPoint: 4),
+      ModelResult(value: 5, atPoint: 5)
+    ],
   );
 
   setUp(() {
@@ -52,7 +55,8 @@ void main() {
 
   testWidgets('Options shows error if error', (WidgetTester tester) async {
     stubRetrieveDataWithError();
-    final bloc = OptionsBloc(finside: finside, selectPageBloc: SelectPageBloc());
+    final bloc =
+        OptionsBloc(finside: finside, selectPageBloc: SelectPageBloc());
     await tester.pumpWidget(wrap(bloc));
     await tester.pumpAndSettle();
     expect(find.text("Please submit parameters!"), findsOneWidget);
@@ -65,7 +69,8 @@ void main() {
   testWidgets('Input no error or progress when data is returned',
       (WidgetTester tester) async {
     stubRetrieveData();
-    final bloc = OptionsBloc(finside: finside, selectPageBloc: SelectPageBloc());
+    final bloc =
+        OptionsBloc(finside: finside, selectPageBloc: SelectPageBloc());
     await tester.pumpWidget(wrap(bloc));
     await tester.pumpAndSettle();
     expect(find.text("Big error!"), findsNothing);
@@ -78,7 +83,8 @@ void main() {
       (WidgetTester tester) async {
     stubRetrieveData();
 
-    final bloc = OptionsBloc(finside: finside, selectPageBloc: SelectPageBloc());
+    final bloc =
+        OptionsBloc(finside: finside, selectPageBloc: SelectPageBloc());
     await tester.pumpWidget(wrap(bloc));
     await tester.pumpAndSettle();
     bloc.getOptions(hestonRequest());

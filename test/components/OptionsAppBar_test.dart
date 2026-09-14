@@ -24,9 +24,8 @@ void main() {
     apiBloc = ApiBloc(firebaseAuth: auth, apiRepository: apiRepository);
     // Switching the model in the app bar fires a constraints fetch; the shared
     // mock throws on any unstubbed call, so give it an empty answer.
-    when(finside.fetchConstraints(any))
-        .thenAnswer((_) => Future<List<InputConstraint>>.value(
-            <InputConstraint>[]));
+    when(finside.fetchConstraints(any)).thenAnswer(
+        (_) => Future<List<InputConstraint>>.value(<InputConstraint>[]));
   });
   tearDown(() {
     apiBloc.close();

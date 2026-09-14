@@ -31,7 +31,8 @@ void main() {
       const range = AxisRange(0, 10, ticks: 5);
       expect(range.interval, 2.5);
       for (var i = 1; i < range.values.length; i++) {
-        expect(range.values[i] - range.values[i - 1], closeTo(range.interval, 1e-12));
+        expect(range.values[i] - range.values[i - 1],
+            closeTo(range.interval, 1e-12));
       }
     });
 

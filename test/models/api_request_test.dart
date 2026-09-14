@@ -11,44 +11,52 @@ import 'package:realoptions/models/models.dart';
 void main() {
   group('CfParameters.forModel', () {
     test('dispatches to the class for the named model', () {
-      expect(CfParameters.forModel('heston', const {
-        'v0': 0.3,
-        'speed': 1.5,
-        'eta_v': 1.5,
-        'sigma': 0.35,
-        'rho': -0.2,
-      }), isA<HestonParameters>());
-      expect(CfParameters.forModel('cgmy', const {
-        'c': 0.5,
-        'g': 10.0,
-        'm': 10.0,
-        'y': 0.5,
-        'sigma': 0.35,
-        'v0': 0.98,
-        'speed': 1.5,
-        'eta_v': 1.5,
-        'rho': -0.2,
-      }), isA<CgmyParameters>());
-      expect(CfParameters.forModel('cgmyse', const {
-        'c': 0.5,
-        'g': 10.0,
-        'm': 10.0,
-        'y': 0.5,
-        'sigma': 0.35,
-        'v0': 0.98,
-        'speed': 0.5,
-        'eta_v': 0.2,
-      }), isA<CgmyseParameters>());
-      expect(CfParameters.forModel('merton', const {
-        'lambda': 1.0,
-        'mu_l': -0.2,
-        'sig_l': 1.0,
-        'sigma': 0.35,
-        'v0': 0.98,
-        'speed': 1.5,
-        'eta_v': 1.5,
-        'rho': -0.2,
-      }), isA<MertonParameters>());
+      expect(
+          CfParameters.forModel('heston', const {
+            'v0': 0.3,
+            'speed': 1.5,
+            'eta_v': 1.5,
+            'sigma': 0.35,
+            'rho': -0.2,
+          }),
+          isA<HestonParameters>());
+      expect(
+          CfParameters.forModel('cgmy', const {
+            'c': 0.5,
+            'g': 10.0,
+            'm': 10.0,
+            'y': 0.5,
+            'sigma': 0.35,
+            'v0': 0.98,
+            'speed': 1.5,
+            'eta_v': 1.5,
+            'rho': -0.2,
+          }),
+          isA<CgmyParameters>());
+      expect(
+          CfParameters.forModel('cgmyse', const {
+            'c': 0.5,
+            'g': 10.0,
+            'm': 10.0,
+            'y': 0.5,
+            'sigma': 0.35,
+            'v0': 0.98,
+            'speed': 0.5,
+            'eta_v': 0.2,
+          }),
+          isA<CgmyseParameters>());
+      expect(
+          CfParameters.forModel('merton', const {
+            'lambda': 1.0,
+            'mu_l': -0.2,
+            'sig_l': 1.0,
+            'sigma': 0.35,
+            'v0': 0.98,
+            'speed': 1.5,
+            'eta_v': 1.5,
+            'rho': -0.2,
+          }),
+          isA<MertonParameters>());
     });
 
     test('refuses a model it has no typed set for', () {
@@ -63,11 +71,10 @@ void main() {
       for (final Model model in MODEL_CHOICES) {
         // A model with no typed class says so outright; anything else means the
         // dispatch found the class and got as far as checking its parameters.
-        expect(() => CfParameters.forModel(model.value, const {}),
-            throwsA(isA<RequestMappingException>().having(
-                (e) => e.message,
-                'message',
-                isNot(startsWith('no typed cf_parameters')))),
+        expect(
+            () => CfParameters.forModel(model.value, const {}),
+            throwsA(isA<RequestMappingException>().having((e) => e.message,
+                'message', isNot(startsWith('no typed cf_parameters')))),
             reason: '${model.value} is selectable but has no typed parameters');
       }
     });
@@ -75,103 +82,113 @@ void main() {
 
   group('toJson round-trips the wire keys', () {
     test('heston', () {
-      expect(const HestonParameters(
-        v0: 0.3,
-        speed: 1.5,
-        etaV: 1.5,
-        sigma: 0.35,
-        rho: -0.2,
-      ).toJson(), {
-        'v0': 0.3,
-        'speed': 1.5,
-        'eta_v': 1.5,
-        'sigma': 0.35,
-        'rho': -0.2,
-      });
+      expect(
+          const HestonParameters(
+            v0: 0.3,
+            speed: 1.5,
+            etaV: 1.5,
+            sigma: 0.35,
+            rho: -0.2,
+          ).toJson(),
+          {
+            'v0': 0.3,
+            'speed': 1.5,
+            'eta_v': 1.5,
+            'sigma': 0.35,
+            'rho': -0.2,
+          });
     });
 
     test('cgmy', () {
-      expect(const CgmyParameters(
-        c: 0.5,
-        g: 10.0,
-        m: 10.0,
-        y: 0.5,
-        sigma: 0.35,
-        v0: 0.98,
-        speed: 1.5,
-        etaV: 1.5,
-        rho: -0.2,
-      ).toJson(), {
-        'c': 0.5,
-        'g': 10.0,
-        'm': 10.0,
-        'y': 0.5,
-        'sigma': 0.35,
-        'v0': 0.98,
-        'speed': 1.5,
-        'eta_v': 1.5,
-        'rho': -0.2,
-      });
+      expect(
+          const CgmyParameters(
+            c: 0.5,
+            g: 10.0,
+            m: 10.0,
+            y: 0.5,
+            sigma: 0.35,
+            v0: 0.98,
+            speed: 1.5,
+            etaV: 1.5,
+            rho: -0.2,
+          ).toJson(),
+          {
+            'c': 0.5,
+            'g': 10.0,
+            'm': 10.0,
+            'y': 0.5,
+            'sigma': 0.35,
+            'v0': 0.98,
+            'speed': 1.5,
+            'eta_v': 1.5,
+            'rho': -0.2,
+          });
     });
 
     test('cgmyse', () {
-      expect(const CgmyseParameters(
-        c: 0.5,
-        g: 10.0,
-        m: 10.0,
-        y: 0.5,
-        sigma: 0.35,
-        v0: 0.98,
-        speed: 0.5,
-        etaV: 0.2,
-      ).toJson(), {
-        'c': 0.5,
-        'g': 10.0,
-        'm': 10.0,
-        'y': 0.5,
-        'sigma': 0.35,
-        'v0': 0.98,
-        'speed': 0.5,
-        'eta_v': 0.2,
-      });
+      expect(
+          const CgmyseParameters(
+            c: 0.5,
+            g: 10.0,
+            m: 10.0,
+            y: 0.5,
+            sigma: 0.35,
+            v0: 0.98,
+            speed: 0.5,
+            etaV: 0.2,
+          ).toJson(),
+          {
+            'c': 0.5,
+            'g': 10.0,
+            'm': 10.0,
+            'y': 0.5,
+            'sigma': 0.35,
+            'v0': 0.98,
+            'speed': 0.5,
+            'eta_v': 0.2,
+          });
     });
 
     test('merton', () {
-      expect(const MertonParameters(
-        lambda: 1.0,
-        muL: -0.2,
-        sigL: 1.0,
-        sigma: 0.35,
-        v0: 0.98,
-        speed: 1.5,
-        etaV: 1.5,
-        rho: -0.2,
-      ).toJson(), {
-        'lambda': 1.0,
-        'mu_l': -0.2,
-        'sig_l': 1.0,
-        'sigma': 0.35,
-        'v0': 0.98,
-        'speed': 1.5,
-        'eta_v': 1.5,
-        'rho': -0.2,
-      });
+      expect(
+          const MertonParameters(
+            lambda: 1.0,
+            muL: -0.2,
+            sigL: 1.0,
+            sigma: 0.35,
+            v0: 0.98,
+            speed: 1.5,
+            etaV: 1.5,
+            rho: -0.2,
+          ).toJson(),
+          {
+            'lambda': 1.0,
+            'mu_l': -0.2,
+            'sig_l': 1.0,
+            'sigma': 0.35,
+            'v0': 0.98,
+            'speed': 1.5,
+            'eta_v': 1.5,
+            'rho': -0.2,
+          });
     });
 
     test('market', () {
-      expect(const MarketParameters(
-        asset: 50.0,
-        maturity: 1.0,
-        numU: 8,
-        quantile: 0.05,
-        rate: 0.04,
-      ).toJson(), {
-        'asset': 50.0,
-        'maturity': 1.0,
-        'num_u': 8,
-        'quantile': 0.05,
-        'rate': 0.04,
-      });
+      expect(
+          const MarketParameters(
+            asset: 50.0,
+            maturity: 1.0,
+            numU: 8,
+            quantile: 0.05,
+            rate: 0.04,
+          ).toJson(),
+          {
+            'asset': 50.0,
+            'maturity': 1.0,
+            'num_u': 8,
+            'quantile': 0.05,
+            'rate': 0.04,
+          });
     });
   });
 
@@ -218,7 +235,8 @@ void main() {
     });
   });
 
-  test('CalculationRequest nests cf_parameters and keeps strikes alongside market',
+  test(
+      'CalculationRequest nests cf_parameters and keeps strikes alongside market',
       () {
     const CalculationRequest request = CalculationRequest(
       model: Model(label: "Heston", value: "heston"),
@@ -246,7 +264,6 @@ void main() {
     // And the two blocks stay separate: no market key leaks into cf_parameters
     // and no cf key leaks out of it.
     expect(json.containsKey('v0'), isFalse);
-    expect(
-        (json[CfParameters.wireKey] as Map).containsKey('asset'), isFalse);
+    expect((json[CfParameters.wireKey] as Map).containsKey('asset'), isFalse);
   });
 }

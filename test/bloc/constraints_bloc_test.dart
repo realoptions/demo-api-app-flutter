@@ -64,10 +64,8 @@ void main() {
     },
     act: (bloc) => bloc.add(
         RequestConstraints(model: Model(label: "Heston", value: "heston"))),
-    expect: () => [
-      ConstraintsIsFetching(),
-      ConstraintsData(constraints: constraints)
-    ],
+    expect: () =>
+        [ConstraintsIsFetching(), ConstraintsData(constraints: constraints)],
   );
   blocTest(
     'emits [error] when error is returned',

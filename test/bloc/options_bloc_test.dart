@@ -63,6 +63,7 @@ void main() {
       return bloc;
     },
     act: (bloc) => bloc.add(RequestOptions(request: request)),
-    expect: () => [IsOptionsFetching(), OptionsError(optionsError: "Some Error")],
+    expect: () =>
+        [IsOptionsFetching(), OptionsError(optionsError: "Some Error")],
   );
 }

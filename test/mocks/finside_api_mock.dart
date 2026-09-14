@@ -38,19 +38,19 @@ class MockFinsideService extends Mock implements FinsideApi {
   @override
   Future<List<InputConstraint>> fetchConstraints(String? model) =>
       super.noSuchMethod(Invocation.method(#fetchConstraints, [model]),
-              returnValue: Future<List<InputConstraint>>.value(
-                  _placeholderConstraints))
+              returnValue:
+                  Future<List<InputConstraint>>.value(_placeholderConstraints))
           as Future<List<InputConstraint>>;
 
   @override
   Future<DensityAndVaR> fetchDensityAndVaR(CalculationRequest? request) =>
       super.noSuchMethod(Invocation.method(#fetchDensityAndVaR, [request]),
-          returnValue: Future<DensityAndVaR>.value(_placeholderDensity))
+              returnValue: Future<DensityAndVaR>.value(_placeholderDensity))
           as Future<DensityAndVaR>;
 
   @override
   Future<OptionPrices> fetchOptionPrices(CalculationRequest? request) =>
       super.noSuchMethod(Invocation.method(#fetchOptionPrices, [request]),
-          returnValue: Future<OptionPrices>.value(_placeholderPrices))
+              returnValue: Future<OptionPrices>.value(_placeholderPrices))
           as Future<OptionPrices>;
 }

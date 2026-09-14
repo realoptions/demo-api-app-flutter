@@ -10,31 +10,33 @@ import '../support/form_fixtures.dart';
 
 void main() {
   test('generateStrikes', () {
-    expect(
-        generateStrikes(asset: 4.0, numStrikes: 3, percentRange: 0.25),
+    expect(generateStrikes(asset: 4.0, numStrikes: 3, percentRange: 0.25),
         [3.0, 4.0, 5.0]);
-    expect(
-        generateStrikes(asset: 4.0, numStrikes: 3, percentRange: 0.5),
+    expect(generateStrikes(asset: 4.0, numStrikes: 3, percentRange: 0.5),
         [2.0, 4.0, 6.0]);
   });
   test('toRequest splits the form on its market/model tags', () {
     final CalculationRequest request =
         SubmitBody(model: heston, formBody: fullHestonForm()).toRequest();
     expect(request.model, heston);
-    expect(request.market, const MarketParameters(
-      asset: 4.0,
-      maturity: 1.0,
-      numU: 8,
-      quantile: 0.05,
-      rate: 0.04,
-    ));
-    expect(request.cfParameters, const HestonParameters(
-      v0: 0.3,
-      speed: 1.5,
-      etaV: 1.5,
-      sigma: 0.35,
-      rho: -0.2,
-    ));
+    expect(
+        request.market,
+        const MarketParameters(
+          asset: 4.0,
+          maturity: 1.0,
+          numU: 8,
+          quantile: 0.05,
+          rate: 0.04,
+        ));
+    expect(
+        request.cfParameters,
+        const HestonParameters(
+          v0: 0.3,
+          speed: 1.5,
+          etaV: 1.5,
+          sigma: 0.35,
+          rho: -0.2,
+        ));
     expect(request.strikes.length, NUM_STRIKES);
   });
   test('toRequest produces the wire payload the endpoints expect', () {
@@ -61,12 +63,11 @@ void main() {
   // downstream could tell that `maturity` had never been sent. These pin the
   // opposite behaviour: the mapping refuses rather than omits.
   test('toRequest rejects a submission missing a market parameter', () {
-    final Map<String, SubmitItems> form = fullHestonForm()
-      ..remove("maturity");
+    final Map<String, SubmitItems> form = fullHestonForm()..remove("maturity");
     expect(
         () => SubmitBody(model: heston, formBody: form).toRequest(),
-        throwsA(isA<RequestMappingException>().having(
-            (e) => e.message, 'message', contains('"maturity"'))));
+        throwsA(isA<RequestMappingException>()
+            .having((e) => e.message, 'message', contains('"maturity"'))));
   });
   test('toRequest rejects a model parameter the selected model does not define',
       () {
@@ -76,8 +77,8 @@ void main() {
       ..["lambda"] = SubmitItems(value: 1.0, inputType: InputType.Model);
     expect(
         () => SubmitBody(model: heston, formBody: form).toRequest(),
-        throwsA(isA<RequestMappingException>().having(
-            (e) => e.message, 'message', contains("lambda"))));
+        throwsA(isA<RequestMappingException>()
+            .having((e) => e.message, 'message', contains("lambda"))));
   });
   test('toRequest rejects a model with no typed parameter set', () {
     final Map<String, SubmitItems> form = fullHestonForm();

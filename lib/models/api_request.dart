@@ -36,7 +36,8 @@ class _ValueReader {
   num take(String key) {
     final num? value = _remaining.remove(key);
     if (value == null) {
-      throw RequestMappingException('$_owner is missing required parameter "$key"');
+      throw RequestMappingException(
+          '$_owner is missing required parameter "$key"');
     }
     return value;
   }

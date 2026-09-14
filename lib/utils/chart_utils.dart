@@ -29,7 +29,8 @@ class AxisRange {
 
   double get interval => ticks > 1 ? (max - min) / (ticks - 1) : 0.0;
 
-  List<double> get values => [for (var i = 0; i < ticks; i++) min + interval * i];
+  List<double> get values =>
+      [for (var i = 0; i < ticks; i++) min + interval * i];
 
   /// Titles for one side of an axis spanning this range.
   SideTitles sideTitles({double reservedSize = 44}) => SideTitles(
@@ -98,8 +99,7 @@ List<FlSpot> toSpots(
   double Function(ModelResult result) y,
 ) =>
     [
-      for (final ModelResult r in results)
-        FlSpot(r.atPoint.toDouble(), y(r)),
+      for (final ModelResult r in results) FlSpot(r.atPoint.toDouble(), y(r)),
     ];
 
 /// One swatch-and-label pair in a [ChartLegend].

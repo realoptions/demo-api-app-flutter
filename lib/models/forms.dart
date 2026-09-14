@@ -4,6 +4,7 @@ import 'package:realoptions/models/models.dart';
 import 'package:realoptions/models/response.dart';
 
 enum InputType { Model, Market }
+
 const String MARKET_NAME = "market";
 
 /// One form field, as described by the API's `parameter_ranges`.
@@ -73,8 +74,7 @@ List<InputConstraint> parseJson(Map<String, ParameterRange> ranges,
         name: entry.key,
         lower: range.lower,
         upper: range.upper,
-        fieldType:
-            range.type == 'float' ? FieldType.Float : FieldType.Integer,
+        fieldType: range.type == 'float' ? FieldType.Float : FieldType.Integer,
         defaultValue: entry.value,
         inputType: model == MARKET_NAME ? InputType.Market : InputType.Model,
         description: range.description);

@@ -53,7 +53,8 @@ void main() {
 
   testWidgets('Density shows parameter message', (WidgetTester tester) async {
     stubRetrieveDataWithError();
-    final bloc = DensityBloc(finside: finside, selectPageBloc: SelectPageBloc());
+    final bloc =
+        DensityBloc(finside: finside, selectPageBloc: SelectPageBloc());
     await tester.pumpWidget(wrap(bloc));
     await tester.pumpAndSettle();
     expect(find.text("Please submit parameters!"), findsOneWidget);
@@ -62,7 +63,8 @@ void main() {
 
   testWidgets('Density shows error if error', (WidgetTester tester) async {
     stubRetrieveDataWithError();
-    final bloc = DensityBloc(finside: finside, selectPageBloc: SelectPageBloc());
+    final bloc =
+        DensityBloc(finside: finside, selectPageBloc: SelectPageBloc());
     await tester.pumpWidget(wrap(bloc));
     await tester.pumpAndSettle();
     expect(find.text("Please submit parameters!"), findsOneWidget);
@@ -75,7 +77,8 @@ void main() {
   testWidgets('Input no error or progress when data is returned',
       (WidgetTester tester) async {
     stubRetrieveData();
-    final bloc = DensityBloc(finside: finside, selectPageBloc: SelectPageBloc());
+    final bloc =
+        DensityBloc(finside: finside, selectPageBloc: SelectPageBloc());
     await tester.pumpWidget(wrap(bloc));
     await tester.pumpAndSettle();
     expect(find.text("Big error!"), findsNothing);
@@ -87,7 +90,8 @@ void main() {
       (WidgetTester tester) async {
     stubRetrieveData();
 
-    final bloc = DensityBloc(finside: finside, selectPageBloc: SelectPageBloc());
+    final bloc =
+        DensityBloc(finside: finside, selectPageBloc: SelectPageBloc());
     await tester.pumpWidget(wrap(bloc));
     await tester.pumpAndSettle();
 

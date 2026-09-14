@@ -53,8 +53,7 @@ class FinsideApi {
       if (response.statusCode == 200) {
         final Map<String, dynamic> decoded = json.decode(response.body);
         final Map<String, ParameterRange> ranges = decoded.map(
-            (String key, dynamic value) => MapEntry(
-                key,
+            (String key, dynamic value) => MapEntry(key,
                 ParameterRange.fromJson(Map<String, dynamic>.from(value))));
         return parseJson(ranges, DEFAULT_VALUES[model]!, model);
       } else {
@@ -120,8 +119,8 @@ class FinsideApi {
   Future<List<ModelResult>> _fetchModelDensity(CalculationRequest request) {
     return _client
         .post(
-            Uri.parse(p.join(BASE_ENDPOINT, API_VERSION, request.model.value,
-                "density")),
+            Uri.parse(p.join(
+                BASE_ENDPOINT, API_VERSION, request.model.value, "density")),
             headers: _getHeaders(),
             body: jsonEncode(request.toJson()))
         .then(_parseResult);
@@ -130,8 +129,8 @@ class FinsideApi {
   Future<VaRResult> _fetchModelValueAtRisk(CalculationRequest request) {
     return _client
         .post(
-            Uri.parse(p.join(BASE_ENDPOINT, API_VERSION, request.model.value,
-                "riskmetric")),
+            Uri.parse(p.join(
+                BASE_ENDPOINT, API_VERSION, request.model.value, "riskmetric")),
             headers: _getHeaders(),
             body: jsonEncode(request.toJson()))
         .then(_parseMetric);
@@ -140,12 +139,11 @@ class FinsideApi {
   Future<DensityAndVaR> fetchDensityAndVaR(CalculationRequest request) {
     // The two futures have different result types, so `Future.wait` infers
     // `Object` for the list element and the pair has to be cast back out here.
-    return Future.wait<Object>([
-      _fetchModelDensity(request),
-      _fetchModelValueAtRisk(request)
-    ]).then((results) => DensityAndVaR(
-        density: results[0] as List<ModelResult>,
-        riskMetrics: results[1] as VaRResult));
+    return Future.wait<Object>(
+            [_fetchModelDensity(request), _fetchModelValueAtRisk(request)])
+        .then((results) => DensityAndVaR(
+            density: results[0] as List<ModelResult>,
+            riskMetrics: results[1] as VaRResult));
   }
 
   Future<OptionPrices> fetchOptionPrices(CalculationRequest request) {

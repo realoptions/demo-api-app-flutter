@@ -46,7 +46,8 @@ class _FakeFacebookAuthPlatform extends FacebookAuthPlatform {
     requestedPermissions.add(permissions);
     requestedBehaviors.add(loginBehavior);
     if (queued.isEmpty) {
-      throw StateError('test did not queue a LoginResult for login #$loginCalls');
+      throw StateError(
+          'test did not queue a LoginResult for login #$loginCalls');
     }
     return queued.removeAt(0);
   }
@@ -85,7 +86,8 @@ class _FakeFacebookAuthPlatform extends FacebookAuthPlatform {
       throw UnimplementedError('not used by ApiRepository');
 
   @override
-  Future<void> logOut() => throw UnimplementedError('not used by ApiRepository');
+  Future<void> logOut() =>
+      throw UnimplementedError('not used by ApiRepository');
 
   @override
   Future<AccessToken?> get accessToken =>
@@ -178,11 +180,13 @@ void main() {
       // always passes its own default down). Asserting equality against the
       // wrapper default is what proves nothing is being overridden here, and the
       // explicit webOnly check documents the thing that had to go away.
-      expect(platform.requestedBehaviors.single, LoginBehavior.nativeWithFallback);
+      expect(
+          platform.requestedBehaviors.single, LoginBehavior.nativeWithFallback);
       expect(platform.requestedBehaviors.single, isNot(LoginBehavior.webOnly));
     });
 
-    test('surfaces a cancellation as an error instead of a null token', () async {
+    test('surfaces a cancellation as an error instead of a null token',
+        () async {
       platform.queueResult(LoginResult(status: LoginStatus.cancelled));
 
       Object? thrown;
@@ -221,7 +225,8 @@ void main() {
     });
 
     test('treats a login already in progress as a failure', () async {
-      platform.queueResult(LoginResult(status: LoginStatus.operationInProgress));
+      platform
+          .queueResult(LoginResult(status: LoginStatus.operationInProgress));
 
       expect(repo.handleFacebookSignIn(auth),
           throwsA(isA<FacebookSignInException>()));

@@ -62,6 +62,7 @@ void main() {
       return bloc;
     },
     act: (bloc) => bloc.add(RequestDensity(request: request)),
-    expect: () => [IsDensityFetching(), DensityError(densityError: "Some Error")],
+    expect: () =>
+        [IsDensityFetching(), DensityError(densityError: "Some Error")],
   );
 }

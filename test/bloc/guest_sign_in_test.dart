@@ -76,7 +76,8 @@ void main() {
       );
     });
 
-    test('only the literal "true" enables it, so a typo cannot open the door', () {
+    test('only the literal "true" enables it, so a typo cannot open the door',
+        () {
       expect(
         DemoConfig.resolveGuestLogin(isWeb: false, override: 'yes'),
         isFalse,

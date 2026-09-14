@@ -47,11 +47,9 @@ void main() {
 
   void stubRetrieveOptions() {
     when(finside.fetchOptionPrices(any)).thenAnswer((_) => Future.value(
-        OptionPrices(calls: [
-          ModelResult(value: 4, atPoint: 4)
-        ], puts: [
-          ModelResult(value: 4, atPoint: 4)
-        ])));
+        OptionPrices(
+            calls: [ModelResult(value: 4, atPoint: 4)],
+            puts: [ModelResult(value: 4, atPoint: 4)])));
   }
 
   void stubRetrieveDataWithError() {

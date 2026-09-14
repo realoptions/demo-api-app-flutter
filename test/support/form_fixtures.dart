@@ -40,12 +40,12 @@ CalculationRequest hestonRequest() =>
 /// parameters it never had, so the fixture has to describe what the API
 /// actually sends back.
 List<InputConstraint> fullHestonConstraints() => [
-      for (final MapEntry<String, SubmitItems> entry in fullHestonForm().entries)
+      for (final MapEntry<String, SubmitItems> entry
+          in fullHestonForm().entries)
         InputConstraint(
           name: entry.key,
-          fieldType: entry.value.value is int
-              ? FieldType.Integer
-              : FieldType.Float,
+          fieldType:
+              entry.value.value is int ? FieldType.Integer : FieldType.Float,
           inputType: entry.value.inputType,
           defaultValue: entry.value.value,
           // Wide bounds: the fixture's job is to let every default through,

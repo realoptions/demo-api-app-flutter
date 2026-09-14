@@ -107,14 +107,17 @@ void main() {
 
   group('SubmitItems', () {
     test('equal by value hashes equal', () {
-      const SubmitItems a = SubmitItems(value: 2.5, inputType: InputType.Market);
-      const SubmitItems b = SubmitItems(value: 2.5, inputType: InputType.Market);
+      const SubmitItems a =
+          SubmitItems(value: 2.5, inputType: InputType.Market);
+      const SubmitItems b =
+          SubmitItems(value: 2.5, inputType: InputType.Market);
       expect(a, equals(b));
       expect(a.hashCode, equals(b.hashCode));
     });
 
     test('inputType participates in equality', () {
-      const SubmitItems a = SubmitItems(value: 2.5, inputType: InputType.Market);
+      const SubmitItems a =
+          SubmitItems(value: 2.5, inputType: InputType.Market);
       const SubmitItems b = SubmitItems(value: 2.5, inputType: InputType.Model);
       expect(a, isNot(equals(b)));
     });
@@ -122,15 +125,19 @@ void main() {
 
   group('FormItem', () {
     test('equal by value hashes equal', () {
-      final FormItem a = FormItem(valueAtLastSubmit: '1.0', constraint: constraint());
-      final FormItem b = FormItem(valueAtLastSubmit: '1.0', constraint: constraint());
+      final FormItem a =
+          FormItem(valueAtLastSubmit: '1.0', constraint: constraint());
+      final FormItem b =
+          FormItem(valueAtLastSubmit: '1.0', constraint: constraint());
       expect(a, equals(b));
       expect(a.hashCode, equals(b.hashCode));
     });
 
     test('a different last-submitted value separates them', () {
-      final FormItem a = FormItem(valueAtLastSubmit: '1.0', constraint: constraint());
-      final FormItem b = FormItem(valueAtLastSubmit: '2.0', constraint: constraint());
+      final FormItem a =
+          FormItem(valueAtLastSubmit: '1.0', constraint: constraint());
+      final FormItem b =
+          FormItem(valueAtLastSubmit: '2.0', constraint: constraint());
       expect(a, isNot(equals(b)));
     });
   });

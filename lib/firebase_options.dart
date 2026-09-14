@@ -26,7 +26,8 @@ class FirebaseConfig {
   const FirebaseConfig._();
 
   /// The Firebase web API key, or `''` when it was not supplied at build time.
-  static const String webApiKey = String.fromEnvironment('FIREBASE_WEB_API_KEY');
+  static const String webApiKey =
+      String.fromEnvironment('FIREBASE_WEB_API_KEY');
 
   /// Google OAuth client ID for this app, used by `google_sign_in` on the web.
   ///
