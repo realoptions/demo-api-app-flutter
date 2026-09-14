@@ -1,30 +1,30 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility that Flutter provides. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:badges/badges.dart';
+
 import 'package:realoptions/components/ShowBadge.dart';
 
 void main() {
-  testWidgets('Shows badge if showBadge is true', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(Directionality(
-        textDirection: TextDirection.ltr,
-        child: ShowBadge(icon: Icon(Icons.event), showBadge: true)));
+  testWidgets('draws the dot over the icon when showBadge is true',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: ShowBadge(icon: Icon(Icons.event), showBadge: true),
+    ));
     expect(find.byIcon(Icons.event), findsOneWidget);
-    expect(find.byType(Badge), findsOneWidget);
+    final Badge badge = tester.widget(find.byType(Badge));
+    expect(badge.isLabelVisible, isTrue);
   });
-  testWidgets('Shows badge if showBadge is false', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(Directionality(
-        textDirection: TextDirection.ltr,
-        child: ShowBadge(icon: Icon(Icons.event), showBadge: false)));
+
+  testWidgets('hides the dot when showBadge is false, keeping the icon',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: ShowBadge(icon: Icon(Icons.event), showBadge: false),
+    ));
     expect(find.byIcon(Icons.event), findsOneWidget);
-    expect(find.byType(Badge), findsNothing);
+    // The Badge widget stays mounted either way - it is the label that toggles,
+    // not the widget - so the assertion is on visibility rather than presence.
+    final Badge badge = tester.widget(find.byType(Badge));
+    expect(badge.isLabelVisible, isFalse);
   });
 }

@@ -6,23 +6,29 @@ import 'package:realoptions/blocs/api/api_bloc.dart';
 import 'package:realoptions/blocs/constraints/constraints_bloc.dart';
 import 'package:realoptions/blocs/select_model/select_model_bloc.dart';
 import 'package:realoptions/components/OptionsAppBar.dart';
+import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/models/models.dart';
+import 'package:mockito/mockito.dart';
 import '../mocks/api_repository_mock.dart';
 import '../mocks/finside_api_mock.dart';
 
 void main() {
-  MockFinsideService finside;
-  MockFirebaseAuth auth;
-  MockApiRepository apiRepository;
-  ApiBloc apiBloc;
+  late MockFinsideService finside;
+  late MockFirebaseAuth auth;
+  late MockApiRepository apiRepository;
+  late ApiBloc apiBloc;
   setUp(() {
     finside = MockFinsideService();
     auth = MockFirebaseAuth(signedIn: true);
     apiRepository = MockApiRepository();
     apiBloc = ApiBloc(firebaseAuth: auth, apiRepository: apiRepository);
+    // Switching the model in the app bar fires a constraints fetch; the shared
+    // mock throws on any unstubbed call, so give it an empty answer.
+    when(finside.fetchConstraints(any))
+        .thenAnswer((_) => Future<List<InputConstraint>>.value(
+            <InputConstraint>[]));
   });
   tearDown(() {
-    finside = null;
     apiBloc.close();
   });
   testWidgets('AppBar displays with no inputs', (WidgetTester tester) async {

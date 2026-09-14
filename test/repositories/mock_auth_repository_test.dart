@@ -11,17 +11,12 @@ import '../mocks/api_repository_mock.dart';
 /// "signed in with Facebook" assertion meaningless. These tests pin each path to
 /// its own provider id so a copy-paste regression fails loudly.
 void main() {
-  MockApiRepository repo;
-  FirebaseAuth auth;
+  late MockApiRepository repo;
+  late FirebaseAuth auth;
 
   setUp(() {
     repo = MockApiRepository();
     auth = MockFirebaseAuth();
-  });
-
-  tearDown(() {
-    repo = null;
-    auth = null;
   });
 
   test('fake Facebook sign-in returns a facebook.com credential', () async {

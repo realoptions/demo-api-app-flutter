@@ -4,33 +4,34 @@ import 'package:flutter/material.dart';
 @immutable
 class CustomRaisedButton extends StatelessWidget {
   const CustomRaisedButton({
-    Key key,
-    @required this.child,
+    super.key,
+    required this.child,
     this.color,
     this.textColor,
     this.height = 50.0,
     this.borderRadius = 4.0,
     this.loading = false,
     this.onPressed,
-  }) : super(key: key);
+  });
+
   final Widget child;
-  final Color color;
-  final Color textColor;
+  final Color? color;
+  final Color? textColor;
   final double height;
   final double borderRadius;
   final bool loading;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   Widget buildSpinner(BuildContext context) {
-    final ThemeData data = Theme.of(context);
-    return Theme(
-      data: data.copyWith(accentColor: Colors.white70),
-      child: SizedBox(
-        width: 28,
-        height: 28,
-        child: CircularProgressIndicator(
-          strokeWidth: 3.0,
-        ),
+    // The old version recoloured `ThemeData.accentColor` and relied on
+    // CircularProgressIndicator picking it up. accentColor no longer exists, and
+    // the indicator takes a colour directly, so the Theme override is gone.
+    return const SizedBox(
+      width: 28,
+      height: 28,
+      child: CircularProgressIndicator(
+        strokeWidth: 3.0,
+        color: Colors.white70,
       ),
     );
   }
@@ -39,7 +40,9 @@ class CustomRaisedButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final ButtonStyle style = ElevatedButton.styleFrom(
       textStyle: TextStyle(color: textColor),
-      primary: color,
+      // `primary:` was the fill colour in the old styleFrom signature; it is
+      // `backgroundColor:` now.
+      backgroundColor: color,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(borderRadius),

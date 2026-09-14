@@ -7,13 +7,10 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import '../mocks/api_repository_mock.dart';
 
 void main() {
-  MockFirebaseAuth auth;
+  late MockFirebaseAuth auth;
 
   setUp(() {
     auth = MockFirebaseAuth();
-  });
-  tearDown(() {
-    auth = null;
   });
 
   testWidgets('Updates api key on change', (WidgetTester tester) async {
@@ -27,17 +24,23 @@ void main() {
       ),
       theme: ThemeData(
           primarySwatch: Colors.teal,
-          accentColor: Colors.orange,
-          buttonTheme: ButtonThemeData(
+          // Mirrors the app theme: `accentColor` is gone, the scheme's secondary
+          // slot replaces it, and `bodyText2` is `bodyLarge`.
+          colorScheme: ColorScheme.fromSwatch(
+            primarySwatch: Colors.teal,
+          ).copyWith(secondary: Colors.orange),
+          buttonTheme: const ButtonThemeData(
             buttonColor: Colors.orange,
           ),
-          textTheme: TextTheme(
-            bodyText2: TextStyle(
+          textTheme: const TextTheme(
+            bodyLarge: TextStyle(
               fontSize: 15.0,
             ),
           )),
     ));
     await tester.pumpAndSettle();
-    bloc.close();
+    // On the real clock: `await bloc.close()` never lands under testWidgets'
+    // fake clock (see the note in density_test.dart).
+    await tester.runAsync(bloc.close);
   });
 }

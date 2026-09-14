@@ -11,5 +11,7 @@ void main() {
   blocTest('emits other model when setting model',
       build: () => SelectModelBloc(),
       act: (bloc) => bloc.setModel(Model(label: "CGMY", value: "cgmy")),
-      expect: [Model(label: "CGMY", value: "cgmy")]);
+      // bloc_test 10 takes a thunk so the expected list is built after the act
+      // step, not before it.
+      expect: () => [Model(label: "CGMY", value: "cgmy")]);
 }

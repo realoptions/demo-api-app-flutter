@@ -19,7 +19,7 @@ import 'package:realoptions/blocs/select_page/select_page_bloc.dart';
 import 'package:realoptions/blocs/form/form_bloc.dart';
 
 class AppScaffold extends StatelessWidget {
-  AppScaffold({Key key, @required this.title, @required this.apiKey});
+  const AppScaffold({super.key, required this.title, required this.apiKey});
   final String title;
   final String apiKey;
 
@@ -39,12 +39,11 @@ class AppScaffold extends StatelessWidget {
 }
 
 class WaitForConstraints extends StatelessWidget {
-  const WaitForConstraints(
-      {Key key,
-      @required this.title,
-      //@required this.selectPageBloc,
-      @required this.finside})
-      : super(key: key);
+  const WaitForConstraints({
+    super.key,
+    required this.title,
+    required this.finside,
+  });
   final String title;
   final FinsideApi finside;
   //final SelectPageBloc selectPageBloc;
@@ -83,7 +82,7 @@ class WaitForConstraints extends StatelessWidget {
 }
 
 class _Scaffold extends StatelessWidget {
-  _Scaffold({@required this.title});
+  _Scaffold({required this.title});
   final String title;
   final PageStorageBucket _bucket = PageStorageBucket();
   List<PageEntry> _getPages(List<bool> showBadge) {

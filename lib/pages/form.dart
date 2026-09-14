@@ -22,8 +22,8 @@ Widget getField(BuildContext context, String valueAtLastSubmit,
       labelText: constraint.name,
       defaultValue: valueAtLastSubmit,
       type: constraint.fieldType,
-      lowValue: constraint.lower,
-      highValue: constraint.upper,
+      lowValue: constraint.lower ?? double.negativeInfinity,
+      highValue: constraint.upper ?? double.infinity,
       onSaved: (String key, num value) =>
           context.read<FormBloc>().onSave(constraint.inputType, key, value),
     )),
@@ -34,7 +34,9 @@ Widget getField(BuildContext context, String valueAtLastSubmit,
         showDialog(
             context: context,
             builder: (BuildContext context) {
-              return AlertDialog(content: Text(constraint.description));
+              return AlertDialog(
+                  content: Text(constraint.description ??
+                      'No description available for ${constraint.name}.'));
             });
       },
     )
@@ -42,7 +44,7 @@ Widget getField(BuildContext context, String valueAtLastSubmit,
 }
 
 class InputForm extends StatelessWidget {
-  const InputForm({Key key}) : super(key: key);
+  const InputForm({super.key});
   static final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext _) {
@@ -65,17 +67,14 @@ class InputForm extends StatelessWidget {
 }
 
 class FormButton extends StatelessWidget {
-  FormButton({@required this.formKey});
+  const FormButton({required this.formKey});
   final GlobalKey<FormState> formKey;
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final ButtonStyle style = ElevatedButton.styleFrom(
-      textStyle: TextStyle(
-        color: Colors.black,
-      ),
-      onPrimary: Colors.black,
-      primary: theme.accentColor,
+      foregroundColor: Colors.black,
+      backgroundColor: theme.colorScheme.secondary,
     );
     return BlocBuilder<DensityBloc, DensityState>(
         builder: (context, densityData) {
@@ -91,8 +90,8 @@ class FormButton extends StatelessWidget {
             onPressed: () {
               // Validate returns true if the form is valid, or false
               // otherwise.
-              if (formKey.currentState.validate()) {
-                formKey.currentState.save();
+              if (formKey.currentState!.validate()) {
+                formKey.currentState!.save();
                 final CalculationRequest request = SubmitBody(
                   model: model,
                   formBody: context.read<FormBloc>().getCurrentForm(),

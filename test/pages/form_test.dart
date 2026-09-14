@@ -15,9 +15,9 @@ import 'package:realoptions/blocs/density/density_bloc.dart';
 import 'package:realoptions/blocs/select_page/select_page_bloc.dart';
 import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/models/response.dart';
-import 'package:realoptions/components/CustomTextFields.dart';
 import '../mocks/api_repository_mock.dart';
 import '../mocks/finside_api_mock.dart';
+import '../support/form_fixtures.dart';
 
 void main() {
   late MockFinsideService finside;
@@ -27,15 +27,10 @@ void main() {
   late ApiBloc apiBloc;
   setUp(() {
     finside = MockFinsideService();
-    constraints = [
-      InputConstraint(
-          defaultValue: 2,
-          upper: 3,
-          lower: 1,
-          fieldType: FieldType.Float,
-          name: "asset",
-          inputType: InputType.Market)
-    ];
+    // The whole Heston parameter set. Submitting builds a typed request, which
+    // needs every market and model field present, so a one-field form can no
+    // longer stand in for a real submission.
+    constraints = fullHestonConstraints();
     auth = MockFirebaseAuth(signedIn: true);
     apiRepository = MockApiRepository();
     apiBloc = ApiBloc(firebaseAuth: auth, apiRepository: apiRepository);
@@ -142,13 +137,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text("Big error!"), findsNothing);
     expect(find.byType(CircularProgressIndicator), findsNothing);
-    await tester.enterText(find.byType(TextFormField), "2.5");
+    await tester.enterText(find.byType(TextFormField).first, "2.5");
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(ElevatedButton));
+    // Ten fields push the submit button below the fold of the scrolling form,
+    // so a bare tap() hits nothing; scroll it into view first.
+    final Finder submit = find.text('Submit');
+    await tester.ensureVisible(submit);
+    await tester.pumpAndSettle();
+    await tester.tap(submit);
     await tester.pumpAndSettle();
     expect(find.text("Big error!"), findsNothing);
     expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(bloc.getCurrentForm(),
-        {"asset": SubmitItems(value: 2.5, inputType: InputType.Market)});
+    // Saving the form writes every rendered field, not only the edited one, so
+    // the assertion is on the field that was changed rather than on the whole
+    // map.
+    expect(
+        bloc.getCurrentForm()["asset"],
+        SubmitItems(value: 2.5, inputType: InputType.Market));
+    verify(finside.fetchOptionPrices(any)).called(1);
+    verify(finside.fetchDensityAndVaR(any)).called(1);
   });
 }

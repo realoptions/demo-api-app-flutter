@@ -91,6 +91,7 @@ void main() {
   test('equality with inputconstraint', () {
     expect(
         InputConstraint(
+                defaultValue: 1.0,
                 lower: 2.0,
                 upper: 3.0,
                 fieldType: FieldType.Float,
@@ -98,6 +99,7 @@ void main() {
                 inputType: InputType.Market,
                 description: "body") ==
             InputConstraint(
+                defaultValue: 1.0,
                 lower: 2.0,
                 upper: 3.0,
                 fieldType: FieldType.Float,
@@ -107,6 +109,7 @@ void main() {
         true);
     expect(
         InputConstraint(
+                defaultValue: 1.0,
                 lower: 2.0,
                 upper: 3.0,
                 fieldType: FieldType.Float,
@@ -114,6 +117,7 @@ void main() {
                 inputType: InputType.Market,
                 description: "body") ==
             InputConstraint(
+                defaultValue: 1.0,
                 lower: 2.0,
                 upper: 4.0,
                 fieldType: FieldType.Float,
@@ -123,6 +127,7 @@ void main() {
         true);
     expect(
         InputConstraint(
+                defaultValue: 1.0,
                 lower: 2.0,
                 upper: 3.0,
                 fieldType: FieldType.Float,
@@ -130,6 +135,7 @@ void main() {
                 inputType: InputType.Market,
                 description: "body") ==
             InputConstraint(
+                defaultValue: 1.0,
                 lower: 2.0,
                 upper: 3.0,
                 fieldType: FieldType.Integer,
@@ -139,6 +145,7 @@ void main() {
         true);
     expect(
         InputConstraint(
+                defaultValue: 1.0,
                 lower: 2.0,
                 upper: 3.0,
                 fieldType: FieldType.Integer,
@@ -146,6 +153,7 @@ void main() {
                 inputType: InputType.Market,
                 description: "body") ==
             InputConstraint(
+                defaultValue: 1.0,
                 lower: 2.0,
                 upper: 3.0,
                 fieldType: FieldType.Integer,

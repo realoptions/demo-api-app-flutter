@@ -1,23 +1,36 @@
-import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:realoptions/blocs/api/api_bloc.dart';
 import 'package:realoptions/components/CustomTextFields.dart';
 import 'package:realoptions/models/forms.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:realoptions/blocs/constraints/constraints_bloc.dart';
 import 'package:realoptions/models/models.dart';
-import 'package:realoptions/services/finside_service.dart';
 import 'package:mockito/mockito.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:realoptions/blocs/constraints/constraints_events.dart';
 import 'package:realoptions/blocs/constraints/constraints_state.dart';
 
-class MockFinsideService extends Mock implements FinsideApi {}
+import '../mocks/finside_api_mock.dart';
 
-class MockApiBloc extends Mock implements ApiBloc {}
+// MockFinsideService comes from the shared test double, which supplies the typed
+// `returnValue` placeholders a bare `extends Mock` cannot: `fetchConstraints`
+// returns `Future<List<InputConstraint>>` and mockito's `noSuchMethod` hands
+// back null during stub recording, which fails that cast.
+
+/// `Cubit.close()` returns `Future<void>`, and a bare Mock's `noSuchMethod`
+/// hands back `null` - which fails the implicit cast at the call site before
+/// `when()` can even record the stub. Overriding with a real completed Future
+/// keeps `tearDown` able to close it.
+class MockApiBloc extends Mock implements ApiBloc {
+  @override
+  Future<void> close() => Future<void>.value();
+}
 
 void main() {
-  MockFinsideService finside;
-  MockApiBloc apiBloc;
+  // `late` because these are assigned in setUp, not at declaration: under sound
+  // null safety a plain `MockFinsideService finside;` is non-nullable and the
+  // analyser rightly refuses to read it before assignment.
+  late MockFinsideService finside;
+  late MockApiBloc apiBloc;
   List<InputConstraint> constraints = [
     InputConstraint(
         defaultValue: 2,
@@ -32,7 +45,8 @@ void main() {
     apiBloc = MockApiBloc();
   });
   tearDown(() {
-    finside = null;
+    // No `finside.close()`: the shared mock sets `throwOnMissingStub`, so an
+    // unstubbed `close()` would raise, and the mock owns no resources anyway.
     apiBloc.close();
   });
 
@@ -50,7 +64,7 @@ void main() {
     },
     act: (bloc) => bloc.add(
         RequestConstraints(model: Model(label: "Heston", value: "heston"))),
-    expect: [
+    expect: () => [
       ConstraintsIsFetching(),
       ConstraintsData(constraints: constraints)
     ],
@@ -64,7 +78,7 @@ void main() {
     },
     act: (bloc) => bloc.add(
         RequestConstraints(model: Model(label: "Heston", value: "heston"))),
-    expect: [
+    expect: () => [
       ConstraintsIsFetching(),
       ConstraintsError(constraintsError: "Some Error")
     ],
@@ -77,7 +91,7 @@ void main() {
       },
       act: (bloc) => bloc.add(
           RequestConstraints(model: Model(label: "Heston", value: "heston"))),
-      expect: [ConstraintsIsFetching()],
+      expect: () => [ConstraintsIsFetching()],
       verify: (_) {
         verify(apiBloc.setNoData()).called(1);
       });

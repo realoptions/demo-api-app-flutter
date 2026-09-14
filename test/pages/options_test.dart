@@ -45,6 +45,11 @@ void main() {
         theme: ThemeData(useMaterial3: false, colorSchemeSeed: Colors.teal),
       );
 
+  /// Closes [bloc] on the real clock; see the note in `density_test.dart` —
+  /// `await bloc.close()` never returns under `testWidgets`' fake clock.
+  Future<void> closeBloc(WidgetTester tester, Bloc bloc) =>
+      tester.runAsync(bloc.close);
+
   testWidgets('Options shows error if error', (WidgetTester tester) async {
     stubRetrieveDataWithError();
     final bloc = OptionsBloc(finside: finside, selectPageBloc: SelectPageBloc());
@@ -54,19 +59,19 @@ void main() {
     bloc.getOptions(hestonRequest());
     await tester.pumpAndSettle();
     expect(find.text("Big error!"), findsOneWidget);
-    await bloc.close();
+    await closeBloc(tester, bloc);
   });
 
   testWidgets('Input no error or progress when data is returned',
       (WidgetTester tester) async {
     stubRetrieveData();
     final bloc = OptionsBloc(finside: finside, selectPageBloc: SelectPageBloc());
-    addTearDown(bloc.close);
     await tester.pumpWidget(wrap(bloc));
     await tester.pumpAndSettle();
     expect(find.text("Big error!"), findsNothing);
     expect(find.text("Please submit parameters!"), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
+    await closeBloc(tester, bloc);
   });
 
   testWidgets('Displays charts ratio when data is returned',
@@ -80,6 +85,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text("Please submit parameters!"), findsNothing);
     expect(find.byType(PaddingForm), findsNWidgets(2));
-    await bloc.close();
+    await closeBloc(tester, bloc);
   });
 }

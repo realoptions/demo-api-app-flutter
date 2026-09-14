@@ -1,5 +1,6 @@
 import 'package:mockito/mockito.dart';
 import 'package:realoptions/models/api_request.dart';
+import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/models/response.dart';
 import 'package:realoptions/services/finside_service.dart';
 
@@ -30,6 +31,16 @@ class MockFinsideService extends Mock implements FinsideApi {
 
   static const OptionPrices _placeholderPrices =
       OptionPrices(calls: <ModelResult>[], puts: <ModelResult>[]);
+
+  static const List<InputConstraint> _placeholderConstraints =
+      <InputConstraint>[];
+
+  @override
+  Future<List<InputConstraint>> fetchConstraints(String? model) =>
+      super.noSuchMethod(Invocation.method(#fetchConstraints, [model]),
+              returnValue: Future<List<InputConstraint>>.value(
+                  _placeholderConstraints))
+          as Future<List<InputConstraint>>;
 
   @override
   Future<DensityAndVaR> fetchDensityAndVaR(CalculationRequest? request) =>

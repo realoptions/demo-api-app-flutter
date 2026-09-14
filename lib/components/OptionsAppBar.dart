@@ -1,31 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:realoptions/blocs/constraints/constraints_bloc.dart';
 import 'package:realoptions/blocs/select_model/select_model_bloc.dart';
 import 'package:realoptions/models/models.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-class OptionsAppBar extends StatelessWidget with PreferredSizeWidget {
-  OptionsAppBar({@required this.title, @required this.choices});
+/// App bar that also reports the model currently selected.
+///
+/// Declared `implements PreferredSizeWidget` rather than `with`: the Dart 3
+/// class hierarchy no longer lets a plain interface be mixed in, and there was
+/// nothing to inherit here anyway - only `preferredSize` was being supplied.
+class OptionsAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const OptionsAppBar({required this.title, required this.choices});
+
   final String title;
   final List<Model> choices;
+
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SelectModelBloc, Model>(
         builder: (context, selectedModel) {
       return AppBar(
-        key: Key("AppBarComponent"),
-        title: Text(this.title + ": " + selectedModel.label),
+        key: const Key('AppBarComponent'),
+        title: Text('$title: ${selectedModel.label}'),
         actions: <Widget>[
           IconButton(
-              icon: Icon(Icons.help),
+              icon: const Icon(Icons.help),
               onPressed: () {
                 showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                      return AlertDialog(
+                      return const AlertDialog(
                           title: Text('Help'),
                           content: SingleChildScrollView(
                             child: ListBody(
@@ -42,26 +51,30 @@ class OptionsAppBar extends StatelessWidget with PreferredSizeWidget {
                     });
               }),
           IconButton(
-            icon: Icon(Icons.more_vert),
+            icon: const Icon(Icons.more_vert),
             onPressed: () {
               showModalBottomSheet<void>(
                   context: context,
                   builder: (BuildContext modalContext) {
                     return ListView(
                         shrinkWrap: true,
-                        children: this
-                            .choices
-                            .map((choice) => RadioListTile<Model>(
+                        children: choices
+                            .map((Model choice) => RadioListTile<Model>(
                                 title: Text(choice.label),
                                 value: choice,
                                 groupValue: selectedModel,
-                                onChanged: (choice) {
+                                // RadioListTile hands back a nullable: the radio
+                                // can be toggled off. There is no "no model"
+                                // state here, so a null selection is ignored
+                                // rather than pushed into the blocs.
+                                onChanged: (Model? picked) {
+                                  if (picked == null) return;
                                   context
                                       .read<SelectModelBloc>()
-                                      .setModel(choice);
+                                      .setModel(picked);
                                   context
                                       .read<ConstraintsBloc>()
-                                      .getConstraints(choice);
+                                      .getConstraints(picked);
                                   Navigator.pop(modalContext);
                                 }))
                             .toList());
@@ -74,12 +87,13 @@ class OptionsAppBar extends StatelessWidget with PreferredSizeWidget {
   }
 }
 
-_launchDocs() async {
-  const url =
-      'https://raw.githubusercontent.com/realoptions/option_price_faas/master/techdoc/OptionCalculation.pdf';
-  if (await canLaunch(url)) {
-    await launch(url);
-  } else {
+Future<void> _launchDocs() async {
+  // `launch`/`canLaunch` are the deprecated string-taking legacy API; the
+  // current one works on a parsed Uri.
+  final Uri url = Uri.parse(
+      'https://raw.githubusercontent.com/realoptions/option_price_faas/master/techdoc/OptionCalculation.pdf');
+  if (!await canLaunchUrl(url)) {
     throw 'Could not launch $url';
   }
+  await launchUrl(url);
 }

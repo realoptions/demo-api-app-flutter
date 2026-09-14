@@ -8,21 +8,28 @@ import 'package:realoptions/models/response.dart';
 enum InputType { Model, Market }
 const String MARKET_NAME = "market";
 
+/// One form field, as described by the API's `parameter_ranges`.
+///
+/// The identity of a field - what it is called, how it is typed, whether it is a
+/// market or model parameter, and what it starts at - is always present in a
+/// parsed constraint, so those are required and non-null: the form cannot render
+/// a field without them. Only the bounds and the help text are genuinely
+/// optional, because those arrive straight from JSON and may be absent.
 class InputConstraint {
   final num? lower;
   final num? upper;
-  final num? defaultValue;
-  final FieldType? fieldType;
-  final String? name;
-  final InputType? inputType;
+  final num defaultValue;
+  final FieldType fieldType;
+  final String name;
+  final InputType inputType;
   final String? description;
   InputConstraint(
-      {this.lower,
+      {required this.name,
+      required this.fieldType,
+      required this.inputType,
+      required this.defaultValue,
+      this.lower,
       this.upper,
-      this.fieldType,
-      this.name,
-      this.defaultValue,
-      this.inputType,
       this.description});
   @override
   bool operator ==(other) {

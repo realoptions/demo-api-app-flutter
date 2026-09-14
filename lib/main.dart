@@ -37,12 +37,19 @@ class MyApp extends StatelessWidget {
         title: 'Demo Option Pricing App',
         theme: ThemeData(
             primarySwatch: Colors.teal,
-            accentColor: Colors.orange,
-            buttonTheme: ButtonThemeData(
+            // `ThemeData.accentColor` was removed. The secondary slot of the
+            // colour scheme replaces it, and it is the value the density and
+            // put-price charts read through `colorScheme.secondary`, so this
+            // is the one place that decides that orange.
+            colorScheme: ColorScheme.fromSwatch(
+              primarySwatch: Colors.teal,
+            ).copyWith(secondary: Colors.orange),
+            buttonTheme: const ButtonThemeData(
               buttonColor: Colors.orange,
             ),
-            textTheme: TextTheme(
-              bodyText2: TextStyle(
+            textTheme: const TextTheme(
+              // `bodyText2` is `bodyLarge` under the Material 3 text roles.
+              bodyLarge: TextStyle(
                 fontSize: 15.0,
               ),
             )),
