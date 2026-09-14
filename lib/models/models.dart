@@ -1,4 +1,3 @@
-import 'package:quiver/core.dart' show hash2;
 
 const List<Model> MODEL_CHOICES = const <Model>[
   const Model(label: "Heston", value: "heston"),
@@ -74,5 +73,5 @@ class Model {
   }
 
   @override
-  int get hashCode => hash2(value, label);
+  int get hashCode => Object.hash(value, label);
 }

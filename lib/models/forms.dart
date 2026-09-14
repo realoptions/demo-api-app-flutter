@@ -1,6 +1,4 @@
 import 'package:realoptions/components/CustomTextFields.dart';
-import 'package:quiver/core.dart' show hash4;
-import 'package:quiver/core.dart' show hash2;
 import 'package:realoptions/models/api_request.dart';
 import 'package:realoptions/models/models.dart';
 import 'package:realoptions/models/response.dart';
@@ -43,7 +41,15 @@ class InputConstraint {
   }
 
   @override
-  int get hashCode => hash4(lower, upper, name, defaultValue);
+  // Hashed on `name` alone because that is all `operator ==` above compares.
+  // The old hash4(lower, upper, name, defaultValue) hashed three fields that
+  // equality ignores, so two constraints sharing a name but differing on a
+  // bound compared equal while hashing differently - the contract that equal
+  // objects must hash equal was broken. Note the reverse question is also
+  // open: identity by name alone may well be too coarse for a type that
+  // carries bounds, but that is a change to == and to how callers dedup,
+  // not something to slip in under a dependency swap.
+  int get hashCode => name.hashCode;
 }
 
 const NUM_STRIKES = 10;
@@ -95,7 +101,7 @@ class SubmitItems {
   }
 
   @override
-  int get hashCode => hash2(value, inputType);
+  int get hashCode => Object.hash(value, inputType);
 }
 
 /// Evenly spaced strikes centred on [asset].

@@ -64,9 +64,6 @@ dependencies:
   fl_chart: ^1.2.0
   url_launcher: ^6.3.2
   equatable: ^2.1.0
-  # Previously resolved transitively but imported directly by models/forms,
-  # so it is declared explicitly now.
-  quiver: ^3.2.2
 
 dev_dependencies:
   flutter_test:

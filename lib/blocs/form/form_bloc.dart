@@ -1,5 +1,4 @@
 import 'package:realoptions/models/forms.dart';
-import 'package:quiver/core.dart' show hash2;
 import 'package:realoptions/components/CustomTextFields.dart';
 import 'package:bloc/bloc.dart';
 
@@ -23,7 +22,7 @@ class FormItem {
   }
 
   @override
-  int get hashCode => hash2(valueAtLastSubmit, constraint);
+  int get hashCode => Object.hash(valueAtLastSubmit, constraint);
 }
 
 final StringUtils stringUtils = StringUtils();
