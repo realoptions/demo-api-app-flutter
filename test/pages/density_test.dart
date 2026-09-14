@@ -33,9 +33,9 @@ void main() {
 
   Widget wrap(DensityBloc bloc) => MaterialApp(
         home: Directionality(
+          textDirection: TextDirection.ltr,
           child: BlocProvider<DensityBloc>(
               create: (_) => bloc, child: ShowDensity()),
-          textDirection: TextDirection.ltr,
         ),
         theme: ThemeData(useMaterial3: false, colorSchemeSeed: Colors.teal),
       );

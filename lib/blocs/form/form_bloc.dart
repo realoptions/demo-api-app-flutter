@@ -29,7 +29,7 @@ final StringUtils stringUtils = StringUtils();
 
 class FormBloc extends Cubit<Iterable<FormItem>> {
   final List<InputConstraint> constraints;
-  Map<String, SubmitItems> _formValues = {};
+  final Map<String, SubmitItems> _formValues = {};
   FormBloc({required this.constraints}) : super(_onSubmit({}, constraints));
 
   static String _getValueAtLastSubmit(

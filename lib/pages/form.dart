@@ -55,19 +55,19 @@ class InputForm extends StatelessWidget {
       }).toList();
       formFields.add(PaddingForm(child: FormButton(formKey: _formKey)));
       return SingleChildScrollView(
+          key: PageStorageKey("Form"),
           child: Form(
               autovalidateMode: AutovalidateMode.always,
               key: _formKey,
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: formFields)),
-          key: PageStorageKey("Form"));
+                  children: formFields)));
     });
   }
 }
 
 class FormButton extends StatelessWidget {
-  const FormButton({required this.formKey});
+  const FormButton({super.key, required this.formKey});
   final GlobalKey<FormState> formKey;
   @override
   Widget build(BuildContext context) {

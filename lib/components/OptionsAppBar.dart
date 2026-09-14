@@ -12,7 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 /// class hierarchy no longer lets a plain interface be mixed in, and there was
 /// nothing to inherit here anyway - only `preferredSize` was being supplied.
 class OptionsAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const OptionsAppBar({required this.title, required this.choices});
+  const OptionsAppBar({super.key, required this.title, required this.choices});
 
   final String title;
   final List<Model> choices;
@@ -56,28 +56,31 @@ class OptionsAppBar extends StatelessWidget implements PreferredSizeWidget {
               showModalBottomSheet<void>(
                   context: context,
                   builder: (BuildContext modalContext) {
-                    return ListView(
+                    // RadioGroup owns the selection now. The per-tile
+                    // groupValue/onChanged pair is deprecated in favour of a
+                    // single ancestor that holds the value and handles the
+                    // change, which also means the null-tolerance comment
+                    // below moves with it: the nullable still arrives here, from
+                    // RadioGroup rather than from each tile.
+                    return RadioGroup<Model>(
+                      groupValue: selectedModel,
+                      // A null comes back because a radio can be toggled off.
+                      // There is no "no model" state here, so it is ignored
+                      // rather than pushed into the blocs.
+                      onChanged: (Model? picked) {
+                        if (picked == null) return;
+                        context.read<SelectModelBloc>().setModel(picked);
+                        context.read<ConstraintsBloc>().getConstraints(picked);
+                        Navigator.pop(modalContext);
+                      },
+                      child: ListView(
                         shrinkWrap: true,
                         children: choices
                             .map((Model choice) => RadioListTile<Model>(
-                                title: Text(choice.label),
-                                value: choice,
-                                groupValue: selectedModel,
-                                // RadioListTile hands back a nullable: the radio
-                                // can be toggled off. There is no "no model"
-                                // state here, so a null selection is ignored
-                                // rather than pushed into the blocs.
-                                onChanged: (Model? picked) {
-                                  if (picked == null) return;
-                                  context
-                                      .read<SelectModelBloc>()
-                                      .setModel(picked);
-                                  context
-                                      .read<ConstraintsBloc>()
-                                      .getConstraints(picked);
-                                  Navigator.pop(modalContext);
-                                }))
-                            .toList());
+                                title: Text(choice.label), value: choice))
+                            .toList(),
+                      ),
+                    );
                   });
             },
           ),
@@ -119,26 +122,33 @@ Future<void> _launchDocs(BuildContext context) async {
   // current one works on a parsed Uri.
   final Uri url = Uri.parse(
       'https://raw.githubusercontent.com/realoptions/option_price_faas/master/techdoc/OptionCalculation.pdf');
+  DocsLaunchException? failure;
   try {
     if (!await canLaunchUrl(url)) {
       throw DocsLaunchException(url, 'no app is registered to open it');
     }
     await launchUrl(url);
   } on DocsLaunchException catch (error) {
-    _reportLaunchFailure(context, error);
+    failure = error;
   } catch (error) {
     // launchUrl itself can throw (platform channel failure, bad mode, etc).
     // Fold anything else into the same reported failure rather than letting it
     // reach the zone.
-    _reportLaunchFailure(context, DocsLaunchException(url, error.toString()));
+    failure = DocsLaunchException(url, error.toString());
+  }
+  // The mounted check belongs here, in the same function that performed the
+  // await. Guarding inside _reportLaunchFailure is not enough: the flow
+  // analysis cannot see through the call to know the guard is there, so it
+  // still counts the context as used across the async gap. The dialog holding
+  // the button may already be dismissed by the time the platform round trip
+  // fails, and touching a dead context is worse than the error we are trying
+  // to report.
+  if (failure != null && context.mounted) {
+    _reportLaunchFailure(context, failure);
   }
 }
 
 void _reportLaunchFailure(BuildContext context, DocsLaunchException error) {
-  // The dialog that held the button may already be gone by the time the
-  // platform round-trip fails; touching a dead context is worse than the
-  // error we are trying to report.
-  if (!context.mounted) return;
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text(error.message)));

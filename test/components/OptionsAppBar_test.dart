@@ -74,5 +74,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text("SomeTitle: CGMY"), findsOneWidget);
     expect(find.text("CGMY"), findsNothing);
+    // The selection has to do more than update the label: it also has to kick
+    // off the constraints fetch for the newly picked model. Asserted here so
+    // the RadioGroup migration cannot drop that half while still leaving the
+    // label looking correct.
+    verify(finside.fetchConstraints("cgmy")).called(1);
   });
 }

@@ -31,6 +31,8 @@ void main() async {
 const String title = "Options";
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -63,6 +65,8 @@ class MyApp extends StatelessWidget {
 }
 
 class StartupPage extends StatelessWidget {
+  const StartupPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ApiBloc, ApiState>(

@@ -1,8 +1,8 @@
-const List<Model> MODEL_CHOICES = const <Model>[
-  const Model(label: "Heston", value: "heston"),
-  const Model(label: "CGMY", value: "cgmy"),
-  const Model(label: "CGMYSE", value: "cgmyse"),
-  const Model(label: "Merton", value: "merton")
+const List<Model> MODEL_CHOICES = <Model>[
+  Model(label: "Heston", value: "heston"),
+  Model(label: "CGMY", value: "cgmy"),
+  Model(label: "CGMYSE", value: "cgmyse"),
+  Model(label: "Merton", value: "merton")
 ];
 
 const Map<String, Map<String, double>> DEFAULT_VALUES = {

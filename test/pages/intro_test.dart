@@ -18,9 +18,9 @@ void main() {
     var bloc = ApiBloc(firebaseAuth: auth, apiRepository: MockApiRepository());
     await tester.pumpWidget(MaterialApp(
       home: Directionality(
+        textDirection: TextDirection.ltr,
         child:
             BlocProvider<ApiBloc>(create: (_) => bloc, child: Introduction()),
-        textDirection: TextDirection.ltr,
       ),
       theme: ThemeData(
           primarySwatch: Colors.teal,

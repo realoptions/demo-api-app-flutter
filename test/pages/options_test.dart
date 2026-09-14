@@ -41,9 +41,9 @@ void main() {
 
   Widget wrap(OptionsBloc bloc) => MaterialApp(
         home: Directionality(
+          textDirection: TextDirection.ltr,
           child: BlocProvider<OptionsBloc>(
               create: (_) => bloc, child: ShowOptionPrices()),
-          textDirection: TextDirection.ltr,
         ),
         theme: ThemeData(useMaterial3: false, colorSchemeSeed: Colors.teal),
       );

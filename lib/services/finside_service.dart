@@ -107,9 +107,8 @@ class FinsideApi {
       String optionType, String sensitivity, bool includeIV) {
     return _client
         .post(
-          Uri.parse(p.join(BASE_ENDPOINT, API_VERSION, request.model.value,
-                  "calculator", optionType, sensitivity) +
-              "?include_implied_volatility=$includeIV"),
+          Uri.parse(
+              "${p.join(BASE_ENDPOINT, API_VERSION, request.model.value, "calculator", optionType, sensitivity)}?include_implied_volatility=$includeIV"),
           headers: _getHeaders(),
           body: jsonEncode(request.toJson()),
         )

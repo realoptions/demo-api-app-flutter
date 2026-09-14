@@ -117,7 +117,7 @@ class ChartLegendEntry {
 /// series were drawn with - a legend that drifts from the line it names is worse
 /// than no legend.
 class ChartLegend extends StatelessWidget {
-  const ChartLegend({Key? key, required this.entries}) : super(key: key);
+  const ChartLegend({super.key, required this.entries});
 
   final List<ChartLegendEntry> entries;
 
@@ -158,10 +158,10 @@ class ChartLegend extends StatelessWidget {
 /// the same shape and the legend never overlaps the plot.
 class LegendChart extends StatelessWidget {
   const LegendChart({
-    Key? key,
+    super.key,
     required this.chart,
     required this.entries,
-  }) : super(key: key);
+  });
 
   final Widget chart;
   final List<ChartLegendEntry> entries;

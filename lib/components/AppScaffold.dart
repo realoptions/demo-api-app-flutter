@@ -115,11 +115,11 @@ class _Scaffold extends StatelessWidget {
         final pages = _getPages(showBadges);
         return Scaffold(
             appBar: OptionsAppBar(
-              title: this.title,
+              title: title,
               choices: MODEL_CHOICES,
             ),
             body: PageStorage(
-                child: pages[selectedIndex].widget, bucket: _bucket),
+                bucket: _bucket, child: pages[selectedIndex].widget),
             bottomNavigationBar: BottomNavigationBar(
               items: pages.map((PageEntry entry) {
                 return BottomNavigationBarItem(

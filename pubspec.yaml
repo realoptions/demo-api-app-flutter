@@ -79,6 +79,10 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.4
   google_sign_in_mocks: ^0.4.2
   bloc_test: ^10.0.0
+  # Base lint set for analysis_options.yaml. Matches the version the Flutter
+  # 3.47.4 app template ships, so the rules here are the ones the SDK authors
+  # expect this Dart/Flutter combination to be held to.
+  flutter_lints: ^6.0.0
   
 flutter_icons:
   android: "launcher_icon" 

@@ -25,15 +25,14 @@ class StringUtils {
 
 class NumberTextField extends StatelessWidget {
   NumberTextField(
-      {Key? key,
+      {super.key,
       this.hintText,
       this.labelText,
       this.defaultValue,
       this.lowValue = double.negativeInfinity,
       this.highValue = double.infinity,
       required this.type,
-      required this.onSaved})
-      : super(key: key);
+      required this.onSaved});
   final String? hintText;
   final String? labelText;
   final String? defaultValue;
@@ -46,10 +45,10 @@ class NumberTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-        initialValue: this.defaultValue,
+        initialValue: defaultValue,
         decoration: InputDecoration(
-          hintText: this.hintText,
-          labelText: this.labelText,
+          hintText: hintText,
+          labelText: labelText,
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
@@ -58,15 +57,12 @@ class NumberTextField extends StatelessWidget {
           num currentValue;
           try {
             currentValue = strUtils.getValueFromString(type, value);
-          } catch (_err) {
+          } catch (_) {
             return 'Not a valid number!';
           }
 
           if (currentValue < lowValue || currentValue > highValue) {
-            return 'Number must be between ' +
-                lowValue.toString() +
-                ' and ' +
-                highValue.toString();
+            return 'Number must be between $lowValue and $highValue';
           }
           return null;
         },
@@ -75,7 +71,7 @@ class NumberTextField extends StatelessWidget {
           LengthLimitingTextInputFormatter(12),
         ],
         textAlign: TextAlign.right,
-        onSaved: (value) => onSaved(this.labelText ?? '',
-            strUtils.getValueFromString(this.type, value ?? '')));
+        onSaved: (value) => onSaved(
+            labelText ?? '', strUtils.getValueFromString(type, value ?? '')));
   }
 }

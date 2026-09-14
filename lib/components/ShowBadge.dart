@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 /// was reaching for, so the third-party dependency is dropped rather than
 /// prefixed.
 class ShowBadge extends StatelessWidget {
-  const ShowBadge({required this.showBadge, required this.icon});
+  const ShowBadge({super.key, required this.showBadge, required this.icon});
 
   final Widget icon;
   final bool showBadge;

@@ -1,4 +1,6 @@
 /// Copied from https://github.com/bizz84/firebase_auth_demo_flutter/blob/master/lib/services/firebase_auth_service.dart
+library;
+
 import 'package:flutter/material.dart';
 
 @immutable
@@ -52,9 +54,9 @@ class CustomRaisedButton extends StatelessWidget {
     return SizedBox(
       height: height,
       child: ElevatedButton(
-        child: loading ? buildSpinner(context) : child,
         style: style,
         onPressed: onPressed,
+        child: loading ? buildSpinner(context) : child,
       ),
     );
   }

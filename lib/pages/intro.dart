@@ -6,7 +6,7 @@ import 'package:realoptions/demo_config.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class Introduction extends StatelessWidget {
-  Introduction();
+  const Introduction({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
