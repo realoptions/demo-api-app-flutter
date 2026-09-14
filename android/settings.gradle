@@ -1,15 +1,45 @@
-include ':app'
+// Plugin resolution now goes through Flutter's own Gradle build via
+// pluginManagement/includeBuild, using the `dev.flutter.flutter-plugin-loader`
+// plugin. This replaces the previous hand-rolled block that read a
+// `.flutter-plugins` file out of the project root and `include`d each entry.
+//
+// That old block was not merely dated - it was silently inert. Flutter stopped
+// writing the flat `.flutter-plugins` file (only `.flutter-plugins-dependencies`,
+// as JSON, is produced now), so `pluginsFile.exists()` was false and the loop
+// body never ran: zero plugins were ever added to the Gradle build. A build that
+// appeared to work would have been compiled without firebase, url_launcher or
+// facebook auth, and failed at runtime rather than at configuration.
+pluginManagement {
+    def flutterSdkPath = {
+        def properties = new Properties()
+        file("local.properties").withInputStream { properties.load(it) }
+        def sdkPath = properties.getProperty("flutter.sdk")
+        assert sdkPath != null : "flutter.sdk not set in local.properties"
+        return sdkPath
+    }()
 
-def flutterProjectRoot = rootProject.projectDir.parentFile.toPath()
+    includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
-def plugins = new Properties()
-def pluginsFile = new File(flutterProjectRoot.toFile(), '.flutter-plugins')
-if (pluginsFile.exists()) {
-    pluginsFile.withReader('UTF-8') { reader -> plugins.load(reader) }
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
 }
 
-plugins.each { name, path ->
-    def pluginDirectory = flutterProjectRoot.resolve(path).resolve('android').toFile()
-    include ":$name"
-    project(":$name").projectDir = pluginDirectory
+// Versions are declared once here and applied without a version in each module.
+//
+// AGP 9.1.0 is Flutter 3.47.4's own template version. It is not an arbitrary
+// pick and it is not the newest thing on the repository either - AGP 9.4.0 is
+// published, but Flutter's tooling declares 9.2 as its highest known version, so
+// going past it buys an unsupported configuration for nothing. On the other side,
+// Flutter's DependencyVersionChecker hard-fails anything below 8.11.1 and warns
+// below 9.0.1, so 9.1.0 sits inside the window that is both supported and quiet.
+plugins {
+    id "dev.flutter.flutter-plugin-loader" version "1.0.0"
+    id "com.android.application" version "9.1.0" apply false
+    id "org.jetbrains.kotlin.android" version "2.4.0" apply false
+    id "com.google.gms.google-services" version "4.5.0" apply false
 }
+
+include ":app"

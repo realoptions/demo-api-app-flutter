@@ -199,6 +199,14 @@ jobs:
         with:
           serviceAccountJson: ${{ steps.write_json.outputs.filePath }}
           packageName: com.finside.realoptions
-          releaseFiles: build/app/outputs/bundle/release/app.aab
+          # Globbed rather than spelled out. This used to be the literal
+          # `.../release/app.aab`, which matched the old AGP 3.3 output name.
+          # AGP 3.5 onwards writes `app-release.aab` (build mode in the
+          # filename), so the literal path would have pointed at a file that no
+          # longer exists and the upload would fail on every release. Flutter's
+          # own findBundleFile handles both names; the workflow now does too by
+          # not committing to either. See
+          # flutter/packages/flutter_tools/test/general.shard/android/gradle_find_bundle_test.dart
+          releaseFiles: build/app/outputs/bundle/release/*.aab
           track: ${{ inputs.google-play-track }}
           whatsNewDirectory: assets/whatsnew
