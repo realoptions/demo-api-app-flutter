@@ -154,4 +154,36 @@ void main() {
     verify(finside.fetchOptionPrices(any)).called(1);
     verify(finside.fetchDensityAndVaR(any)).called(1);
   });
+
+  testWidgets('two InputForms can be mounted side by side',
+      (WidgetTester tester) async {
+    final SelectPageBloc selectPageBloc = SelectPageBloc();
+    await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+            body: MultiBlocProvider(
+                providers: [
+          BlocProvider<SelectPageBloc>(create: (_) => selectPageBloc),
+          BlocProvider<SelectModelBloc>(create: (_) => SelectModelBloc()),
+          BlocProvider<DensityBloc>(
+              create: (_) => DensityBloc(
+                  finside: finside, selectPageBloc: selectPageBloc)),
+          BlocProvider<OptionsBloc>(
+              create: (_) => OptionsBloc(
+                  finside: finside, selectPageBloc: selectPageBloc)),
+          BlocProvider<FormBloc>(
+              create: (_) => FormBloc(constraints: constraints)),
+        ],
+                child: const Row(children: [
+                  Expanded(child: InputForm()),
+                  Expanded(child: InputForm()),
+                ])))));
+    await tester.pumpAndSettle();
+
+    // The form key used to be `static` - one GlobalKey for the whole InputForm
+    // class - so registering it on a second Form is a hard "Duplicate GlobalKey
+    // detected in widget tree" error. This pump is itself the regression check;
+    // the count confirms both forms really mounted instead of one silently
+    // taking the other's state.
+    expect(find.byType(Form), findsNWidgets(2));
+  });
 }

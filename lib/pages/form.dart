@@ -43,9 +43,24 @@ Widget getField(BuildContext context, String valueAtLastSubmit,
   ]));
 }
 
-class InputForm extends StatelessWidget {
+class InputForm extends StatefulWidget {
   const InputForm({super.key});
-  static final _formKey = GlobalKey<FormState>();
+
+  @override
+  State<InputForm> createState() => _InputFormState();
+}
+
+class _InputFormState extends State<InputForm> {
+  /// One key per mounted form, not one per class.
+  ///
+  /// This was `static final`, so every InputForm shared a single GlobalKey:
+  /// mount the widget twice and the second `Form` registers the same key,
+  /// which Flutter rejects outright as a duplicate GlobalKey - and short of
+  /// throwing, `validate()`/`save()` would drive whichever form grabbed the
+  /// key last rather than the one the button sits in. On the State it is
+  /// created with the instance it identifies.
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext _) {
     return BlocBuilder<FormBloc, Iterable<FormItem>>(builder: (context, data) {

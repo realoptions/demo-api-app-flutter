@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
 class PageEntry {
-  PageEntry({
+  const PageEntry({
     required this.widget,
     required this.icon,
     required this.text,
