@@ -1,32 +1,36 @@
-buildscript {
-    ext.kotlin_version = '1.3.31'
-    repositories {
-        google()
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.0'
-        classpath 'com.google.gms:google-services:4.3.3'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
-
+// There is deliberately no buildscript { classpath ... } block here.
+//
+// AGP, the Kotlin plugin and google-services used to be pulled in from this
+// file's buildscript block. They are now declared with their versions in
+// settings.gradle's plugins block and applied by id in each module, which is how
+// every current Flutter project is laid out. Re-adding a classpath here would
+// define the same plugin twice through two different class loaders.
+//
+// jcenter() is gone from both places it appeared. JCenter stopped serving new
+// artifacts and its read-only mirror has been intermittently unavailable, so any
+// dependency that resolved only there made the build depend on someone else's
+// goodwill. Everything this project needs comes from google() or mavenCentral().
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 }
 
-rootProject.buildDir = '../build'
+// Keep build output in <repo>/build as before. The path is resolved relative to
+// the current build directory (<repo>/android/build), so ../../build lands on
+// <repo>/build. Uses layout.buildDirectory rather than the deprecated
+// Project.buildDir property, which Gradle 9 no longer encourages.
+def newBuildDir = rootProject.layout.buildDirectory.dir("../../build").get()
+rootProject.layout.buildDirectory.value(newBuildDir)
+
 subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
+    project.layout.buildDirectory.value(newBuildDir.dir(project.name))
 }
 subprojects {
-    project.evaluationDependsOn(':app')
+    project.evaluationDependsOn(":app")
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+tasks.register("clean", Delete) {
+    delete rootProject.layout.buildDirectory
 }

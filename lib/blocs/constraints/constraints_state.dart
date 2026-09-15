@@ -1,24 +1,30 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:realoptions/models/forms.dart';
 
-abstract class ConstraintsState extends Equatable {}
+/// Every state the constraints bloc can be in.
+///
+/// Sealed so the shell that switches over it is checked for exhaustiveness:
+/// a new state has to be handled, not absorbed by a fallback spinner.
+sealed class ConstraintsState extends Equatable {
+  const ConstraintsState();
+}
 
 class ConstraintsData extends ConstraintsState {
   final List<InputConstraint> constraints;
-  ConstraintsData({@required this.constraints});
+  const ConstraintsData({required this.constraints});
   @override
   List<Object> get props => [constraints];
 }
 
 class ConstraintsIsFetching extends ConstraintsState {
+  const ConstraintsIsFetching();
   @override
   List<Object> get props => [];
 }
 
 class ConstraintsError extends ConstraintsState {
   final String constraintsError;
-  ConstraintsError({@required this.constraintsError});
+  const ConstraintsError({required this.constraintsError});
   @override
   List<Object> get props => [constraintsError];
 }

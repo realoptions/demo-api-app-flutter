@@ -17,3 +17,9 @@ This is the mobile app for consuming [Finside's](https://finside.org) APIs.
 # CI
 
 See https://appditto.com/blog/automate-your-flutter-workflow
+
+```sh
+cd $HOME
+FLUTTER_VERSION=3.47.4
+git clone https://github.com/flutter/flutter.git -b ${FLUTTER_VERSION} --depth 1 
+```

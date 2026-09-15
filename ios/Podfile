@@ -1,0 +1,56 @@
+# iOS deployment floor for the CocoaPods integration.
+#
+# Pinned explicitly rather than left commented out. The Flutter project template
+# ships this line as a comment, which leaves CocoaPods to infer the platform from
+# the Xcode project's IPHONEOS_DEPLOYMENT_TARGET. That indirection is exactly
+# what broke here: the project target was 8.0 while firebase_core 4.14 /
+# firebase_auth 6.6 both declare `s.ios.deployment_target = '15.0'`, so pod
+# resolution could not satisfy the graph. Stating 15.0 in the tracked Podfile
+# makes the floor visible in review and independent of the pbxproj default.
+#
+# 15.0 is not an arbitrary bump - it is what this Flutter version (3.47.4)
+# migrates every project to, and it is the highest floor among the pods this app
+# actually pulls in, so it satisfies both sides without excluding any device the
+# Firebase SDKs would otherwise support.
+platform :ios, '15.0'
+
+# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
+
+def flutter_root
+  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  unless File.exist?(generated_xcode_build_settings_path)
+    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
+  end
+
+  File.foreach(generated_xcode_build_settings_path) do |line|
+    matches = line.match(/FLUTTER_ROOT\=(.*)/)
+    return matches[1].strip if matches
+  end
+  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
+end
+
+require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+
+flutter_ios_podfile_setup
+
+target 'Runner' do
+  use_frameworks!
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  # No `RunnerTests` sub-target, unlike the stock template: this project's
+  # Xcode project defines only `Runner`, and CocoaPods fails the install when a
+  # Podfile names a target the project does not have.
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+  end
+end

@@ -10,8 +10,6 @@ class StringUtils {
         return double.parse(value);
       case FieldType.Integer:
         return int.parse(value);
-      default:
-        return null; //can never get here.  I miss rust...
     }
   }
 
@@ -21,26 +19,23 @@ class StringUtils {
         return val.toStringAsFixed(2);
       case FieldType.Integer:
         return val.toStringAsFixed(0);
-      default:
-        return "";
     }
   }
 }
 
 class NumberTextField extends StatelessWidget {
   NumberTextField(
-      {Key key,
+      {super.key,
       this.hintText,
       this.labelText,
       this.defaultValue,
       this.lowValue = double.negativeInfinity,
       this.highValue = double.infinity,
-      @required this.type,
-      @required this.onSaved})
-      : super(key: key);
-  final String hintText;
-  final String labelText;
-  final String defaultValue;
+      required this.type,
+      required this.onSaved});
+  final String? hintText;
+  final String? labelText;
+  final String? defaultValue;
   final FieldType type;
   final void Function(String, num) onSaved;
   final StringUtils strUtils = StringUtils();
@@ -50,27 +45,24 @@ class NumberTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-        initialValue: this.defaultValue,
+        initialValue: defaultValue,
         decoration: InputDecoration(
-          hintText: this.hintText,
-          labelText: this.labelText,
+          hintText: hintText,
+          labelText: labelText,
         ),
         validator: (value) {
-          if (value.isEmpty) {
+          if (value == null || value.isEmpty) {
             return 'Please enter some text';
           }
           num currentValue;
           try {
             currentValue = strUtils.getValueFromString(type, value);
-          } catch (_err) {
+          } catch (_) {
             return 'Not a valid number!';
           }
 
           if (currentValue < lowValue || currentValue > highValue) {
-            return 'Number must be between ' +
-                lowValue.toString() +
-                ' and ' +
-                highValue.toString();
+            return 'Number must be between $lowValue and $highValue';
           }
           return null;
         },
@@ -80,6 +72,6 @@ class NumberTextField extends StatelessWidget {
         ],
         textAlign: TextAlign.right,
         onSaved: (value) => onSaved(
-            this.labelText, strUtils.getValueFromString(this.type, value)));
+            labelText ?? '', strUtils.getValueFromString(type, value ?? '')));
   }
 }

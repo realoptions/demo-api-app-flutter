@@ -12,46 +12,77 @@ description: An app for interacting with Finside RealOption apis.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-#the "+n" has to increment...even if semantic version is bumped
-version: 1.6.11+22
+# Version authority.
+#
+# This line is the single source of the app's *semantic* version. It is read
+# by .github/workflows/tag.yml, which turns it into the `release-<version>` /
+# `beta-<version>` tag that drives deployment; the release build then takes
+# its version name from that tag rather than re-reading this file, so the tag
+# that triggered a deploy is what the shipped artifact is versioned with.
+#
+# There is deliberately no `+<build>` suffix here. The build number (Android
+# versionCode / iOS CFBundleVersion) is assigned by CI from the Actions run
+# number, which only ever increases, so a release needs no hand-incrementing.
+# The previous `version: 1.6.11+22` carried a comment saying the `+n` had to
+# be bumped by hand on every release even when the semantic version moved - a
+# ritual that was easy to forget and that failed late, at the Play upload.
+# See docs/release-flow.md.
+version: 1.6.11
 
+# Dart 3 / sound null safety. Every pin below comes out of a resolution that
+# actually works on Dart >=3.0: the previous pins (charts_flutter, the old
+# Facebook login plugin, equatable 1.x, bloc 6.x, ...) all top out at an
+# `<3.0.0` SDK ceiling and cannot be resolved at all, so several are swapped
+# for their maintained successors rather than merely widened.
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^0.5.3
+  firebase_core: ^4.14.0
   # Add the dependency for the FlutterFire plugin for Google Analytics
   #firebase_analytics: ^7.0.1
 
   # Add the dependencies for any other Firebase products you want to use in your app
   # For example, to use Firebase Authentication and Cloud Firestore
-  google_sign_in: ^4.5.9
-  firebase_auth: ^0.18.0
-  flutter_facebook_login: ^3.0.0
-  bloc: ^6.1.1  
-  flutter_bloc: ^6.1.1
+  google_sign_in: ^7.2.0
+  firebase_auth: ^6.6.1
+  # Maintained Facebook auth plugin; the one this used before was discontinued
+  # and never went null safe.
+  flutter_facebook_auth: ^7.2.0
+  bloc: ^9.2.1
+  flutter_bloc: ^9.1.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^0.1.2
-  path:
-  http:
-  charts_flutter: ^0.8.0
-  badges: ^1.1.0
-  url_launcher:
-  equatable: ^1.2.3
+  cupertino_icons: ^1.0.8
+  path: ^1.9.0
+  http: ^1.5.0
+  # charts_flutter was abandoned at 0.12.0 with an `<3.0.0` SDK ceiling;
+  # fl_chart is the maintained charting package.
+  fl_chart: ^1.2.0
+  url_launcher: ^6.3.2
+  equatable: ^2.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  test: 
-  mockito: 
-  firebase_auth_mocks: ^0.3.2
-  flutter_launcher_icons: "^0.7.3"
-  google_sign_in_mocks: ^0.1.0+2
-  bloc_test: ^7.0.0
+  test: ^1.26.3
+  mockito: ^5.8.1
+  # Imported directly by test/repositories/facebook_sign_in_test.dart so the
+  # Facebook plugin's platform interface can be swapped for a fake. It is a
+  # transitive dep of flutter_facebook_auth, but anything a test imports by name
+  # has to be declared, otherwise it silently floats on the parent's version.
+  flutter_facebook_auth_platform_interface: ^6.1.2
+  firebase_auth_mocks: ^0.15.0
+  flutter_launcher_icons: ^0.14.4
+  google_sign_in_mocks: ^0.4.2
+  bloc_test: ^10.0.0
+  # Base lint set for analysis_options.yaml. Matches the version the Flutter
+  # 3.47.4 app template ships, so the rules here are the ones the SDK authors
+  # expect this Dart/Flutter combination to be held to.
+  flutter_lints: ^6.0.0
   
 flutter_icons:
   android: "launcher_icon" 

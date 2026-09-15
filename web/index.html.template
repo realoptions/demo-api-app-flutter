@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    Substituted by `flutter build web --base-href`; `flutter_bootstrap.js`
+    resolves every artefact it needs (main.dart.js, the canvaskit wasm,
+    flutter_assets/) relative to this, so it must stay.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <!-- Without an explicit viewport the hosted demo renders at desktop width on a
+       phone and the visitor has to pinch-zoom to use a mobile app. -->
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=yes, minimum-scale=1.0">
+  <meta name="color-scheme" content="light">
+
+  <title>Real Options &mdash; European Option Pricing Calculator</title>
+  <meta name="description" content="European option pricing calculator for the Heston, CGMY and Merton jump-diffusion models, with density, implied volatility and value-at-risk plots.">
+
+  <!-- Matches the app's Material teal / orange theme (see ThemeData in lib/main.dart). -->
+  <meta name="theme-color" content="#009688">
+
+  <!-- Home-screen / PWA metadata; the icons are copied into build/web by the
+       Flutter web build, and manifest.json is what makes the app installable. -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Real Options">
+  <link rel="apple-touch-icon" href="icons/Icon-512.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="manifest" href="manifest.json">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Real Options &mdash; European Option Pricing Calculator">
+  <meta property="og:description" content="Price European options under the Heston, CGMY and Merton models and inspect the density, implied volatility and value-at-risk.">
+
+  <style>
+    /* Boot spinner: the Flutter bundle is multi-megabyte, so without this the page
+       is plain white while it downloads. Removed on Flutter's first-frame event. */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #fafafa;
+    }
+    #boot-loader {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      background: #fafafa;
+      font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      color: #5f6368;
+      z-index: 9999;
+    }
+    #boot-loader .boot-spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid rgba(0, 150, 136, 0.18);
+      border-top-color: #ff9800;
+      border-radius: 50%;
+      animation: boot-spin 900ms linear infinite;
+    }
+    #boot-loader .boot-label {
+      font-size: 15px;
+      letter-spacing: 0.2px;
+    }
+    #boot-loader .boot-error { color: #b3261e; }
+    @keyframes boot-spin { to { transform: rotate(360deg); } }
+    /* Honour a reduced-motion preference: show a static indicator instead. */
+    @media (prefers-reduced-motion: reduce) {
+      #boot-loader .boot-spinner {
+        animation: none;
+        border-top-color: rgba(255, 152, 0, 0.85);
+      }
+    }
+    /* Keep the loader visible if JS is off rather than showing an empty page. */
+    noscript #boot-noscript {
+      display: block;
+      text-align: center;
+      padding: 40px 24px;
+      font-family: Roboto, -apple-system, sans-serif;
+      color: #b3261e;
+    }
+  </style>
+</head>
+<body>
+  <div id="boot-loader" role="status" aria-live="polite">
+    <div class="boot-spinner" aria-hidden="true"></div>
+    <div class="boot-label" id="boot-label">Loading the option calculator&hellip;</div>
+  </div>
+  <noscript>
+    <div id="boot-noscript">This calculator needs JavaScript enabled.</div>
+  </noscript>
+
+  <script>
+    // Flutter web fires `flutter-first-frame` on the document once it has painted.
+    // Registered before the bundle loads so the event cannot be missed.
+    (function () {
+      function dismissBootLoader() {
+        var loader = document.getElementById('boot-loader');
+        if (loader && loader.parentNode) {
+          loader.parentNode.removeChild(loader);
+        }
+      }
+      window.addEventListener('flutter-first-frame', dismissBootLoader);
+
+      // Soft signal only: if the bundle is very slow, say so instead of leaving the
+      // visitor wondering whether the page is broken. Never removes the spinner.
+      window.setTimeout(function () {
+        var label = document.getElementById('boot-label');
+        if (label) {
+          label.textContent = 'Still loading \u2014 the first download is a few megabytes.';
+        }
+      }, 15000);
+    })();
+  </script>
+
+  <!--
+    Firebase is configured on the Dart side (lib/firebase_options.dart), not here.
+
+    There are deliberately no `firebase-app.js` / `firebase-auth.js` <script>
+    tags in this page: firebase_core_web ships and owns the Firebase JS SDK, and
+    pinning a version here silently overrides the one the Dart package was built
+    against (the old pin was 7.9.3, several majors behind). The Google OAuth
+    client ID likewise comes from the Firebase web stack rather than a
+    `google-signin-client_id` meta tag pasted into HTML.
+
+    The API key itself is supplied at build time with
+      --dart-define=FIREBASE_WEB_API_KEY=...
+    so it never appears in a tracked file; see scripts/generate_build_config.sh.
+  -->
+
+  <!--
+    flutter_bootstrap.js is generated by `flutter build web` and is what makes
+    the bundle configurable at load time instead of baked in: it picks the
+    entrypoint, the renderer and the service-worker version, and it registers
+    flutter_service_worker.js (also generated) for caching/offline.
+
+    The service worker is the cache-busting mechanism this demo needs: gh-pages
+    is a purely static host with no cache-control headers, so without it a
+    visitor can keep running a stale bundle long after a deploy.
+  -->
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

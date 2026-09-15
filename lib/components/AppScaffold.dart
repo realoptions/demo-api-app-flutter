@@ -19,7 +19,7 @@ import 'package:realoptions/blocs/select_page/select_page_bloc.dart';
 import 'package:realoptions/blocs/form/form_bloc.dart';
 
 class AppScaffold extends StatelessWidget {
-  AppScaffold({Key key, @required this.title, @required this.apiKey});
+  const AppScaffold({super.key, required this.title, required this.apiKey});
   final String title;
   final String apiKey;
 
@@ -39,72 +39,106 @@ class AppScaffold extends StatelessWidget {
 }
 
 class WaitForConstraints extends StatelessWidget {
-  const WaitForConstraints(
-      {Key key,
-      @required this.title,
-      //@required this.selectPageBloc,
-      @required this.finside})
-      : super(key: key);
+  const WaitForConstraints({
+    super.key,
+    required this.title,
+    required this.finside,
+  });
   final String title;
   final FinsideApi finside;
   //final SelectPageBloc selectPageBloc;
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ConstraintsBloc, ConstraintsState>(
-      builder: (context, data) {
-        if (data is ConstraintsIsFetching) {
-          return Scaffold(body: Center(child: CircularProgressIndicator()));
-        } else if (data is ConstraintsError) {
-          return Scaffold(
-              body: Center(child: Text(data.constraintsError.toString())));
-        } else if (data is ConstraintsData) {
-          return MultiBlocProvider(providers: [
-            BlocProvider<OptionsBloc>(create: (_) {
-              return OptionsBloc(
-                  finside: finside,
-                  selectPageBloc: context.read<SelectPageBloc>());
-            }),
-            BlocProvider<DensityBloc>(create: (_) {
-              return DensityBloc(
-                  finside: finside,
-                  selectPageBloc: context.read<SelectPageBloc>());
-            }),
-            BlocProvider<FormBloc>(create: (context) {
-              return FormBloc(constraints: data.constraints);
-            }),
-          ], child: _Scaffold(title: title));
-        } else {
-          //should never get here
-          return Scaffold(body: Center(child: CircularProgressIndicator()));
-        }
+      builder: (BuildContext context, ConstraintsState data) => switch (data) {
+        ConstraintsIsFetching() =>
+          Scaffold(body: Center(child: CircularProgressIndicator())),
+        ConstraintsError(:final constraintsError) =>
+          Scaffold(body: Center(child: Text(constraintsError))),
+        // The form and both chart blocs need the constraints, so they are
+        // provided here rather than re-fetched downstream.
+        ConstraintsData(:final constraints) => MultiBlocProvider(
+            providers: [
+              BlocProvider<OptionsBloc>(
+                create: (_) => OptionsBloc(
+                    finside: finside,
+                    selectPageBloc: context.read<SelectPageBloc>()),
+              ),
+              BlocProvider<DensityBloc>(
+                create: (_) => DensityBloc(
+                    finside: finside,
+                    selectPageBloc: context.read<SelectPageBloc>()),
+              ),
+              BlocProvider<FormBloc>(
+                create: (_) => FormBloc(constraints: constraints),
+              ),
+            ],
+            child: _Scaffold(title: title),
+          ),
       },
     );
   }
 }
 
-class _Scaffold extends StatelessWidget {
-  _Scaffold({@required this.title});
+class _Scaffold extends StatefulWidget {
+  const _Scaffold({required this.title});
   final String title;
-  final PageStorageBucket _bucket = PageStorageBucket();
-  List<PageEntry> _getPages(List<bool> showBadge) {
-    return [
-      PageEntry(
-        widget: InputForm(),
-        icon: Icon(Icons.input),
-        text: "Entry",
-      ),
-      PageEntry(
-          widget: ShowDensity(),
-          icon: badge.ShowBadge(
-              icon: Icon(Icons.show_chart), showBadge: showBadge[DENSITY_PAGE]),
-          text: "Density"),
-      PageEntry(
-          widget: ShowOptionPrices(),
-          icon: badge.ShowBadge(
-              icon: Icon(Icons.scatter_plot),
-              showBadge: showBadge[OPTIONS_PAGE]),
-          text: "Prices"),
-    ];
+
+  @override
+  State<_Scaffold> createState() => _ScaffoldState();
+}
+
+class _ScaffoldState extends State<_Scaffold> {
+  /// The three pages of the shell, allocated once rather than per build.
+  ///
+  /// This used to be a `_getPages(showBadges)` call run on every build, which
+  /// threw away the page bodies and rebuilt every `Icon` just to flip two
+  /// badge booleans. Held as `const` instead: the instances are canonicalised,
+  /// so a rebuild hands the tree the identical widget and Flutter can skip the
+  /// work below it. The badge flag - the only thing that actually varies - is
+  /// applied in [_navIcon], on top of the shared icon.
+  static const List<PageEntry> _pages = <PageEntry>[
+    PageEntry(
+      widget: InputForm(),
+      icon: Icon(Icons.input),
+      text: "Entry",
+    ),
+    PageEntry(
+      widget: ShowDensity(),
+      icon: Icon(Icons.show_chart),
+      text: "Density",
+    ),
+    PageEntry(
+      widget: ShowOptionPrices(),
+      icon: Icon(Icons.scatter_plot),
+      text: "Prices",
+    ),
+  ];
+
+  /// Tabs that carry a "new results" dot. Entry is not one of them - nothing
+  /// ever marks it read or unread - so its icon stays unwrapped, exactly as it
+  /// was when the badge was baked into the page entry.
+  static const Set<int> _badgePages = <int>{DENSITY_PAGE, OPTIONS_PAGE};
+
+  late final PageStorageBucket _bucket;
+
+  @override
+  void initState() {
+    super.initState();
+    // The bucket is mutable storage state: scroll offsets and any other
+    // PageStorage reads and writes live in it. It used to be a field on the
+    // StatelessWidget, where a new widget instance at any time would drop it
+    // (or, if the instance was reused, quietly share it) - a StatelessWidget
+    // has no place to keep it.
+    _bucket = PageStorageBucket();
+  }
+
+  Widget _navIcon(int index, List<bool> showBadges) {
+    final Widget icon = _pages[index].icon;
+    if (!_badgePages.contains(index)) {
+      return icon;
+    }
+    return badge.ShowBadge(icon: icon, showBadge: showBadges[index]);
   }
 
   @override
@@ -113,19 +147,20 @@ class _Scaffold extends StatelessWidget {
       builder: (context, data) {
         final selectedIndex = data.index;
         final showBadges = data.showBadges;
-        final pages = _getPages(showBadges);
         return Scaffold(
             appBar: OptionsAppBar(
-              title: this.title,
+              title: widget.title,
               choices: MODEL_CHOICES,
             ),
             body: PageStorage(
-                child: pages[selectedIndex].widget, bucket: _bucket),
+                bucket: _bucket, child: _pages[selectedIndex].widget),
             bottomNavigationBar: BottomNavigationBar(
-              items: pages.map((PageEntry entry) {
-                return BottomNavigationBarItem(
-                    icon: entry.icon, label: entry.text);
-              }).toList(),
+              items: [
+                for (int index = 0; index < _pages.length; index++)
+                  BottomNavigationBarItem(
+                      icon: _navIcon(index, showBadges),
+                      label: _pages[index].text),
+              ],
               currentIndex: selectedIndex,
               onTap: (index) => context.read<SelectPageBloc>().setPage(index),
             ));

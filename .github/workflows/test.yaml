@@ -9,13 +9,64 @@ jobs:
     # variations of an environment to run each job in.
     steps:
     # A name for your step to display on GitHub.
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     # Sets up a flutter environment.
     # https://github.com/marketplace/actions/flutter-action
-    - uses: subosito/flutter-action@v1
+    - uses: subosito/flutter-action@v2
       with:
-        flutter-version: '2.0.0'
-        channel: 'stable' # or: 'dev' or 'beta'
+        # Kept in step with the release pipeline's default (see
+        # .github/workflows/deploy-reusable.yml) and .metadata. The previous 2.x
+        # pin has been out of support for years and cannot resolve this project's
+        # Dart 3 dependency set.
+        #
+        # `cache: true` caches both the Flutter SDK and the pub dependencies.
+        # That is not an assumption: the action's own step guard is
+        # `(pub-cache == '' && cache == 'true') || pub-cache == 'true'`, so an
+        # unset `pub-cache` with `cache: true` takes the pub branch. `pub-cache`
+        # is left unset rather than written out because actionlint's bundled
+        # action metadata predates that input and reports it as unknown.
+        flutter-version: '3.47.4'
+        channel: 'stable'
+        cache: true
+    # Resolving dependencies has to happen before anything that reads Dart.
+    #
+    # This is not a formality. `dart format` reads .dart_tool/package_config.json
+    # to work out the language version to format against, and with no package
+    # config it silently falls back to a baseline and reports 54 of 66 files as
+    # needing changes - so the format gate below would fail every PR against a
+    # correctly formatted branch. `dart analyze` is worse: on an unresolved tree
+    # it reported 2697 issues and exited 3.
+    #
+    # `flutter analyze` appears to survive this because it runs an implicit
+    # `pub get` first. That is exactly the kind of accident to depend on - it
+    # would leave the format step, which has no such fallback, broken.
+    - name: "Install dependencies"
+      run: flutter pub get
+
+    - name: "Check formatting"
+      # --set-exit-if-changed makes this a check rather than a rewrite: it exits
+      # 1 on any file dart format would touch, so unformatted code cannot land.
+      # Not piped, because a pipe would mask the exit code behind whatever the
+      # last command in the chain returned.
+      #
+      # `.` rather than an explicit list so a new top-level Dart directory is
+      # covered without anyone remembering to update this. Verified it does not
+      # wander: it reports the same 66 files as `lib test`, since build/ and
+      # .dart_tool/ are not traversed.
+      run: dart format --output=none --set-exit-if-changed .
+
+    - name: "Analyze"
+      # dart analyze reads analysis_options.yaml and exits non-zero on info-level
+      # findings by default, so the lints actually gate the build rather than
+      # being advisory. That is the whole point of the config; running with
+      # infos downgraded would let new warnings land quietly.
+      #
+      # `dart analyze` rather than `flutter analyze`: same analyzer, same rules,
+      # but it does not carry flutter analyze's habit of rewriting
+      # analysis_options.yaml in place. CI should check the config that was
+      # committed, not a copy the tool adjusted while reading it.
+      run: dart analyze
+
     - name: "Run Flutter Driver tests"
       run: |
         flutter pub get

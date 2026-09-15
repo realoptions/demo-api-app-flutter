@@ -1,11 +1,8 @@
-import 'package:quiver/core.dart' show hash2;
-import 'package:flutter/foundation.dart';
-
-const List<Model> MODEL_CHOICES = const <Model>[
-  const Model(label: "Heston", value: "heston"),
-  const Model(label: "CGMY", value: "cgmy"),
-  const Model(label: "CGMYSE", value: "cgmyse"),
-  const Model(label: "Merton", value: "merton")
+const List<Model> MODEL_CHOICES = <Model>[
+  Model(label: "Heston", value: "heston"),
+  Model(label: "CGMY", value: "cgmy"),
+  Model(label: "CGMYSE", value: "cgmyse"),
+  Model(label: "Merton", value: "merton")
 ];
 
 const Map<String, Map<String, double>> DEFAULT_VALUES = {
@@ -59,7 +56,7 @@ const Map<String, Map<String, double>> DEFAULT_VALUES = {
 class Model {
   final String value;
   final String label;
-  const Model({@required this.value, @required this.label});
+  const Model({required this.value, required this.label});
   @override
   bool operator ==(other) {
     if (other is! Model) {
@@ -75,5 +72,5 @@ class Model {
   }
 
   @override
-  int get hashCode => hash2(value, label);
+  int get hashCode => Object.hash(value, label);
 }

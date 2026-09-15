@@ -1,0 +1,88 @@
+# Static analysis configuration. The repo had none, so `flutter analyze` was
+# running with no lint rules at all - every rule below is one that was previously
+# not being checked.
+#
+# Base is the Flutter app template's own set. Everything added on top was chosen
+# by measurement, not by taste: each rule listed under "tightening" was run
+# against the tree and produced zero violations, so it locks in a standard the
+# code already meets rather than opening a backlog.
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - "**/*.g.dart"
+    - android/**
+    - ios/**
+    - web/**
+
+linter:
+  rules:
+    # ---------------------------------------------------------------------
+    # Tightening: verified clean against this tree, so enabled with no cost.
+    # ---------------------------------------------------------------------
+
+    # No stray stdout from app code.
+    avoid_print: true
+
+    # Real correctness guards, not style.
+    avoid_dynamic_calls: true
+    avoid_slow_async_io: true
+    literal_only_boolean_expressions: true
+    avoid_returning_null_for_future: true
+    prefer_conditional_assignment: true
+    unnecessary_await_in_return: true
+    use_named_constants: true
+
+    # Resource-leak guards. This project opens streams (bloc state streams, the
+    # injected http.Client), so these are worth having on rather than assumed.
+    cancel_subscriptions: true
+    close_sinks: true
+
+    # Equality/hash contract guards. Directly relevant: two violations of exactly
+    # this contract were found and fixed in the quiver removal (PageState hashed a
+    # List by identity while comparing it by value; InputConstraint hashed fields
+    # its == ignores). These rules would have caught both.
+    hash_and_equals: true
+    avoid_null_checks_in_equality_operators: true
+    avoid_unused_constructor_parameters: true
+
+    # ---------------------------------------------------------------------
+    # Deliberate deviations from the Dart style guide, with reasons.
+    #
+    # Both of these were measured at 20 and 11 violations respectively. They are
+    # switched off because the project has a consistent convention that differs
+    # from the default, not because the violations are unwanted. Turning them
+    # off here keeps that visible and reviewable; leaving them on would bury the
+    # signal under 31 lines of accepted noise, and a lint nobody intends to
+    # satisfy is worse than no lint.
+    # ---------------------------------------------------------------------
+
+    # Module-level configuration constants use SCREAMING_CASE throughout
+    # (API_VERSION, BASE_ENDPOINT, NUM_STRIKES, PERCENT_RANGE, MODEL_CHOICES,
+    # DEFAULT_VALUES, DENSITY_PAGE, OPTIONS_PAGE, NUM_TICKS, PADDING_PERCENTAGE).
+    # This reads as "compile-time constant" at a glance, which is the point.
+    # Renaming to lowerCamelCase touches every call site for no correctness gain.
+    constant_identifier_names: false
+
+    # Component files are PascalCase matching the class they define
+    # (OptionsAppBar.dart, CustomTextFields.dart, ShowBadge.dart) and the test
+    # files mirror them (OptionsAppBar_test.dart). Renaming would rewrite imports
+    # across lib/ and test/ and break `git log --follow` on every one of them.
+    file_names: false
+
+    # ---------------------------------------------------------------------
+    # Considered and rejected, so the reasoning is not lost.
+    # ---------------------------------------------------------------------
+    # require_trailing_commas  - 311 violations. Pure churn.
+    # prefer_single_quotes     - 260 violations. The codebase is consistently
+    #                            double-quoted; flipping it is a whole-repo diff
+    #                            for no gain.
+    # directives_ordering      - 52 violations. Mechanically fixable, but it is
+    #                            import shuffling unrelated to this change.
+    # prefer_final_locals      - 19 violations.
+    # unawaited_futures        - fires on intentional fire-and-forget in tests,
+    #                            which is the common case here rather than a bug.
+    # avoid_equals_and_hash_code_on_mutable_classes - 10 violations, and the
+    #                            affected types are value objects whose
+    #                            immutability is enforced by convention.

@@ -13,38 +13,29 @@ import 'package:realoptions/blocs/constraints/constraints_bloc.dart';
 import 'package:realoptions/blocs/form/form_bloc.dart';
 import 'package:realoptions/blocs/density/density_bloc.dart';
 import 'package:realoptions/blocs/select_page/select_page_bloc.dart';
-import 'package:realoptions/services/finside_service.dart';
 import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/models/response.dart';
-import 'package:realoptions/components/CustomTextFields.dart';
-import '../../mocks/api_repository_mock.dart';
-
-class MockFinsideService extends Mock implements FinsideApi {}
+import '../mocks/api_repository_mock.dart';
+import '../mocks/finside_api_mock.dart';
+import '../support/form_fixtures.dart';
 
 void main() {
-  MockFinsideService finside;
-  List<InputConstraint> constraints;
-  MockFirebaseAuth auth;
-  MockApiRepository apiRepository;
-  ApiBloc apiBloc;
+  late MockFinsideService finside;
+  late List<InputConstraint> constraints;
+  late MockFirebaseAuth auth;
+  late MockApiRepository apiRepository;
+  late ApiBloc apiBloc;
   setUp(() {
     finside = MockFinsideService();
-    constraints = [
-      InputConstraint(
-          defaultValue: 2,
-          upper: 3,
-          lower: 1,
-          fieldType: FieldType.Float,
-          name: "asset",
-          inputType: InputType.Market)
-    ];
+    // The whole Heston parameter set. Submitting builds a typed request, which
+    // needs every market and model field present, so a one-field form can no
+    // longer stand in for a real submission.
+    constraints = fullHestonConstraints();
     auth = MockFirebaseAuth(signedIn: true);
     apiRepository = MockApiRepository();
     apiBloc = ApiBloc(firebaseAuth: auth, apiRepository: apiRepository);
   });
   tearDown(() {
-    finside = null;
-    constraints = null;
     apiBloc.close();
   });
   void stubRetrieveData() {
@@ -53,17 +44,17 @@ void main() {
   }
 
   void stubRetrieveOptions() {
-    when(finside.fetchOptionPrices(any, any)).thenAnswer((_) => Future.value({
-          "call": [ModelResult(value: 4, atPoint: 4)],
-          "put": [ModelResult(value: 4, atPoint: 4)]
-        }));
+    when(finside.fetchOptionPrices(any)).thenAnswer((_) => Future.value(
+        OptionPrices(
+            calls: [ModelResult(value: 4, atPoint: 4)],
+            puts: [ModelResult(value: 4, atPoint: 4)])));
   }
 
   void stubRetrieveDensity() {
     var results = DensityAndVaR(
         density: [ModelResult(atPoint: 4, value: 3)],
         riskMetrics: VaRResult(valueAtRisk: 0.3, expectedShortfall: 0.4));
-    when(finside.fetchDensityAndVaR(any, any))
+    when(finside.fetchDensityAndVaR(any))
         .thenAnswer((_) => Future.value(results));
   }
 
@@ -144,13 +135,55 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text("Big error!"), findsNothing);
     expect(find.byType(CircularProgressIndicator), findsNothing);
-    await tester.enterText(find.byType(TextFormField), "2.5");
+    await tester.enterText(find.byType(TextFormField).first, "2.5");
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(ElevatedButton));
+    // Ten fields push the submit button below the fold of the scrolling form,
+    // so a bare tap() hits nothing; scroll it into view first.
+    final Finder submit = find.text('Submit');
+    await tester.ensureVisible(submit);
+    await tester.pumpAndSettle();
+    await tester.tap(submit);
     await tester.pumpAndSettle();
     expect(find.text("Big error!"), findsNothing);
     expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(bloc.getCurrentForm(),
-        {"asset": SubmitItems(value: 2.5, inputType: InputType.Market)});
+    // Saving the form writes every rendered field, not only the edited one, so
+    // the assertion is on the field that was changed rather than on the whole
+    // map.
+    expect(bloc.getCurrentForm()["asset"],
+        SubmitItems(value: 2.5, inputType: InputType.Market));
+    verify(finside.fetchOptionPrices(any)).called(1);
+    verify(finside.fetchDensityAndVaR(any)).called(1);
+  });
+
+  testWidgets('two InputForms can be mounted side by side',
+      (WidgetTester tester) async {
+    final SelectPageBloc selectPageBloc = SelectPageBloc();
+    await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+            body: MultiBlocProvider(
+                providers: [
+          BlocProvider<SelectPageBloc>(create: (_) => selectPageBloc),
+          BlocProvider<SelectModelBloc>(create: (_) => SelectModelBloc()),
+          BlocProvider<DensityBloc>(
+              create: (_) => DensityBloc(
+                  finside: finside, selectPageBloc: selectPageBloc)),
+          BlocProvider<OptionsBloc>(
+              create: (_) => OptionsBloc(
+                  finside: finside, selectPageBloc: selectPageBloc)),
+          BlocProvider<FormBloc>(
+              create: (_) => FormBloc(constraints: constraints)),
+        ],
+                child: const Row(children: [
+                  Expanded(child: InputForm()),
+                  Expanded(child: InputForm()),
+                ])))));
+    await tester.pumpAndSettle();
+
+    // The form key used to be `static` - one GlobalKey for the whole InputForm
+    // class - so registering it on a second Form is a hard "Duplicate GlobalKey
+    // detected in widget tree" error. This pump is itself the regression check;
+    // the count confirms both forms really mounted instead of one silently
+    // taking the other's state.
+    expect(find.byType(Form), findsNWidgets(2));
   });
 }

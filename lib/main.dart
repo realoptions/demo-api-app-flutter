@@ -9,28 +9,49 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:realoptions/repositories/api_repository.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:realoptions/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  // Web options come from the build environment (see FirebaseConfig); off the web
+  // they are null so the native SDK reads its own google-services.json.
+  if (kIsWeb && FirebaseConfig.webApiKey.isEmpty) {
+    debugPrint(
+      'WARNING: FIREBASE_WEB_API_KEY was not supplied at build time, so Firebase '
+      'sign-in will fail. Render the config and pass it to the build: '
+      'WEB_API_KEY=<key> scripts/generate_build_config.sh web, then build/run '
+      'with --dart-define-from-file=config/firebase_config.json.',
+    );
+  }
+  await Firebase.initializeApp(options: FirebaseConfig.forCurrentPlatform);
   runApp(MyApp());
 }
 
 const String title = "Options";
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         title: 'Demo Option Pricing App',
         theme: ThemeData(
             primarySwatch: Colors.teal,
-            accentColor: Colors.orange,
-            buttonTheme: ButtonThemeData(
+            // `ThemeData.accentColor` was removed. The secondary slot of the
+            // colour scheme replaces it, and it is the value the density and
+            // put-price charts read through `colorScheme.secondary`, so this
+            // is the one place that decides that orange.
+            colorScheme: ColorScheme.fromSwatch(
+              primarySwatch: Colors.teal,
+            ).copyWith(secondary: Colors.orange),
+            buttonTheme: const ButtonThemeData(
               buttonColor: Colors.orange,
             ),
-            textTheme: TextTheme(
-              bodyText2: TextStyle(
+            textTheme: const TextTheme(
+              // `bodyText2` is `bodyLarge` under the Material 3 text roles.
+              bodyLarge: TextStyle(
                 fontSize: 15.0,
               ),
             )),
@@ -44,23 +65,20 @@ class MyApp extends StatelessWidget {
 }
 
 class StartupPage extends StatelessWidget {
+  const StartupPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ApiBloc, ApiState>(
-      builder: (context, data) {
-        if (data is ApiError) {
-          return Center(child: Text(data.apiError.toString()));
-        } else if (data is ApiIsFetching) {
-          return Center(child: CircularProgressIndicator());
-        } else if (data is ApiNoData) {
-          return Introduction();
-        } else if (data is ApiToken) {
-          return BlocProvider<SelectModelBloc>(
-              create: (context) => SelectModelBloc(),
-              child: AppScaffold(title: title, apiKey: data.token));
-        } else {
-          return Center(child: CircularProgressIndicator());
-        }
+      builder: (BuildContext context, ApiState data) => switch (data) {
+        ApiError(:final apiError) => Center(child: Text(apiError.toString())),
+        ApiIsFetching() => const Center(child: CircularProgressIndicator()),
+        // No token yet, so there is nothing to sign in with.
+        ApiNoData() => Introduction(),
+        ApiToken(:final token) => BlocProvider<SelectModelBloc>(
+            create: (context) => SelectModelBloc(),
+            child: AppScaffold(title: title, apiKey: token),
+          ),
       },
     );
   }

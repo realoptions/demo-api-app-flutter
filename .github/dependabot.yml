@@ -1,0 +1,19 @@
+# Keeps the workflow action pins from going stale again.
+#
+# The state this change had to clean up - an `anothrNick/github-tag-action`
+# frozen at 1.34.0 from January 2021, five years behind - happened because
+# nothing in the repo ever proposed an upgrade. This makes the proposal
+# automatic; merging is still a human decision.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # One PR per ecosystem rather than one per action, so a routine bump does
+      # not produce a pile of near-identical reviews.
+      action-updates:
+        patterns:
+          - "*"

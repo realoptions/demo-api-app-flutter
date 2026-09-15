@@ -1,0 +1,24 @@
+{
+    "name": "Real Options - European Option Pricing Calculator",
+    "short_name": "Real Options",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#fafafa",
+    "theme_color": "#009688",
+    "description": "European option pricing calculator for the Heston, CGMY and Merton jump-diffusion models, with density, implied volatility and value-at-risk plots.",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

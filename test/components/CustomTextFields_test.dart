@@ -52,7 +52,7 @@ void main() {
     expect(find.text("Please enter some text"), findsNothing);
     await tester.enterText(find.byType(TextFormField), "");
     await tester.pump();
-    formKey.currentState.validate();
+    formKey.currentState!.validate();
     expect(find.text('value'), findsNothing);
     expect(find.text("Please enter some text"), findsOneWidget);
   });
@@ -75,7 +75,7 @@ void main() {
     expect(find.text("Please enter some text"), findsNothing);
     await tester.enterText(find.byType(TextFormField), "-2.0");
     await tester.pump();
-    formKey.currentState.validate();
+    formKey.currentState!.validate();
     expect(find.text('value'), findsNothing);
     expect(find.text("Number must be between 0.0 and 1.0"), findsOneWidget);
   });
@@ -98,7 +98,7 @@ void main() {
     expect(find.text("Please enter some text"), findsNothing);
     await tester.enterText(find.byType(TextFormField), "2.0");
     await tester.pump();
-    formKey.currentState.validate();
+    formKey.currentState!.validate();
     expect(find.text('value'), findsNothing);
     expect(find.text("Number must be between 0.0 and 1.0"), findsOneWidget);
   });
@@ -122,7 +122,7 @@ void main() {
     expect(find.text("Please enter some text"), findsNothing);
     await tester.enterText(find.byType(TextFormField), "2");
     await tester.pump();
-    formKey.currentState.validate();
+    formKey.currentState!.validate();
     expect(find.text('value'), findsNothing);
     expect(find.text("Number must be between 0 and 1"), findsOneWidget);
   });

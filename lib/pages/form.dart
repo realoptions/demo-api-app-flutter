@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:realoptions/blocs/select_model/select_model_bloc.dart';
 import 'package:realoptions/components/CustomPadding.dart';
 import 'package:realoptions/components/CustomTextFields.dart';
+import 'package:realoptions/models/api_request.dart';
 import 'package:realoptions/models/forms.dart';
 import 'package:realoptions/blocs/form/form_bloc.dart';
 import 'package:realoptions/models/models.dart';
@@ -21,8 +22,8 @@ Widget getField(BuildContext context, String valueAtLastSubmit,
       labelText: constraint.name,
       defaultValue: valueAtLastSubmit,
       type: constraint.fieldType,
-      lowValue: constraint.lower,
-      highValue: constraint.upper,
+      lowValue: constraint.lower ?? double.negativeInfinity,
+      highValue: constraint.upper ?? double.infinity,
       onSaved: (String key, num value) =>
           context.read<FormBloc>().onSave(constraint.inputType, key, value),
     )),
@@ -33,16 +34,33 @@ Widget getField(BuildContext context, String valueAtLastSubmit,
         showDialog(
             context: context,
             builder: (BuildContext context) {
-              return AlertDialog(content: Text(constraint.description));
+              return AlertDialog(
+                  content: Text(constraint.description ??
+                      'No description available for ${constraint.name}.'));
             });
       },
     )
   ]));
 }
 
-class InputForm extends StatelessWidget {
-  const InputForm({Key key}) : super(key: key);
-  static final _formKey = GlobalKey<FormState>();
+class InputForm extends StatefulWidget {
+  const InputForm({super.key});
+
+  @override
+  State<InputForm> createState() => _InputFormState();
+}
+
+class _InputFormState extends State<InputForm> {
+  /// One key per mounted form, not one per class.
+  ///
+  /// This was `static final`, so every InputForm shared a single GlobalKey:
+  /// mount the widget twice and the second `Form` registers the same key,
+  /// which Flutter rejects outright as a duplicate GlobalKey - and short of
+  /// throwing, `validate()`/`save()` would drive whichever form grabbed the
+  /// key last rather than the one the button sits in. On the State it is
+  /// created with the instance it identifies.
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext _) {
     return BlocBuilder<FormBloc, Iterable<FormItem>>(builder: (context, data) {
@@ -52,37 +70,33 @@ class InputForm extends StatelessWidget {
       }).toList();
       formFields.add(PaddingForm(child: FormButton(formKey: _formKey)));
       return SingleChildScrollView(
+          key: PageStorageKey("Form"),
           child: Form(
               autovalidateMode: AutovalidateMode.always,
               key: _formKey,
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: formFields)),
-          key: PageStorageKey("Form"));
+                  children: formFields)));
     });
   }
 }
 
 class FormButton extends StatelessWidget {
-  FormButton({@required this.formKey});
+  const FormButton({super.key, required this.formKey});
   final GlobalKey<FormState> formKey;
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final ButtonStyle style = ElevatedButton.styleFrom(
-      textStyle: TextStyle(
-        color: Colors.black,
-      ),
-      onPrimary: Colors.black,
-      primary: theme.accentColor,
+      foregroundColor: Colors.black,
+      backgroundColor: theme.colorScheme.secondary,
     );
     return BlocBuilder<DensityBloc, DensityState>(
         builder: (context, densityData) {
       return BlocBuilder<OptionsBloc, OptionsState>(
           builder: (context, optionsData) {
-        if (densityData is IsDensityFetching &&
-            optionsData is IsOptionsFetching) {
-          return CircularProgressIndicator();
+        if (densityData.isFetching && optionsData.isFetching) {
+          return const CircularProgressIndicator();
         }
         return BlocBuilder<SelectModelBloc, Model>(builder: (context, model) {
           return ElevatedButton(
@@ -90,13 +104,14 @@ class FormButton extends StatelessWidget {
             onPressed: () {
               // Validate returns true if the form is valid, or false
               // otherwise.
-              if (formKey.currentState.validate()) {
-                formKey.currentState.save();
-                final submittedBody = context.read<FormBloc>().getCurrentForm();
-                final SubmitBody body = SubmitBody(formBody: submittedBody);
-                final jsonBody = body.convertSubmission();
-                context.read<DensityBloc>().getDensity(model.value, jsonBody);
-                context.read<OptionsBloc>().getOptions(model.value, jsonBody);
+              if (formKey.currentState!.validate()) {
+                formKey.currentState!.save();
+                final CalculationRequest request = SubmitBody(
+                  model: model,
+                  formBody: context.read<FormBloc>().getCurrentForm(),
+                ).toRequest();
+                context.read<DensityBloc>().getDensity(request);
+                context.read<OptionsBloc>().getOptions(request);
               }
             },
             child: Text('Submit'),

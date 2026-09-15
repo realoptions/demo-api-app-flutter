@@ -1,57 +1,64 @@
-def localProperties = new Properties()
-def localPropertiesFile = rootProject.file('local.properties')
-if (localPropertiesFile.exists()) {
-    localPropertiesFile.withReader('UTF-8') { reader ->
-        localProperties.load(reader)
-    }
+// Applied by id only. Versions live in settings.gradle's plugins block, and
+// `dev.flutter.flutter-gradle-plugin` replaces the old
+// `apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"`.
+// Order matters: the Flutter plugin must come after the Android and Kotlin plugins.
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+    id "com.google.gms.google-services"
 }
 
-def flutterRoot = localProperties.getProperty('flutter.sdk')
-if (flutterRoot == null) {
-    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
-}
-
-def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
-if (flutterVersionCode == null) {
-    flutterVersionCode = '1'
-}
-
-def flutterVersionName = localProperties.getProperty('flutter.versionName')
-if (flutterVersionName == null) {
-    flutterVersionName = '1.0'
-}
-
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'com.google.gms.google-services'
-apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('key.properties')
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
+
 android {
-    compileSdkVersion 29
+    // Declared here rather than as the `package` attribute in AndroidManifest.xml.
+    // AGP 8 deprecated the manifest attribute and AGP 9 removed it, so the
+    // manifest no longer carries an application identifier at all. This also
+    // fixes the old mismatch where the value here was com.finside.realoptions
+    // while the bundle identifier inherited from the template default
+    // (com.example.demoApiAppFlutter) still appeared in generated paths.
+    namespace = "com.finside.realoptions"
+
+    // Taken from the Flutter extension rather than hard-coded, so these track the
+    // SDK that actually built the engine. For Flutter 3.47.4 that is compile 36 /
+    // target 36 / min 24. Hard-coding them here means they silently rot the next
+    // time the SDK moves, and the tooling's own version checks no longer match.
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
-    lintOptions {
+    defaultConfig {
+        applicationId = "com.finside.realoptions"
+        // minSdk 21 -> 24. This was not optional: Flutter's DependencyVersionChecker
+        // fails the build outright below API 23 and warns below 24, so 21 could not
+        // have been kept regardless of what we would have preferred. Dropping API 21-23
+        // removes Android 5.0-6.0 devices; every plugin in use supports 24.
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+        // Was android.support.test.runner.AndroidJUnitRunner. The support-library
+        // runner cannot be used against an AndroidX-compiled app.
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // `lintOptions` was the AGP 7-era name and is gone in AGP 9.
+    lint {
         disable 'InvalidPackage'
     }
-
-    defaultConfig {
-        applicationId "com.finside.realoptions"
-        //multiDexEnabled true
-        minSdkVersion 21
-        targetSdkVersion 29
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    }
-
-    
 
     signingConfigs {
         release {
@@ -59,19 +66,30 @@ android {
             keyPassword keystoreProperties['keyPassword']
             storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
             storePassword keystoreProperties['storePassword']
-        }       
+        }
     }
+
     buildTypes {
-        if (System.getenv("CI")) { 
-            release {
-                signingConfig signingConfigs.release
-            }
+        release {
+            // Same policy as before, expressed once instead of as two divergent
+            // release blocks around an if/else on the CI environment variable:
+            // CI signs with the upload keystore from key.properties, a local
+            // build falls back to the debug key so `flutter run --release` works.
+            //
+            // Note this still fails loudly rather than quietly downgrading: if CI
+            // has no key.properties, storeFile is null and the signing step
+            // errors out instead of shipping an unsigned or debug-signed AAB.
+            signingConfig = System.getenv("CI") ? signingConfigs.release : signingConfigs.debug
         }
-        else {
-            release {
-                signingConfig signingConfigs.debug
-            }
-        }
+    }
+}
+
+// Kotlin 2.x replaced the android-block `kotlinOptions { jvmTarget = "1.8" }`
+// with this. It has to match compileOptions above or the Java and Kotlin outputs
+// target different bytecode levels.
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 
@@ -80,9 +98,11 @@ flutter {
 }
 
 dependencies {
-    //implementation 'com.android.support:multidex:1.0.3'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    // `org.jetbrains.kotlin:kotlin-stdlib-jdk7` is deliberately not listed.
+    // Since Kotlin 1.8 the jdk7 and jdk8 stdlib artifacts are merged into
+    // kotlin-stdlib, and the Kotlin Gradle plugin adds that automatically, so an
+    // explicit pin here would only risk pinning a stale split artifact.
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
 }

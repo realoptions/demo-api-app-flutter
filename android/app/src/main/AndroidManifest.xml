@@ -1,5 +1,6 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.finside.realoptions">
+<!-- No `package` attribute: AGP 8 deprecated it and AGP 9 removed it. The
+     application identifier now comes from `namespace` in app/build.gradle. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.
@@ -12,6 +13,7 @@
         android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
+            android:exported="true"
             android:launchMode="singleTop"
             android:theme="@style/NormalTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
