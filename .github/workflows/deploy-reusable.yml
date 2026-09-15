@@ -56,7 +56,7 @@ jobs:
       id-token: write   # to verify the deployment originates from an appropriate source
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Version authority.
       #
@@ -135,7 +135,7 @@ jobs:
       # a key that covers both the Gradle configuration and the Flutter packages
       # that contribute Android code.
       - name: Cache Gradle
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.gradle/caches
@@ -197,18 +197,18 @@ jobs:
         run: scripts/cache_bust_web.sh build/web
 
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
         if: inputs.publish-web
       - name: Upload artifact
         if: inputs.publish-web
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           # Upload entire repository
           path: "build/web"
       - name: Deploy to GitHub Pages
         if: inputs.publish-web
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
       - name: Deploy google play store
         if: inputs.publish-android
