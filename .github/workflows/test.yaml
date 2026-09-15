@@ -9,7 +9,7 @@ jobs:
     # variations of an environment to run each job in.
     steps:
     # A name for your step to display on GitHub.
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     # Sets up a flutter environment.
     # https://github.com/marketplace/actions/flutter-action
     - uses: subosito/flutter-action@v2
