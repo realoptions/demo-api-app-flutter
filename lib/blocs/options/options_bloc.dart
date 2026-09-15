@@ -27,7 +27,7 @@ class OptionsBloc extends Bloc<OptionsEvents, OptionsState> {
   final RequestGuard _guard = RequestGuard();
 
   OptionsBloc({required this.finside, required this.selectPageBloc})
-      : super(NoData()) {
+      : super(OptionsNoData()) {
     on<RequestOptions>(_onRequestOptions);
   }
 

@@ -3,7 +3,13 @@ import 'package:equatable/equatable.dart';
 
 abstract class DensityState extends Equatable {}
 
-class NoData extends DensityState {
+/// No density has been fetched yet.
+///
+/// Prefixed with `Density` the way `ApiNoData` is prefixed with `Api`: this
+/// file and `options_state.dart` used to both declare a bare `NoData`, so an
+/// `is NoData` check copied between the two pages compiled against the wrong
+/// hierarchy.
+class DensityNoData extends DensityState {
   @override
   List<Object> get props => [];
 }

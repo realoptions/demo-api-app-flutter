@@ -27,7 +27,7 @@ class DensityBloc extends Bloc<DensityEvents, DensityState> {
   final RequestGuard _guard = RequestGuard();
 
   DensityBloc({required this.finside, required this.selectPageBloc})
-      : super(NoData()) {
+      : super(DensityNoData()) {
     on<RequestDensity>(_onRequestDensity);
   }
 

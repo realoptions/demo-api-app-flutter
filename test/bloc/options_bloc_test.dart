@@ -33,7 +33,7 @@ void main() {
   });
 
   test('gets correct initial state', () {
-    expect(bloc.state, NoData());
+    expect(bloc.state, OptionsNoData());
   });
 
   blocTest<OptionsBloc, OptionsState>(

@@ -14,7 +14,7 @@ class ShowOptionPrices extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<OptionsBloc, OptionsState>(builder: (context, data) {
-      if (data is NoData) {
+      if (data is OptionsNoData) {
         return const Center(child: Text('Please submit parameters!'));
       } else if (data is IsOptionsFetching) {
         return const Center(child: CircularProgressIndicator());
