@@ -18,9 +18,6 @@ class ShowOptionPrices extends StatelessWidget {
         OptionsError(:final optionsError) => ChartFailed(optionsError),
         OptionsData(:final options) =>
           ChartReady(_optionCharts(context, options)),
-        // A state with no branch here reads as "still working", which is what
-        // the hand-written switch this replaced did too.
-        _ => const ChartBusy(),
       },
     );
   }

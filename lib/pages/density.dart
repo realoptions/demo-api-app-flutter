@@ -19,9 +19,6 @@ class ShowDensity extends StatelessWidget {
         DensityError(:final densityError) => ChartFailed(densityError),
         DensityData(:final density) =>
           ChartReady(<Widget>[_DensityChart(density: density)]),
-        // A state with no branch here reads as "still working", which is what
-        // the hand-written switch this replaced did too.
-        _ => const ChartBusy(),
       },
     );
   }

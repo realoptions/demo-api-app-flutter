@@ -1,7 +1,23 @@
 import 'package:realoptions/models/response.dart';
 import 'package:equatable/equatable.dart';
 
-abstract class OptionsState extends Equatable {}
+/// Every state the options bloc can be in.
+///
+/// Sealed on purpose. A widget that switches over this is checked for
+/// exhaustiveness, so adding a state here is a compile error at every site
+/// that has not said what to do with it - instead of falling through, unseen,
+/// onto the spinner those sites used to end with.
+sealed class OptionsState extends Equatable {
+  /// Whether an option-price request is in flight.
+  ///
+  /// An exhaustive switch rather than `this is IsOptionsFetching`, for the same
+  /// reason the class is sealed: a new state has to declare whether it counts
+  /// as busy, and the compiler is the one asking.
+  bool get isFetching => switch (this) {
+        IsOptionsFetching() => true,
+        OptionsNoData() || OptionsError() || OptionsData() => false,
+      };
+}
 
 /// No option prices have been fetched yet.
 ///

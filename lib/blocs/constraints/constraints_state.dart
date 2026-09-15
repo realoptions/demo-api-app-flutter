@@ -1,7 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:realoptions/models/forms.dart';
 
-abstract class ConstraintsState extends Equatable {
+/// Every state the constraints bloc can be in.
+///
+/// Sealed so the shell that switches over it is checked for exhaustiveness:
+/// a new state has to be handled, not absorbed by a fallback spinner.
+sealed class ConstraintsState extends Equatable {
   const ConstraintsState();
 }
 

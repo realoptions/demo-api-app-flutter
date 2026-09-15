@@ -50,32 +50,31 @@ class WaitForConstraints extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ConstraintsBloc, ConstraintsState>(
-      builder: (context, data) {
-        if (data is ConstraintsIsFetching) {
-          return Scaffold(body: Center(child: CircularProgressIndicator()));
-        } else if (data is ConstraintsError) {
-          return Scaffold(
-              body: Center(child: Text(data.constraintsError.toString())));
-        } else if (data is ConstraintsData) {
-          return MultiBlocProvider(providers: [
-            BlocProvider<OptionsBloc>(create: (_) {
-              return OptionsBloc(
-                  finside: finside,
-                  selectPageBloc: context.read<SelectPageBloc>());
-            }),
-            BlocProvider<DensityBloc>(create: (_) {
-              return DensityBloc(
-                  finside: finside,
-                  selectPageBloc: context.read<SelectPageBloc>());
-            }),
-            BlocProvider<FormBloc>(create: (context) {
-              return FormBloc(constraints: data.constraints);
-            }),
-          ], child: _Scaffold(title: title));
-        } else {
-          //should never get here
-          return Scaffold(body: Center(child: CircularProgressIndicator()));
-        }
+      builder: (BuildContext context, ConstraintsState data) => switch (data) {
+        ConstraintsIsFetching() =>
+          Scaffold(body: Center(child: CircularProgressIndicator())),
+        ConstraintsError(:final constraintsError) =>
+          Scaffold(body: Center(child: Text(constraintsError))),
+        // The form and both chart blocs need the constraints, so they are
+        // provided here rather than re-fetched downstream.
+        ConstraintsData(:final constraints) => MultiBlocProvider(
+            providers: [
+              BlocProvider<OptionsBloc>(
+                create: (_) => OptionsBloc(
+                    finside: finside,
+                    selectPageBloc: context.read<SelectPageBloc>()),
+              ),
+              BlocProvider<DensityBloc>(
+                create: (_) => DensityBloc(
+                    finside: finside,
+                    selectPageBloc: context.read<SelectPageBloc>()),
+              ),
+              BlocProvider<FormBloc>(
+                create: (_) => FormBloc(constraints: constraints),
+              ),
+            ],
+            child: _Scaffold(title: title),
+          ),
       },
     );
   }

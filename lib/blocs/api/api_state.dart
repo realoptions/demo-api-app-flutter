@@ -1,6 +1,11 @@
 import 'package:equatable/equatable.dart';
 
-abstract class ApiState extends Equatable {
+/// Every state the api bloc can be in.
+///
+/// Sealed so the startup page that switches over it is checked for
+/// exhaustiveness: a new state has to be handled, not absorbed by a fallback
+/// spinner.
+sealed class ApiState extends Equatable {
   const ApiState();
 }
 

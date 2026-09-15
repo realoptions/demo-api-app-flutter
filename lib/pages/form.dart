@@ -95,9 +95,8 @@ class FormButton extends StatelessWidget {
         builder: (context, densityData) {
       return BlocBuilder<OptionsBloc, OptionsState>(
           builder: (context, optionsData) {
-        if (densityData is IsDensityFetching &&
-            optionsData is IsOptionsFetching) {
-          return CircularProgressIndicator();
+        if (densityData.isFetching && optionsData.isFetching) {
+          return const CircularProgressIndicator();
         }
         return BlocBuilder<SelectModelBloc, Model>(builder: (context, model) {
           return ElevatedButton(

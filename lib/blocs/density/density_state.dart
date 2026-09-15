@@ -1,7 +1,23 @@
 import 'package:realoptions/models/response.dart';
 import 'package:equatable/equatable.dart';
 
-abstract class DensityState extends Equatable {}
+/// Every state the density bloc can be in.
+///
+/// Sealed on purpose. A widget that switches over this is checked for
+/// exhaustiveness, so adding a state here is a compile error at every site
+/// that has not said what to do with it - instead of falling through, unseen,
+/// onto the spinner those sites used to end with.
+sealed class DensityState extends Equatable {
+  /// Whether a density request is in flight.
+  ///
+  /// An exhaustive switch rather than `this is IsDensityFetching`, for the same
+  /// reason the class is sealed: a new state has to declare whether it counts
+  /// as busy, and the compiler is the one asking.
+  bool get isFetching => switch (this) {
+        IsDensityFetching() => true,
+        DensityNoData() || DensityError() || DensityData() => false,
+      };
+}
 
 /// No density has been fetched yet.
 ///

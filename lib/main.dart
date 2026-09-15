@@ -70,20 +70,15 @@ class StartupPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ApiBloc, ApiState>(
-      builder: (context, data) {
-        if (data is ApiError) {
-          return Center(child: Text(data.apiError.toString()));
-        } else if (data is ApiIsFetching) {
-          return Center(child: CircularProgressIndicator());
-        } else if (data is ApiNoData) {
-          return Introduction();
-        } else if (data is ApiToken) {
-          return BlocProvider<SelectModelBloc>(
-              create: (context) => SelectModelBloc(),
-              child: AppScaffold(title: title, apiKey: data.token));
-        } else {
-          return Center(child: CircularProgressIndicator());
-        }
+      builder: (BuildContext context, ApiState data) => switch (data) {
+        ApiError(:final apiError) => Center(child: Text(apiError.toString())),
+        ApiIsFetching() => const Center(child: CircularProgressIndicator()),
+        // No token yet, so there is nothing to sign in with.
+        ApiNoData() => Introduction(),
+        ApiToken(:final token) => BlocProvider<SelectModelBloc>(
+            create: (context) => SelectModelBloc(),
+            child: AppScaffold(title: title, apiKey: token),
+          ),
       },
     );
   }
