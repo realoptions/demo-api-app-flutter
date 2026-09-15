@@ -28,6 +28,21 @@ jobs:
         flutter-version: '3.47.4'
         channel: 'stable'
         cache: true
+    # Resolving dependencies has to happen before anything that reads Dart.
+    #
+    # This is not a formality. `dart format` reads .dart_tool/package_config.json
+    # to work out the language version to format against, and with no package
+    # config it silently falls back to a baseline and reports 54 of 66 files as
+    # needing changes - so the format gate below would fail every PR against a
+    # correctly formatted branch. `dart analyze` is worse: on an unresolved tree
+    # it reported 2697 issues and exited 3.
+    #
+    # `flutter analyze` appears to survive this because it runs an implicit
+    # `pub get` first. That is exactly the kind of accident to depend on - it
+    # would leave the format step, which has no such fallback, broken.
+    - name: "Install dependencies"
+      run: flutter pub get
+
     - name: "Check formatting"
       # --set-exit-if-changed makes this a check rather than a rewrite: it exits
       # 1 on any file dart format would touch, so unformatted code cannot land.
@@ -41,11 +56,16 @@ jobs:
       run: dart format --output=none --set-exit-if-changed .
 
     - name: "Analyze"
-      # flutter analyze defaults to --fatal-infos, so the info-level lints in
-      # analysis_options.yaml actually gate the build rather than being advisory.
-      # That is the whole point of the config; running it without the default
-      # would let new warnings land quietly.
-      run: flutter analyze
+      # dart analyze reads analysis_options.yaml and exits non-zero on info-level
+      # findings by default, so the lints actually gate the build rather than
+      # being advisory. That is the whole point of the config; running with
+      # infos downgraded would let new warnings land quietly.
+      #
+      # `dart analyze` rather than `flutter analyze`: same analyzer, same rules,
+      # but it does not carry flutter analyze's habit of rewriting
+      # analysis_options.yaml in place. CI should check the config that was
+      # committed, not a copy the tool adjusted while reading it.
+      run: dart analyze
 
     - name: "Run Flutter Driver tests"
       run: |
