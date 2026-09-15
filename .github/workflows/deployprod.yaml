@@ -17,5 +17,6 @@ jobs:
     uses: ./.github/workflows/deploy-reusable.yml
     with:
       publish-web: true
+      public-android: false
       google-play-track: production
     secrets: inherit

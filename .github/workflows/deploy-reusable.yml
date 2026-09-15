@@ -32,6 +32,12 @@ on:
         type: boolean
         required: false
         default: false
+      publish-android:
+        description: >-
+          Deploy to play store
+        type: boolean
+        required: false
+        default: false
       google-play-track:
         description: "Google Play track to upload the bundle to."
         type: string
@@ -41,6 +47,13 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    environment:
+      # is this needed?
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -183,18 +196,22 @@ jobs:
         if: inputs.publish-web
         run: scripts/cache_bust_web.sh build/web
 
-      # NOTE: v4 renamed the v3 inputs (ACCESS_TOKEN/BRANCH/FOLDER -> lowercase,
-      # and the credential input is `token`, NOT `github-token`). The classic PAT
-      # is kept as the push credential to preserve the previous publish behaviour.
-      - name: Deploy pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
         if: inputs.publish-web
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Upload artifact
+        if: inputs.publish-web
+        uses: actions/upload-pages-artifact@v3
         with:
-          token: ${{ secrets.ACCESS_TOKEN }}
-          branch: gh-pages
-          folder: build/web
+          # Upload entire repository
+          path: "build/web"
+      - name: Deploy to GitHub Pages
+        if: inputs.publish-web
+        id: deployment
+        uses: actions/deploy-pages@v4
 
       - name: Deploy google play store
+        if: inputs.publish-android
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJson: ${{ steps.write_json.outputs.filePath }}
