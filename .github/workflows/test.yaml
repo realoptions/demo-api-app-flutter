@@ -1,6 +1,15 @@
 # Name of your workflow.
+#
+# Runs on pull requests, and on pushes to master. The master push is not
+# redundant with the PR run: it is what keeps the Codecov master badge and the
+# "is master actually green" signal current after the merge lands, which used to
+# come for free from the tagtest workflow that also lived on every push.
 name: test
-on: [pull_request]
+on:
+  pull_request:
+  push:
+    branches:
+      - master
     
 jobs:
   test:
@@ -14,8 +23,8 @@ jobs:
     # https://github.com/marketplace/actions/flutter-action
     - uses: subosito/flutter-action@v2
       with:
-        # Kept in step with the release pipeline's default (see
-        # .github/workflows/deploy-reusable.yml) and .metadata. The previous 2.x
+        # Kept in step with the release pipeline (see
+        # .github/workflows/release.yml) and .metadata. The previous 2.x
         # pin has been out of support for years and cannot resolve this project's
         # Dart 3 dependency set.
         #
@@ -72,3 +81,15 @@ jobs:
         flutter pub get
         flutter clean
         flutter test --coverage
+
+    # Moved here from the retired tagtest workflow, so the Codecov badge keeps
+    # updating now that nothing on a push creates a release tag any more.
+    #
+    # The Codecov token is exposed as an environment variable only. The
+    # uploader reads CODECOV_TOKEN itself, so the value never has to appear in
+    # the command line (where it would sit in the script text and in `ps`
+    # output).
+    - name: "Upload coverage"
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      run: bash <(curl -s https://codecov.io/bash)

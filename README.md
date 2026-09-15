@@ -14,7 +14,25 @@ This is the mobile app for consuming [Finside's](https://finside.org) APIs.
 
 # How to install on phone
 
+# Releasing
+
+Only the web app ships, and it ships from a hand-cut tag. Bump `version:` in
+`pubspec.yaml`, commit that, then:
+
+```sh
+git tag v1.6.12 && git push origin v1.6.12
+```
+
+The `release` workflow checks the tag against `pubspec.yaml`, runs the tests,
+builds `flutter build web --build-name=<version>` and publishes it to GitHub
+Pages (`https://demo.finside.org`). Nothing deploys from a branch push, and
+Google Play is not deployed at all. Full details:
+[docs/release-flow.md](docs/release-flow.md).
+
 # CI
+
+`test.yaml` gates pull requests and pushes to `master` (format, analyze, tests,
+coverage). The old blog-era setup notes are below.
 
 See https://appditto.com/blog/automate-your-flutter-workflow
 

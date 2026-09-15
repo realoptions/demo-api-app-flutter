@@ -1,0 +1,138 @@
+# The web release. A release is a hand-cut tag; nothing here runs from a
+# branch push, so merging code never deploys anything.
+#
+#   1. bump `version:` in pubspec.yaml, commit it
+#   2. git tag v1.6.12 && git push origin v1.6.12
+#
+# The first step below checks that the tag and the pubspec version agree, so
+# the version you tagged is the version that ships and a mismatch (tagging
+# v1.6.12 while pubspec still says 1.6.11) fails the run before anything is
+# built or published. The build then takes its version name from the tag.
+#
+# Google Play is not part of this pipeline any more. `android/`, `ios/` and
+# scripts/generate_build_config.sh are untouched, so a native build could be
+# re-added later as its own job; it is simply not wanted now.
+#
+# See docs/release-flow.md.
+name: release
+
+on:
+  push:
+    tags:
+      # Requires a digit after the `v` so an unrelated `vendor-*`-style tag
+      # cannot fire a release. Deliberately loose beyond that: a tag matching
+      # nothing here fails *silently*, whereas a tag that matches but is not a
+      # clean x.y.z fails loudly with an explanation. The strict check lives
+      # in the job below.
+      - "v[0-9]*"
+
+jobs:
+  release-web:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write    # to deploy to Pages
+      id-token: write # to verify the deployment originates from this workflow
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # Same pin as test.yaml (and .metadata). Two literals rather than one
+      # because an action input cannot read a shared repo value without adding
+      # a whole indirection step; see the note in docs/release-flow.md.
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.4'
+          channel: 'stable'
+          cache: true
+
+      - name: Check the tag against pubspec.yaml
+        env:
+          # The tag name is text someone pushed, so it comes in through a
+          # mapping and is validated before it reaches any build flag.
+          TAG: ${{ github.ref_name }}
+        run: |
+          VERSION="${TAG#v}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::'$TAG' is not a release tag. Cut releases as v<MAJOR>.<MINOR>.<PATCH> - e.g. v1.6.12, with no -beta suffix and no +build suffix."
+            exit 1
+          fi
+
+          # Anchored at column 0 on purpose: `version:` is a top-level pubspec
+          # key, so this cannot pick up an indented `version:` under a
+          # dependency. The capture stops at anything that is not a digit or a
+          # dot, so if a `+build` suffix is ever reintroduced it is left out
+          # of the comparison and the check stays semver-vs-semver.
+          PUBSPEC_VERSION=$(sed -n 's/^version: *\([0-9][0-9.]*\).*/\1/p' pubspec.yaml | tail -n1)
+          if [ -z "$PUBSPEC_VERSION" ]; then
+            echo "::error::could not read a version from pubspec.yaml"
+            exit 1
+          fi
+
+          if [ "$VERSION" != "$PUBSPEC_VERSION" ]; then
+            echo "::error::tag says v$VERSION but pubspec.yaml says $PUBSPEC_VERSION. They must match: bump version: in pubspec.yaml, commit that, then tag that commit."
+            exit 1
+          fi
+
+          # The tag decides what ships. BUILD_NUMBER is the Actions run number,
+          # which only ever increases, so a re-run yields a newer artifact
+          # rather than a retry of something older, and no one has to
+          # hand-increment a build suffix before releasing.
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "BUILD_NUMBER=$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
+          echo "Releasing web build $VERSION (run $GITHUB_RUN_NUMBER)"
+
+      # Gate before building, and before anything touches a secret: a release
+      # whose tests fail never reaches Pages. `flutter pub get` has to come
+      # first - everything downstream reads Dart.
+      - name: Run tests
+        run: |
+          flutter pub get
+          flutter test
+
+      # The credential is never substituted into a tracked file. The tracked
+      # artifact is config/firebase_config.json.template with no live value in
+      # it; this renders the real config into the gitignored path the build
+      # reads. The secret appears only in this `env:` mapping, never in the
+      # script body, and the script keeps it out of any child process argv.
+      - name: Generate web Firebase config
+        env:
+          WEB_API_KEY: ${{ secrets.WEB_API_KEY }}
+        # Renders web/index.html plus config/firebase_config.json; the key is
+        # read back from that file by the build below.
+        run: scripts/generate_build_config.sh web
+
+      - name: Build web release
+        env:
+          APP_VERSION: ${{ env.APP_VERSION }}
+          BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
+        run: |
+          flutter build web --release \
+            --build-name="$APP_VERSION" \
+            --build-number="$BUILD_NUMBER" \
+            --dart-define-from-file=config/firebase_config.json
+
+      # `flutter build web` emits unversioned filenames, and GitHub Pages
+      # answers them with max-age=600, so without this a visitor can keep
+      # getting the previous release's bootstrap - and through it the previous
+      # app - for as long as that cache holds. Tagging each URL with a content
+      # hash makes every deploy a cache miss for what changed and still
+      # cacheable for what did not. See scripts/cache_bust_web.sh.
+      - name: Cache-bust the web bundle
+        run: scripts/cache_bust_web.sh build/web
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: "build/web"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

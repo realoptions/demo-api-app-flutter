@@ -1,137 +1,163 @@
 # Release flow
 
-The release pipeline is driven entirely by git tags. A push never deploys
-anything directly; it produces a tag, and the tag decides what gets shipped.
+Releases are cut by hand, and only the web app ships. A push never deploys
+anything; a `v<X.Y.Z>` tag does.
 
 ```
-push to a branch
-      |
-      v
- tagtest (tag.yml)  ---- runs tests + coverage ----+
-      |                                          |
-      |  branch == master  ->  release-<version>  |  branch != master  ->  beta-<version>
-      |                                          |
-      v                                          v
- releaseprod (deployprod.yaml)              releasebeta (deploybeta.yaml)
-      |                                          |
-      +-------------------+----------------------+
-                          |
-                          v
-              deploy-reusable.yml  (the whole pipeline, once)
+bump version: in pubspec.yaml, commit
+        |
+        v
+git tag v1.6.12 && git push origin v1.6.12
+        |
+        v
+release.yml  -- checks tag == pubspec.yaml
+             -- runs tests
+             -- renders web config from template (WEB_API_KEY)
+             -- flutter build web --build-name=1.6.12
+             -- cache-bust, upload, deploy
+        |
+        v
+GitHub Pages  (https://demo.finside.org)
 ```
 
-## 1. Tag creation — `tag.yml` (`tagtest`)
+Two workflows exist and neither one deploys from a branch:
 
-Runs on every push to any branch except tags (`tags-ignore: '*.*'`).
+| File | Trigger | What it does |
+| --- | --- | --- |
+| `.github/workflows/test.yaml` | pull request, push to `master` | format + analyze + test gates, coverage upload |
+| `.github/workflows/release.yml` | push of a `v<digits>` tag | the whole web release, gated on the tests |
 
-1. Runs the test suite with coverage and uploads it to Codecov.
-2. Reads the app version out of `pubspec.yaml` into `APP_VERSION` with a
-   pattern anchored at column 0, so it matches the top-level `version:` key
-   and cannot pick up an indented `version:` belonging to a dependency. An
-   unreadable version fails the job — an empty value would otherwise produce a
-   tag like `release-`, which still matches `release-*`.
-3. Picks a prefix from the branch: `release` for `master`, `beta` otherwise.
-4. Builds `CUSTOM_TAG` = `<prefix>-<version>`.
-5. If that tag does not already exist locally, pushes it via
-   `anothrNick/github-tag-action@1.75.0`.
+## Releasing
 
-So merging to `master` yields `release-1.6.11`, and a feature-branch push
-yields `beta-1.6.11`.
+1. Edit `version:` in `pubspec.yaml` (e.g. `1.6.11` → `1.6.12`) and commit
+   that on the commit you want to ship.
+2. `git tag v1.6.12 && git push origin v1.6.12`.
+3. Watch the `release` workflow. It either publishes `build/web` to GitHub
+   Pages or fails before publishing anything.
+
+To re-release the same version (e.g. after a runner hiccup), the tag has to
+move or be re-pushed, since a tag that already exists on the remote cannot be
+pushed again:
+
+```sh
+git tag -d v1.6.12 && git push origin :refs/tags/v1.6.12   # remove it
+git push origin v1.6.12                                    # re-cut the same one
+```
+
+Usually you cut the next number instead.
 
 ## Version authority
 
-Two numbers travel with a Flutter release and they are owned in different
-places. Before this change both were hand-maintained and the second was a
-ritual; now exactly one thing is edited by a human.
+`pubspec.yaml` and the tag have exactly one job each, and CI checks that they
+agree instead of trusting a human to keep them in step.
 
-| Number | Owner | Where it is set |
+| Thing | Owner | Notes |
 | --- | --- | --- |
-| Semantic version (`1.6.11`) | `pubspec.yaml` `version:` | edited by a human, read by `tag.yml` |
-| Build number (Android `versionCode`, iOS `CFBundleVersion`) | CI | `github.run_number`, applied by `deploy-reusable.yml` |
+| Semantic version (`1.6.12`) | `pubspec.yaml` `version:` | edited by hand |
+| Release tag (`v1.6.12`) | the human cutting the release | the only thing that triggers a deploy |
+| Build name of the artifact | CI, from the **tag** | `flutter build web --build-name=1.6.12` |
+| Build number | CI, `github.run_number` | only ever increases |
 
-`pubspec.yaml` deliberately carries **no `+<build>` suffix**. The previous
-`version: 1.6.11+22` came with a comment saying the `+n` had to be
-incremented by hand on every release even when the semantic version moved —
-easy to forget, and it failed late, at the Play upload, because Play rejects
-a `versionCode` that has already been published.
+The first step of `release.yml` rejects, before any build starts:
 
-The release build now takes both numbers from the run rather than from the
-file:
+- a tag that is not `v<digits>.<digits>.<digits>` (no `-beta`, no `+build`);
+- a tag whose version differs from `version:` in `pubspec.yaml`.
+
+That is the answer to "how does this work with the pubspec version": the
+pubspec line is what you edit, the tag is what you fire, and if the two do not
+match the release fails with a message saying so rather than publishing a
+build that misreports which version it is. The tag wins for the artifact's
+version name because the tag is the thing that was deliberately released.
+
+There is still no `+<build>` suffix in `pubspec.yaml`. The build number comes
+from the Actions run number, so nothing has to be hand-incremented. The old
+`version: 1.6.11+22` carried a comment saying the `+n` had to be bumped by
+hand on every release even when the semantic version moved — a ritual that
+was easy to forget and that used to fail late, at the Play upload.
+
+Note the trigger is `v[0-9]*`, not an exact pattern. A tag that matches
+nothing in a trigger fires no workflow at all and fails *silently*, so the
+filter is deliberately a little loose and the strict `x.y.z` check lives in
+the job, where failing produces a readable error.
+
+## No native deployment
+
+Google Play is no longer part of this pipeline. Removed with it: the AAB
+build, the keystore and service-account decoding steps, the Gradle cache,
+`flutter_launcher_icons`, the `publish-android` / `google-play-track`
+inputs, and the beta caller that existed only to feed the Play internal
+track.
+
+`android/`, `ios/` and `scripts/generate_build_config.sh` are untouched, so
+a native build can be brought back later as its own job — nothing outside CI
+was deleted to make the web the only shipping target.
+
+The `release-*` and `beta-*` tags this repo used to make automatically are
+gone as a scheme. Old tags of that shape stay in history and do nothing; the
+`v*` scheme is the live one.
+
+## Required repository secrets
+
+What CI needs shrank with the native build:
+
+| Secret | Used by | For |
+| --- | --- | --- |
+| `WEB_API_KEY` | `release.yml` | renders `config/firebase_config.json` (and `web/index.html`) |
+| `CODECOV_TOKEN` | `test.yaml` | coverage upload |
+
+Every one of these is consumed through a step-level `env:` mapping; none is
+interpolated into the text of a `run:` script.
+
+These are **no longer used** by CI and can be deleted from the repo settings:
+`SIGN_KEY_JKS`, `SERVICE_ACCOUNT_JSON`, `ANDROID_KEY_STORE_PASSWORD`,
+`ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `ANDROID_API_KEY`, and
+`ACCESS_TOKEN` (which existed only so CI could push the tags it no longer
+creates). `scripts/generate_build_config.sh` still accepts the Android ones
+for local or future manual native builds.
+
+## Generated config (`scripts/generate_build_config.sh`)
+
+Nothing that carries a credential is ever a tracked file, and no workflow
+mutates a tracked file at build time.
+
+Tracked, credential-free templates:
+
+| Template | Rendered to (gitignored) | Placeholder source |
+| --- | --- | --- |
+| `config/firebase_config.json.template` | `config/firebase_config.json` | `WEB_API_KEY` |
+| `web/index.html.template` | `web/index.html` | (no placeholders left) |
+| `android/app/google-services.json.template` | `android/app/google-services.json` | `ANDROID_API_KEY` (native only) |
+| `android/key.properties.template` | `android/key.properties` | `ANDROID_KEY_*` (native only) |
+
+Rules the script enforces:
+
+- Every value comes from the environment. It never takes a credential as a
+  command-line argument and never echoes one.
+- Substitution is done with shell parameter expansion, not by shelling out to
+  `sed`, so the value never appears in a child process `argv` (visible in
+  `ps`).
+- A missing or empty variable is a hard error rather than a silently rendered
+  blank — a release fails loudly instead of shipping a config with an empty
+  key.
+- Output is written with `umask 077` (owner-only).
+- After substitution the generated file is re-checked for the placeholder it
+  was supposed to fill, so a typo in a template cannot survive.
+
+The same script serves local development; use a throwaway value when you do
+not have the real credential:
 
 ```sh
-flutter build appbundle --build-name="$APP_VERSION" --build-number="$BUILD_NUMBER"
+WEB_API_KEY=local-dev scripts/generate_build_config.sh web
 ```
-
-* `APP_VERSION` is parsed out of the tag that triggered the workflow
-  (`release-1.6.11` → `1.6.11`), so the artifact is versioned with the tag
-  that caused it to be built rather than whatever the file happened to say at
-  checkout time. A tag that does not carry a clean `x.y.z` fails the job.
-* `BUILD_NUMBER` is `github.run_number`, which is unique per repository and
-  only ever increases, so it satisfies Play's strictly-increasing
-  `versionCode` rule with no human in the loop. Re-running the same tag
-  yields a new build number, which is what you want from a retry.
-
-The chain is therefore `pubspec.yaml` → tag → build, with one authority per
-number and no step that requires remembering anything.
-
-## 2. Deployment entrypoints
-
-`deploybeta.yaml` and `deployprod.yaml` are deliberately tiny. They match their
-tag and pass three values to the shared implementation. They contain no build
-logic of their own — **all pipeline changes belong in `deploy-reusable.yml`.**
-
-| File | Trigger | `publish-web` | `google-play-track` |
-| --- | --- | --- | --- |
-| `deploybeta.yaml` | `beta-*` | `false` | `beta` |
-| `deployprod.yaml` | `release-*` | `true` | `production` |
-
-Both call the reusable workflow with `secrets: inherit`.
-
-## 3. The shared pipeline — `deploy-reusable.yml`
-
-Inputs: `flutter-version` (default `3.47.4`), `flutter-channel` (default
-`stable`), `publish-web` (default `false`), `google-play-track` (default
-`production`).
-
-Steps, in order:
-
-1. **Checkout.**
-2. **Resolve release version** — parses `APP_VERSION` from the triggering tag
-   and sets `BUILD_NUMBER` from `github.run_number`; refuses to continue on a
-   tag that does not carry a clean `x.y.z`.
-3. **Generate Android Firebase config** — `scripts/generate_build_config.sh
-   android`, fed by `ANDROID_API_KEY` from the step's `env:` mapping.
-4. **Generate web Firebase config** — *only when `publish-web`* —
-   `scripts/generate_build_config.sh web`, fed by `WEB_API_KEY`.
-5. **Setup Flutter** with the Flutter SDK and pub caches enabled.
-6. **Run tests** — `flutter pub get`, `flutter clean`, `flutter test`.
-7. **Cache Gradle** keyed on the Android Gradle files plus `pubspec.lock`.
-8. **Write JKS / Write json** — decode the base64 signing keystore and service
-   account into workspace files.
-9. **bundle** — `scripts/generate_build_config.sh keystore` renders
-   `android/key.properties`, then generates launcher icons, builds the AAB
-   with `--build-name` / `--build-number` from step 2, and deletes
-   `key.properties`.
-10. **Build web release** — *only when `publish-web`* — `flutter build web
-    --release`, also carrying `--build-name` / `--build-number`, which emits
-    into `build/web`. Verified against Flutter 3.47.4: the tool prints
-    `✓ Built build/web`, and that is the same folder step 11 publishes. No
-    web-enabling `flutter config` call is needed (web is on by default and
-    the `web/` runner directory is committed here).
-11. **Deploy pages** — *only when `publish-web`* — publishes `build/web` to
-    `gh-pages`, which serves the live demo at `https://demo.finside.org`.
-12. **Deploy google play store** — uploads the AAB to `google-play-track`.
 
 ## Caching
 
-Every workflow that installs Flutter now caches, so a run that does not touch
+Every workflow that installs Flutter caches, so a run that does not touch
 `pubspec.lock` re-downloads nothing:
 
 | Workflow | What is cached | How |
 | --- | --- | --- |
-| `deploy-reusable.yml` | Flutter SDK + pub cache | `subosito/flutter-action` `cache: true` |
-| `deploy-reusable.yml` | Gradle caches and wrapper | `actions/cache@v4` keyed on `android/**/*.gradle`, `gradle-wrapper.properties`, `pubspec.lock` |
-| `tag.yml` | Flutter SDK + pub cache | `subosito/flutter-action` `cache: true` |
+| `release.yml` | Flutter SDK + pub cache | `subosito/flutter-action` `cache: true` |
 | `test.yaml` | Flutter SDK + pub cache | `subosito/flutter-action` `cache: true` |
 
 `cache: true` covers the pub dependencies as well as the SDK. That is not an
@@ -143,123 +169,80 @@ if: ${{ (inputs.pub-cache == '' && inputs.cache == 'true') || inputs.pub-cache =
 
 so an unset `pub-cache` with `cache: 'true'` takes the pub branch. There *is*
 a separate `pub-cache` input, but it is deliberately not written out:
-`actionlint` 1.7.7 ships a snapshot of action metadata that predates it and
-reports it as an unknown input, so spelling it out would break an otherwise
-clean lint for no behavioural gain. Revisit once the lint metadata catches up
-— and do not "fix" that warning by removing something that works.
+actionlint's bundled action metadata snapshot can lag the actions it checks
+(it reported `pub-cache` as an unknown input back at 1.7.7), so spelling it
+out would break an otherwise clean lint for no behavioural gain.
 
 `flutter clean` does not undo any of this: it clears `build/` and
 `.dart_tool/`, not `~/.pub-cache`, so the cache survives the clean that runs
 before `flutter pub get`.
 
-## Generated config (`scripts/generate_build_config.sh`)
+The Gradle cache went with the Android build.
 
-Nothing that carries a credential is ever a tracked file, and no workflow mutates
-a tracked file at build time.
+## Cache-busting the web bundle
 
-Tracked, credential-free templates:
+`flutter build web` emits unversioned filenames and GitHub Pages answers them
+with `Cache-Control: max-age=600`, so a redeploy can leave a visitor on the
+previous release's bootstrap — and through it the previous app — for as long
+as that cache holds. `scripts/cache_bust_web.sh` tags the two links that
+decide which code runs with a content hash:
 
-| Template | Rendered to (gitignored) | Placeholder source |
-| --- | --- | --- |
-| `android/app/google-services.json.template` | `android/app/google-services.json` | `ANDROID_API_KEY` |
-| `web/index.html.template` | `web/index.html` | `WEB_API_KEY` |
-| `android/key.properties.template` | `android/key.properties` | `ANDROID_KEY_*`, `ANDROID_KEYSTORE_PATH` |
-
-Rules the script enforces:
-
-- Every value comes from the environment. It never takes a credential as a
-  command-line argument and never echoes one.
-- Substitution is done with shell parameter expansion, not by shelling out to
-  `sed`, so the value never appears in a child process `argv` (visible in `ps`).
-- A missing or empty variable is a hard error rather than a silently rendered
-  blank — a release fails loudly instead of shipping a config with an empty key.
-- Output is written with `umask 077` (owner-only).
-- After substitution the generated file is re-checked for the placeholder it was
-  supposed to fill, so a typo in a template cannot survive.
-
-The same script serves local development; use a throwaway value when you do not
-have the real credential:
-
-```sh
-ANDROID_API_KEY=local-dev scripts/generate_build_config.sh android
-WEB_API_KEY=local-dev     scripts/generate_build_config.sh web
+```
+index.html            -> flutter_bootstrap.js?v=<hash of flutter_bootstrap.js>
+flutter_bootstrap.js -> main.dart.js?v=<hash of main.dart.js>
 ```
 
-Re-running the Android render with the real project key reproduces the file that
-used to be committed byte-for-byte (plus a trailing newline), which is what
-`apply plugin: 'com.google.gms.google-services'` needs at build time.
-
-## Required repository secrets
-
-Every one of these is consumed through a step-level `env:` mapping; none is
-interpolated into the text of a `run:` script.
-
-| Secret | Used for |
-| --- | --- |
-| `ANDROID_API_KEY` | Android `google-services.json` (rendered) |
-| `WEB_API_KEY` | web `index.html` (production only) |
-| `SIGN_KEY_JKS` | base64 signing keystore |
-| `SERVICE_ACCOUNT_JSON` | base64 Play service account |
-| `ANDROID_KEY_STORE_PASSWORD` | keystore password |
-| `ANDROID_KEY_ALIAS` | key alias |
-| `ANDROID_KEY_PASSWORD` | key password |
-| `ACCESS_TOKEN` | PAT for pushing `gh-pages` and creating tags |
-| `CODECOV_TOKEN` | coverage upload (in `tag.yml`), read from the environment |
+Each deploy is therefore a guaranteed cache miss for what changed and still
+cacheable forever for what did not. The script is idempotent (it rewrites an
+existing `?v=` rather than failing on it) and dies loudly if it cannot tag
+something.
 
 ## Known issues in the current design
 
-Documented here because they are deliberately *not* changed by this
-consolidation:
+Documented rather than quietly left out:
 
 - Piping the Codecov uploader straight from `curl` into a shell is still a
-  supply-chain risk (the token itself is now passed via `CODECOV_TOKEN` in the
-  environment instead of a command-line argument, but the *script* is still
-  unpinned). Worth migrating to a pinned `codecov/codecov-action`.
+  supply-chain risk (the token travels in `CODECOV_TOKEN` in the environment
+  rather than on the command line, but the *script* is unpinned). Worth
+  migrating to a pinned `codecov/codecov-action`.
 - The live Android API key that used to sit in the committed
-  `android/app/google-services.json` is still in git history. Moving it to a
-  template stops new leaks; it does not remove the old value. Rotating that key
-  in the Firebase console is the actual fix and has to be done by a project
-  owner.
-- The Flutter version is written in three places — the reusable workflow's
-  `flutter-version` default, `tag.yml` and `test.yaml`. All three now sit at
-  `3.47.4` (with `.metadata` pointing at the matching stable revision), but
-  they are still independent literals rather than one value, so a bump has to
-  touch all three. Sharing a single source (a repo variable, or a
-  `.fvmrc` read through the action's `flutter-version-file` input) is the
-  eventual fix.
+  `android/app/google-services.json` is still in git history. The template
+  stops new leaks; it does not remove the old value. Rotating that key in the
+  Firebase console is the actual fix and has to be done by a project owner.
+  Deleting the Android secrets from the repo settings does not retire the
+  value that is already public, either.
+- The Flutter version is written in two places — `release.yml` and
+  `test.yaml` (with `.metadata` pointing at the matching stable revision).
+  They are still independent literals rather than one value, so a bump has to
+  touch both. A single source (a repo variable, or a `.fvmrc` read through
+  the action's `flutter-version-file` input) is the eventual fix.
+- `release.yml` runs the suite itself rather than reusing `test.yaml`, so a
+  release runs the tests again even when the PR already passed them. That is
+  the point: the thing that ships is gated by a run of its own, on the commit
+  that is tagged.
 
-Two things worth recording that are *not* defects here, because both look like
+Two things worth recording that are *not* defects, because both look like
 unfinished version bumps and neither is:
 
 - **`subosito/flutter-action` has no `v4` to upgrade to.** The pipeline uses
   `@v2`, which is the current major line (latest release `v2.23.0`); the
-  action has only ever shipped `v1` and `v2`. `@v4` would not resolve. It is
-  a current pin, not a stale one.
-- **`anothrNick/github-tag-action` was moved `1.34.0` → `1.75.0`.** The
-  upgrade is safe for how this repo uses it: `CUSTOM_TAG` is still honoured,
-  and the README states that setting it "will invalidate any other settings
-  set", which is why the old `RELEASE_BRANCHES: '.*'` entry is gone — it was
-  already dead config under `CUSTOM_TAG`, not a behaviour change. This is the
-  action that creates the `release-*` / `beta-*` tags, so the first run after
-  merging should be watched for the tag actually appearing.
+  action has only ever shipped `v1` and `v2`. `@v4` would not resolve.
+- **`actions/checkout@v7`, `configure-pages@v6`,
+  `upload-pages-artifact@v5` and `deploy-pages@v5`** are current pins, kept
+  as they were. Dependabot's `github-actions` ecosystem keeps proposing bumps
+  for all of them.
 
 ## Verifying the workflows
 
-`actionlint` (v1.7.7) passes clean over every file in `.github/workflows`:
+`actionlint` (verified with 1.7.12) passes clean over every file in
+`.github/workflows`:
 
 ```sh
 actionlint .github/workflows/*.yml .github/workflows/*.yaml
 ```
 
-A reusable workflow cannot be exercised without a real tag, so the change is
-guarded by lint plus a differential check that every step and every secret from
-the two original files still exists somewhere in the new set. The shell logic
-that does not need a runner — the tag-to-version parse, the `release`/`beta`
-prefix selection, and the rejection of malformed tags — was exercised
-separately, because a workflow that first fails at release time is a bad place
-to discover a quoting mistake.
-
-`actionlint`'s bundled action metadata is a snapshot and can lag the actions it
-checks — see *Caching* for a case where it reports a real input as unknown.
-The first production run after merging this change should be watched end to
-end.
+A release workflow cannot be exercised without a real tag, so the version-check
+logic was run on its own against the cases it has to get right — a good tag,
+a tag with a suffix, a tag that does not match pubspec, and a pubspec with no
+readable version — rather than being discovered at release time. The first
+production release after this change is still worth watching end to end.
