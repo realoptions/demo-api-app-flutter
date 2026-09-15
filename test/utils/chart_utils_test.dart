@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:realoptions/models/response.dart';
@@ -114,6 +115,43 @@ void main() {
 
       final ivSpots = toSpots(results, (r) => r.iv!.toDouble());
       expect(ivSpots.map((s) => s.y).toList(), [0.25, 0.35]);
+    });
+  });
+
+  group('chartSeries', () {
+    final results = [
+      ModelResult(value: 2, atPoint: 1),
+      ModelResult(value: 4, atPoint: 2),
+    ];
+
+    test('plots every result and applies the shared line shape', () {
+      final series = chartSeries(results, color: Colors.green);
+      expect(series.spots.map((s) => s.x).toList(), [1.0, 2.0]);
+      expect(series.spots.map((s) => s.y).toList(), [2.0, 4.0]);
+      expect(series.isCurved, isTrue);
+      expect(series.barWidth, 2);
+      expect(series.dotData.show, isFalse);
+    });
+
+    test('defaults to the value field, but y can pick another', () {
+      final withIv = [ModelResult(value: 2, atPoint: 1, iv: 0.5)];
+      expect(chartSeries(withIv, color: Colors.green).spots.single.y, 2.0);
+      expect(
+        chartSeries(withIv,
+            color: Colors.green,
+            y: (r) => r.iv?.toDouble() ?? 0.0).spots.single.y,
+        0.5,
+      );
+    });
+
+    test('fills only when given a fill colour', () {
+      expect(
+          chartSeries(results, color: Colors.green).belowBarData.show, isFalse);
+
+      final filled = chartSeries(results,
+          color: Colors.green, fill: Colors.blue, fillOpacity: 0.5);
+      expect(filled.belowBarData.show, isTrue);
+      expect(filled.belowBarData.color, Colors.blue.withValues(alpha: 0.5));
     });
   });
 }

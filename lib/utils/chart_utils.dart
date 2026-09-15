@@ -102,6 +102,91 @@ List<FlSpot> toSpots(
       for (final ModelResult r in results) FlSpot(r.atPoint.toDouble(), y(r)),
     ];
 
+/// A result's measured `value`, as a plot-ready double.
+///
+/// The default vertical selector for [chartSeries]. Pages override it when a
+/// curve reads a different field - the implied volatility series, for one.
+double valueOf(ModelResult result) => result.value.toDouble();
+
+/// One line series over [results].
+///
+/// Every series in the app is drawn the same way - curved, 2px, no point
+/// markers - so the shape is stated once here instead of at each call site.
+/// [y] picks the vertical value ([valueOf] by default). [fill] shades the area
+/// under the line, which is how the density page marks the tail beyond Value
+/// at Risk; leave it null for a plain line.
+LineChartBarData chartSeries(
+  Iterable<ModelResult> results, {
+  required Color color,
+  double Function(ModelResult result) y = valueOf,
+  Color? fill,
+  double fillOpacity = 0.22,
+}) =>
+    LineChartBarData(
+      spots: toSpots(results, y),
+      isCurved: true,
+      color: color,
+      barWidth: 2,
+      dotData: const FlDotData(show: false),
+      belowBarData: BarAreaData(
+        show: fill != null,
+        color: (fill ?? color).withValues(alpha: fillOpacity),
+      ),
+    );
+
+/// Titles for a chart spanning [x] horizontally and, when given, [y] vertically.
+///
+/// The top and right edges stay bare: the plot is read off the left and bottom
+/// axes only. The reserved sizes differ because the y labels are wider than the
+/// x labels.
+FlTitlesData axisTitles({required AxisRange x, AxisRange? y}) => FlTitlesData(
+      bottomTitles: AxisTitles(sideTitles: x.sideTitles(reservedSize: 34)),
+      leftTitles: y == null
+          ? const AxisTitles()
+          : AxisTitles(sideTitles: y.sideTitles(reservedSize: 52)),
+      topTitles: const AxisTitles(),
+      rightTitles: const AxisTitles(),
+    );
+
+/// The plot border: axis lines along the left and bottom, nothing on the other
+/// two sides.
+FlBorderData axisBorder(ThemeData theme) => FlBorderData(
+      show: true,
+      border: Border(
+        left: BorderSide(color: theme.dividerColor),
+        bottom: BorderSide(color: theme.dividerColor),
+      ),
+    );
+
+/// A line chart with the chrome every chart in the app shares: [series] drawn
+/// across [x] and (optionally) [y], a horizontal-only grid, an axis-only
+/// border, and [verticalLines] marked over the top - the Value at Risk marker,
+/// for instance.
+///
+/// Leaving [y] out lets the library pick the vertical extent, which is what the
+/// price chart wants: calls and puts sharing one scale it did not have to
+/// negotiate.
+LineChart lineChart({
+  required List<LineChartBarData> series,
+  required AxisRange x,
+  AxisRange? y,
+  required ThemeData theme,
+  List<VerticalLine> verticalLines = const <VerticalLine>[],
+}) =>
+    LineChart(
+      LineChartData(
+        minX: x.min,
+        maxX: x.max,
+        minY: y?.min,
+        maxY: y?.max,
+        lineBarsData: series,
+        titlesData: axisTitles(x: x, y: y),
+        gridData: const FlGridData(show: true, drawVerticalLine: false),
+        borderData: axisBorder(theme),
+        extraLinesData: ExtraLinesData(verticalLines: verticalLines),
+      ),
+    );
+
 /// One swatch-and-label pair in a [ChartLegend].
 class ChartLegendEntry {
   const ChartLegendEntry({required this.label, required this.color});
