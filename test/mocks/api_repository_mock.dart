@@ -5,13 +5,20 @@ import 'package:realoptions/repositories/api_repository.dart';
 
 /// Test double for [AuthRepository].
 ///
-/// The Google path drives a real `MockGoogleSignIn` object and returns the
-/// `firebase_auth` credential built from it, so what the bloc receives is a
-/// genuine Google-shaped credential (providerId `google.com`) rather than a
-/// hand-rolled stand-in that could drift from what production produces.
+/// The Google path drives a real `MockGoogleSignIn` object and then really
+/// exchanges the resulting credential with the injected Firebase fake, so what
+/// the bloc receives is a genuine sign-in shaped by `firebase_auth` rather than
+/// a hand-rolled stand-in that could drift from what production produces.
+///
+/// Note which transport this mirrors: the **native** one (google_sign_in -> ID
+/// token -> `signInWithCredential`), because tests run on the Dart VM. It is
+/// deliberately not a mirror of the web popup transport — that path is covered
+/// against the real `ApiRepository` in
+/// `test/repositories/api_repository_web_test.dart`, since faking it here is
+/// exactly what let it ship broken.
 class MockApiRepository extends AuthRepository {
   @override
-  Future<AuthCredential> handleGoogleSignIn(FirebaseAuth auth) async {
+  Future<User> handleGoogleSignIn(FirebaseAuth auth) async {
     final MockGoogleSignIn googleSignIn = MockGoogleSignIn();
     // google_sign_in v7 replaced signIn() with authenticate(), and the
     // account's `authentication` is a synchronous getter rather than a future.
@@ -21,18 +28,11 @@ class MockApiRepository extends AuthRepository {
     if (idToken == null) {
       throw StateError('MockGoogleSignIn returned no id token');
     }
-    return GoogleAuthProvider.credential(idToken: idToken);
-  }
-
-  @override
-  Future<User> convertCredentialToUser(
-      FirebaseAuth auth, AuthCredential credential) async {
-    final UserCredential userCredential =
-        await auth.signInWithCredential(credential);
+    final UserCredential userCredential = await auth
+        .signInWithCredential(GoogleAuthProvider.credential(idToken: idToken));
     final User? user = userCredential.user;
     if (user == null) {
-      throw StateError(
-          'signInWithCredential(${credential.providerId}) returned no user');
+      throw StateError('MockGoogleSignIn sign-in produced no user');
     }
     return user;
   }
