@@ -23,9 +23,19 @@ class ApiIsFetching extends ApiState {
 }
 
 class ApiNoData extends ApiState {
-  const ApiNoData();
+  const ApiNoData({this.message});
+
+  /// Why there is no data — e.g. the reason a sign-in attempt did not complete.
+  ///
+  /// Carried on the state rather than only written to the log because
+  /// `dart:developer log()` publishes to the Dart developer-event channel, and
+  /// a released web build has no listener attached to it. A sign-in that failed
+  /// there is invisible: it looked exactly like a button that was never pressed.
+  /// The screen that offers the button again needs the reason in its own data.
+  final String? message;
+
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [message];
 }
 
 class ApiError extends ApiState {

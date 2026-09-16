@@ -4,12 +4,15 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 
 import '../mocks/api_repository_mock.dart';
 
-/// Guards the shape of the credentials the shared auth fake produces.
+/// Pins the provider id of the credential the shared auth fake produces.
 ///
-/// The Facebook path used to return a *Google* credential (copy-pasted with a
-/// comment saying it only existed to satisfy the abstract class), which made any
-/// "signed in with Facebook" assertion meaningless. These tests pin each path to
-/// its own provider id so a copy-paste regression fails loudly.
+/// The fake once handed back a *Google* credential on the Facebook path as well
+/// (copy-pasted, with a comment admitting it only existed to satisfy the
+/// abstract class), which made every "signed in with Facebook" assertion in the
+/// suite meaningless. Facebook is no longer part of the app; what survives is the
+/// lesson in the one shape that still matters — the bloc's credential exchange is
+/// keyed on the provider id, so the Google path has to really produce a
+/// `google.com` credential rather than whatever a stub felt like returning.
 void main() {
   late MockApiRepository repo;
   late FirebaseAuth auth;
@@ -19,19 +22,8 @@ void main() {
     auth = MockFirebaseAuth();
   });
 
-  test('fake Facebook sign-in returns a facebook.com credential', () async {
-    final credential = await repo.handleFacebookSignIn(auth);
-    expect(credential.providerId, 'facebook.com');
-  });
-
   test('fake Google sign-in returns a google.com credential', () async {
     final credential = await repo.handleGoogleSignIn(auth);
     expect(credential.providerId, 'google.com');
-  });
-
-  test('the two paths are not the same credential', () async {
-    final facebook = await repo.handleFacebookSignIn(auth);
-    final google = await repo.handleGoogleSignIn(auth);
-    expect(facebook.providerId, isNot(google.providerId));
   });
 }

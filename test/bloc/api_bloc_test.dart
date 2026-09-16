@@ -42,10 +42,10 @@ void main() {
   // fetch, so the second one is coalesced and the recorded sequence is two
   // states, not three.
   //
-  // The sign-in paths previously had no coverage at all, and the shared fake made
-  // Facebook indistinguishable from Google. This group records which repository
-  // method the bloc actually routes each event to, and hands back the user it was
-  // given, so the assertions do not depend on firebase mock internals.
+  // The sign-in paths previously had no coverage at all. This group records which
+  // repository method the bloc actually routes each event to, and hands back the
+  // user it was given, so the assertions do not depend on firebase mock
+  // internals.
   group('sign-in routing', () {
     late MockFirebaseAuth auth;
     late _RecordingAuthRepository repo;
@@ -69,15 +69,73 @@ void main() {
         expect(repo.calls, ['google', 'convert:google.com', 'token']);
       },
     );
+  });
+
+  // A sign-in that does not complete used to be logged and dropped. In a
+  // released web build that is the same as saying nothing at all: the Dart
+  // developer-event channel the log goes to has no listener there, so the
+  // screen came back looking exactly as it did before the button was pressed.
+  // These pin the contract that replaced it — back to ApiNoData with a reason
+  // attached, and the token fetch never attempted.
+  group('failed Google sign-in surfaces the Firebase error', () {
+    late _FailingAuthRepository repo;
+    late ApiBloc bloc;
+
+    setUp(() {
+      repo = _FailingAuthRepository(
+        auth.currentUser!,
+        FirebaseAuthException(code: 'network-request-failed'),
+      );
+      bloc = ApiBloc(firebaseAuth: auth, apiRepository: repo);
+    });
+    tearDown(() {
+      bloc.close();
+    });
 
     blocTest(
-      'FacebookSignIn routes to handleFacebookSignIn, not the Google path',
+      'emits ApiNoData carrying the Firebase error code',
       build: () => bloc,
-      act: (bloc) => bloc.handleFacebookSignIn(),
-      expect: () => [ApiIsFetching(), ApiToken(token: "fake_token")],
+      act: (bloc) => bloc.handleGoogleSignIn(),
+      expect: () => [
+        ApiIsFetching(),
+        predicate<ApiState>((state) =>
+            state is ApiNoData &&
+            (state.message ?? '').contains('network-request-failed')),
+      ],
       verify: (bloc) {
-        expect(repo.calls, ['facebook', 'convert:facebook.com', 'token']);
-        expect(repo.calls, isNot(contains('google')));
+        // Failed before a credential ever existed, so no token was fetched.
+        expect(repo.calls, ['google']);
+      },
+    );
+  });
+
+  group('failed Google sign-in surfaces a non-Firebase error', () {
+    late _FailingAuthRepository repo;
+    late ApiBloc bloc;
+
+    setUp(() {
+      repo = _FailingAuthRepository(
+        auth.currentUser!,
+        StateError('Google sign-in returned no ID token'),
+      );
+      bloc = ApiBloc(firebaseAuth: auth, apiRepository: repo);
+    });
+    tearDown(() {
+      bloc.close();
+    });
+
+    blocTest(
+      'emits ApiNoData carrying the thrown error text',
+      build: () => bloc,
+      act: (bloc) => bloc.handleGoogleSignIn(),
+      expect: () => [
+        ApiIsFetching(),
+        predicate<ApiState>((state) =>
+            state is ApiNoData &&
+            (state.message ?? '').contains('returned no ID token')),
+      ],
+      verify: (bloc) {
+        expect(repo.calls, ['google']);
       },
     );
   });
@@ -101,12 +159,6 @@ class _RecordingAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AuthCredential> handleFacebookSignIn(FirebaseAuth auth) async {
-    calls.add('facebook');
-    return FacebookAuthProvider.credential('fake_facebook_access_token');
-  }
-
-  @override
   Future<User> convertCredentialToUser(
       FirebaseAuth auth, AuthCredential credential) async {
     calls.add('convert:${credential.providerId}');
@@ -116,8 +168,32 @@ class _RecordingAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<User> signInAsGuest(FirebaseAuth auth) async {
-    calls.add('guest');
+  Future<String> getToken(User user) async {
+    calls.add('token');
+    return "fake_token";
+  }
+}
+
+/// [AuthRepository] whose Google sign-in throws [error] instead of returning a
+/// credential, so the bloc's failure contract can be asserted without standing
+/// up a failing identity provider.
+class _FailingAuthRepository implements AuthRepository {
+  _FailingAuthRepository(this.user, this.error);
+
+  final User user;
+  final Object error;
+  final List<String> calls = <String>[];
+
+  @override
+  Future<AuthCredential> handleGoogleSignIn(FirebaseAuth auth) async {
+    calls.add('google');
+    throw error;
+  }
+
+  @override
+  Future<User> convertCredentialToUser(
+      FirebaseAuth auth, AuthCredential credential) async {
+    calls.add('convert:${credential.providerId}');
     return user;
   }
 

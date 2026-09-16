@@ -2,47 +2,22 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:realoptions/firebase_options.dart';
 
+/// The identity-provider operations the app needs.
+///
+/// Google is the only provider implemented. Facebook was removed: the hosted web
+/// build has no Facebook app id anywhere — not in Dart, not in
+/// `web/index.html.template`, not in the deployed bundle — so the Facebook
+/// button could never complete a login. Anonymous/guest access was removed
+/// because the hosting project does not permit it.
 abstract class AuthRepository {
   Future<AuthCredential> handleGoogleSignIn(FirebaseAuth auth);
   Future<User> convertCredentialToUser(
       FirebaseAuth auth, AuthCredential credential);
-  Future<AuthCredential> handleFacebookSignIn(FirebaseAuth auth);
-
-  /// Signs in without a social identity provider, for the hosted demo.
-  ///
-  /// Returns the signed-in [User] rather than an [AuthCredential] because
-  /// anonymous auth has no external credential to exchange: `signInAnonymously`
-  /// yields the user directly, so the `convertCredentialToUser` step the social
-  /// paths need does not exist here.
-  Future<User> signInAsGuest(FirebaseAuth auth);
 
   Future<String> getToken(User user);
-}
-
-/// Raised when a Facebook login request completes without a usable token.
-///
-/// `flutter_facebook_auth` reports the ordinary "no token for you" outcomes
-/// (cancelled, failed, another login already in flight) through
-/// [LoginResult.status] rather than by throwing, so the repository has to turn
-/// them into an error itself. Without this the null [LoginResult.accessToken]
-/// would reach `FacebookAuthProvider.credential` and either blow up on the
-/// null check or, worse, be coerced into a credential that fails later at
-/// `signInWithCredential` with a message that points nowhere near the real
-/// cause.
-class FacebookSignInException implements Exception {
-  const FacebookSignInException(this.status, [this.message]);
-
-  final LoginStatus status;
-  final String? message;
-
-  @override
-  String toString() => 'Exception: Facebook sign-in produced no access token'
-      ' (status: ${status.name}'
-      '${message == null ? '' : ', message: $message'})';
 }
 
 class ApiRepository extends AuthRepository {
@@ -81,78 +56,6 @@ class ApiRepository extends AuthRepository {
       throw StateError('Google sign-in returned no ID token');
     }
     return GoogleAuthProvider.credential(idToken: idToken);
-  }
-
-  /// Signs the user in with Facebook and returns the matching Firebase
-  /// credential.
-  ///
-  /// Migrated off the previously-used discontinued Facebook login plugin to its
-  /// maintained successor `flutter_facebook_auth`. Two shapes changed:
-  ///
-  /// * The old `logIn()` returned a result whose `accessToken` was read
-  ///   unconditionally (crashing on cancel); the new `login()` returns a
-  ///   [LoginResult] carrying a [LoginStatus] plus a *nullable* token, which
-  ///   is checked here.
-  /// * The token type changed from the old `FacebookAccessToken.token` to
-  ///   [AccessToken.tokenString], which is what
-  ///   `FacebookAuthProvider.credential` is now built from.
-  ///
-  /// The old forced-embedded-web-view `loginBehavior` is deliberately dropped
-  /// rather than translated: it existed only to work around a deadlock in the
-  /// discontinued package's *native* login activity. That package is gone, and
-  /// the successor's own default (`FacebookAuth.login` defaults to
-  /// `LoginBehavior.nativeWithFallback`) uses the supported path, so carrying
-  /// the override over would re-impose a workaround whose reason no longer
-  /// exists. It is also the direction Facebook's own guidance points: an
-  /// embedded web view is no longer a supported way to run their login, while a
-  /// native/system-browser flow is. If a specific behavior is ever wanted it is
-  /// a single `loginBehavior:` argument away.
-  ///
-  /// `test/repositories/facebook_sign_in_test.dart` pins this down: it records
-  /// the behavior the app actually sends and asserts it is the package default
-  /// and not the web view.
-  @override
-  Future<AuthCredential> handleFacebookSignIn(FirebaseAuth auth) async {
-    final LoginResult result = await FacebookAuth.instance.login(
-      // Same scope set the old code requested; keeping it identical avoids this
-      // migration silently widening what users are asked to consent to.
-      permissions: const ['public_profile'],
-    );
-
-    final AccessToken? token = result.accessToken;
-    if (result.status != LoginStatus.success || token == null) {
-      throw FacebookSignInException(result.status, result.message);
-    }
-
-    return FacebookAuthProvider.credential(token.tokenString);
-  }
-
-  /// Signs in anonymously so the hosted demo can be used without a social
-  /// account.
-  ///
-  /// An existing session is reused rather than signed in again.
-  ///
-  /// For an anonymous user that is a correctness point: `signInAnonymously`
-  /// creates a *new* Firebase user every time it is called on a signed-out
-  /// client, so re-entering the demo would otherwise mint a fresh uid per visit
-  /// and pile up throwaway accounts on the project.
-  ///
-  /// For a non-anonymous (socially signed-in) user it is a safety point: "continue
-  /// as guest" is not a sign-out, and silently replacing a signed-in social
-  /// session with an anonymous one would be a surprising thing for that button to
-  /// do. The existing session is returned untouched.
-  @override
-  Future<User> signInAsGuest(FirebaseAuth auth) async {
-    final User? current = auth.currentUser;
-    if (current != null) {
-      return current;
-    }
-    final UserCredential userCredential = await auth.signInAnonymously();
-    final User? user = userCredential.user;
-    if (user == null) {
-      throw StateError('Anonymous sign-in returned no user');
-    }
-    return user;
   }
 
   /// Exchanges [credential] for a signed-in [User].
