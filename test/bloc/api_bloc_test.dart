@@ -69,7 +69,6 @@ void main() {
         expect(repo.calls, ['google', 'convert:google.com', 'token']);
       },
     );
-
   });
 
   // A sign-in that does not complete used to be logged and dropped. In a

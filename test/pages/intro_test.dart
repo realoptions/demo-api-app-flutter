@@ -19,14 +19,16 @@ void main() {
   /// land under `testWidgets`' fake clock — it has to run on the real clock via
   /// `tester.runAsync`, which is only reachable from inside the test body (see
   /// the note in density_test.dart).
-  Future<ApiBloc> pumpSignIn(WidgetTester tester, {String? errorMessage}) async {
+  Future<ApiBloc> pumpSignIn(WidgetTester tester,
+      {String? errorMessage}) async {
     final ApiBloc bloc =
         ApiBloc(firebaseAuth: auth, apiRepository: MockApiRepository());
     await tester.pumpWidget(MaterialApp(
       home: Directionality(
         textDirection: TextDirection.ltr,
         child: BlocProvider<ApiBloc>(
-            create: (_) => bloc, child: Introduction(errorMessage: errorMessage)),
+            create: (_) => bloc,
+            child: Introduction(errorMessage: errorMessage)),
       ),
       theme: ThemeData(
           primarySwatch: Colors.teal,

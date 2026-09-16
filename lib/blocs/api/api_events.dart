@@ -1,5 +1,1 @@
-enum ApiEvents {
-  RequestApiKey,
-  GoogleSignIn,
-  SignOut
-}
+enum ApiEvents { RequestApiKey, GoogleSignIn, SignOut }
