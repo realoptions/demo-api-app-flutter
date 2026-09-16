@@ -5,26 +5,11 @@ import 'package:realoptions/repositories/api_repository.dart';
 
 /// Test double for [AuthRepository].
 ///
-/// The Google path drives a real `MockGoogleSignIn` object. The Facebook path
-/// builds a genuine Facebook-shaped [AuthCredential] straight from
-/// `firebase_auth`'s [FacebookAuthProvider] instead of copying the Google
-/// result: a fake that hands back Google credentials would silently turn any
-/// "signed in with Facebook" assertion into a tautology.
-///
-/// Building the credential from `firebase_auth` also means this fake does not
-/// depend on a Facebook login plugin at all, so the Facebook path keeps being
-/// testable across the plugin swap and needs no device, Facebook app or network
-/// round-trip. The replacement plugin itself is covered separately by
-/// `test/repositories/facebook_sign_in_test.dart`, which swaps the plugin's
-/// platform interface instead of bypassing it.
+/// The Google path drives a real `MockGoogleSignIn` object and returns the
+/// `firebase_auth` credential built from it, so what the bloc receives is a
+/// genuine Google-shaped credential (providerId `google.com`) rather than a
+/// hand-rolled stand-in that could drift from what production produces.
 class MockApiRepository extends AuthRepository {
-  /// Access token reported by the fake Facebook sign-in path.
-  ///
-  /// Deliberately a Facebook-looking value rather than a shared fake token: tests
-  /// can assert it is the exact string that reaches
-  /// [FacebookAuthProvider.credential].
-  static const String facebookAccessToken = "fake_facebook_access_token";
-
   @override
   Future<AuthCredential> handleGoogleSignIn(FirebaseAuth auth) async {
     final MockGoogleSignIn googleSignIn = MockGoogleSignIn();
@@ -37,31 +22,6 @@ class MockApiRepository extends AuthRepository {
       throw StateError('MockGoogleSignIn returned no id token');
     }
     return GoogleAuthProvider.credential(idToken: idToken);
-  }
-
-  @override
-  Future<AuthCredential> handleFacebookSignIn(FirebaseAuth auth) async {
-    // FacebookAuthProvider ships with firebase_auth, so no Facebook login plugin
-    // (and no network round-trip) is needed to produce a real Facebook
-    // credential: the resulting credential carries providerId 'facebook.com',
-    // exactly like the one the production path builds from the plugin's token.
-    return FacebookAuthProvider.credential(facebookAccessToken);
-  }
-
-  @override
-  Future<User> signInAsGuest(FirebaseAuth auth) async {
-    // Mirrors the production rule: reuse whatever session exists rather than
-    // minting a new uid per visit, and never downgrade a signed-in user.
-    final User? current = auth.currentUser;
-    if (current != null) {
-      return current;
-    }
-    final UserCredential userCredential = await auth.signInAnonymously();
-    final User? user = userCredential.user;
-    if (user == null) {
-      throw StateError('Anonymous sign-in returned no user');
-    }
-    return user;
   }
 
   @override

@@ -48,9 +48,6 @@ dependencies:
   # For example, to use Firebase Authentication and Cloud Firestore
   google_sign_in: ^7.2.0
   firebase_auth: ^6.6.1
-  # Maintained Facebook auth plugin; the one this used before was discontinued
-  # and never went null safe.
-  flutter_facebook_auth: ^7.2.0
   bloc: ^9.2.1
   flutter_bloc: ^9.1.1
 
@@ -70,11 +67,6 @@ dev_dependencies:
     sdk: flutter
   test: ^1.26.3
   mockito: ^5.8.1
-  # Imported directly by test/repositories/facebook_sign_in_test.dart so the
-  # Facebook plugin's platform interface can be swapped for a fake. It is a
-  # transitive dep of flutter_facebook_auth, but anything a test imports by name
-  # has to be declared, otherwise it silently floats on the parent's version.
-  flutter_facebook_auth_platform_interface: ^6.1.2
   firebase_auth_mocks: ^0.15.0
   flutter_launcher_icons: ^0.14.4
   google_sign_in_mocks: ^0.4.2

@@ -73,8 +73,9 @@ class StartupPage extends StatelessWidget {
       builder: (BuildContext context, ApiState data) => switch (data) {
         ApiError(:final apiError) => Center(child: Text(apiError.toString())),
         ApiIsFetching() => const Center(child: CircularProgressIndicator()),
-        // No token yet, so there is nothing to sign in with.
-        ApiNoData() => Introduction(),
+        // No token yet, so there is nothing to sign in with. A reason is shown
+        // when the state carries one — e.g. a sign-in attempt that failed.
+        ApiNoData(:final message) => Introduction(errorMessage: message),
         ApiToken(:final token) => BlocProvider<SelectModelBloc>(
             create: (context) => SelectModelBloc(),
             child: AppScaffold(title: title, apiKey: token),
