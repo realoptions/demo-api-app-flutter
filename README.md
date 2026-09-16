@@ -16,18 +16,22 @@ This is the mobile app for consuming [Finside's](https://finside.org) APIs.
 
 # Releasing
 
-Only the web app ships, and it ships from a hand-cut tag. Bump `version:` in
-`pubspec.yaml`, commit that, then:
+Only the web app ships, and it ships when you publish a GitHub Release:
 
 ```sh
-git tag v1.6.12 && git push origin v1.6.12
+gh release create v1.6.12 --generate-notes
 ```
 
-The `release` workflow checks the tag against `pubspec.yaml`, runs the tests,
-builds `flutter build web --build-name=<version>` and publishes it to GitHub
-Pages (`https://demo.finside.org`). Nothing deploys from a branch push, and
-Google Play is not deployed at all. Full details:
-[docs/release-flow.md](docs/release-flow.md).
+That is the whole release. The `release` workflow takes the version out of
+the tag, writes it into `pubspec.yaml` itself, runs the tests, builds
+`flutter build web --build-name=1.6.12` and publishes to GitHub Pages
+(`https://demo.finside.org`).
+
+You never bump `version:` in `pubspec.yaml` to ship. Nothing deploys from a
+branch push, and pushing a tag on its own does not release either - publishing
+the release is the event. To put an already-released version out again, run
+the workflow by hand and pass its tag. Google Play is not deployed at all.
+Full details: [docs/release-flow.md](docs/release-flow.md).
 
 # CI
 

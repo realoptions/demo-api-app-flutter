@@ -1,16 +1,14 @@
 # Release flow
 
 Releases are cut by hand, and only the web app ships. A push never deploys
-anything; a `v<X.Y.Z>` tag does.
+anything; **publishing a GitHub Release** does.
 
 ```
-bump version: in pubspec.yaml, commit
+gh release create v1.6.12 --generate-notes     (or the Releases UI)
         |
         v
-git tag v1.6.12 && git push origin v1.6.12
-        |
-        v
-release.yml  -- checks tag == pubspec.yaml
+release.yml  -- reads the version out of the release tag
+             -- stamps it into pubspec.yaml (build tree only)
              -- runs tests
              -- renders web config from template (WEB_API_KEY)
              -- flutter build web --build-name=1.6.12
@@ -25,60 +23,98 @@ Two workflows exist and neither one deploys from a branch:
 | File | Trigger | What it does |
 | --- | --- | --- |
 | `.github/workflows/test.yaml` | pull request, push to `master` | format + analyze + test gates, coverage upload |
-| `.github/workflows/release.yml` | push of a `v<digits>` tag | the whole web release, gated on the tests |
+| `.github/workflows/release.yml` | published GitHub Release (or a manual re-deploy) | the whole web release, gated on the tests |
 
 ## Releasing
 
-1. Edit `version:` in `pubspec.yaml` (e.g. `1.6.11` → `1.6.12`) and commit
-   that on the commit you want to ship.
-2. `git tag v1.6.12 && git push origin v1.6.12`.
-3. Watch the `release` workflow. It either publishes `build/web` to GitHub
-   Pages or fails before publishing anything.
-
-To re-release the same version (e.g. after a runner hiccup), the tag has to
-move or be re-pushed, since a tag that already exists on the remote cannot be
-pushed again:
-
 ```sh
-git tag -d v1.6.12 && git push origin :refs/tags/v1.6.12   # remove it
-git push origin v1.6.12                                    # re-cut the same one
+gh release create v1.6.12 --generate-notes   # tag is created if it is missing
 ```
 
-Usually you cut the next number instead.
+or the same thing in the Releases UI. That is the entire release. The
+workflow reads `1.6.12` out of the tag, writes it into `pubspec.yaml` in its
+own checkout, runs the tests, builds with `--build-name=1.6.12` and publishes
+to Pages.
+
+**You never bump `version:` in `pubspec.yaml` to ship.** See below.
+
+Notes on the trigger:
+
+- A tag pushed on its own (`git tag v1.6.12 && git push`) does **not**
+  deploy. The trigger is the release, not the tag. The tag is where the
+  version is read from.
+- `types: [published]` only. A **draft** release does nothing until you
+  publish it, which makes drafting-then-publishing the safe path. `edited` is
+  deliberately not wired up: fixing release notes on a shipped release must
+  not silently redeploy the app.
+- Tags outside `v<MAJOR>.<MINOR>.<PATCH>` are rejected with an error (no
+  `-beta`, no `+build`, no `latest`).
+
+### Re-deploying without touching the release
+
+A published release cannot be re-published, so `release.yml` also accepts a
+manual run: **Run workflow → `tag` → `v1.6.12`**. It checks that tag out and
+releases it. This is the path for a runner hiccup, and the reason the tag is
+resolved before `actions/checkout` rather than relying on the event's ref.
+
+Re-cutting the release itself (`gh release delete v1.6.12 --yes && gh release
+create v1.6.12`) works too, but re-deploying is usually what you meant.
 
 ## Version authority
 
-`pubspec.yaml` and the tag have exactly one job each, and CI checks that they
-agree instead of trusting a human to keep them in step.
+The direction was reversed from the previous design: the tag writes into
+pubspec.yaml instead of pubspec.yaml having to agree with the tag.
 
 | Thing | Owner | Notes |
 | --- | --- | --- |
-| Semantic version (`1.6.12`) | `pubspec.yaml` `version:` | edited by hand |
-| Release tag (`v1.6.12`) | the human cutting the release | the only thing that triggers a deploy |
-| Build name of the artifact | CI, from the **tag** | `flutter build web --build-name=1.6.12` |
+| Release tag (`v1.6.12`) | the human publishing the release | the trigger **and** the version |
+| `pubspec.yaml` `version:` | CI stamps it from the tag | build-tree only; never pushed back |
+| Build name of the artifact | CI, from the tag | `flutter build web --build-name=1.6.12` |
 | Build number | CI, `github.run_number` | only ever increases |
 
-The first step of `release.yml` rejects, before any build starts:
+Consequences worth being explicit about:
 
-- a tag that is not `v<digits>.<digits>.<digits>` (no `-beta`, no `+build`);
-- a tag whose version differs from `version:` in `pubspec.yaml`.
+- **Nothing to keep in sync.** Releasing is one action. `pubspec.yaml` is a
+  copy of whatever was last released (or whatever you set locally), so it can
+  never make a release wrong.
+- **A mismatch is a notice, not a failure.** If the repo's pubspec says
+  `1.6.11` and you release `v1.7.0`, the run stamps `1.7.0` and prints a
+  `::notice::` saying so. The tag won.
+- **No hand-incremented build suffix.** `BUILD_NUMBER` is the run number, so
+  a re-deploy is newer than what it replaces instead of a byte-identical
+  retry.
 
-That is the answer to "how does this work with the pubspec version": the
-pubspec line is what you edit, the tag is what you fire, and if the two do not
-match the release fails with a message saying so rather than publishing a
-build that misreports which version it is. The tag wins for the artifact's
-version name because the tag is the thing that was deliberately released.
+### Why the stamped pubspec is never committed back
 
-There is still no `+<build>` suffix in `pubspec.yaml`. The build number comes
-from the Actions run number, so nothing has to be hand-incremented. The old
-`version: 1.6.11+22` carried a comment saying the `+n` had to be bumped by
-hand on every release even when the semantic version moved — a ritual that
-was easy to forget and that used to fail late, at the Play upload.
+Tempting, and deliberately not done. A version bump committed by the release
+job lands on the branch as a commit that is **not inside the release it just
+cut** — the tag points at the commit before it. That is not syncing, it is
+relocating the drift, plus a `contents: write` credential to do it, plus a
+push that can conflict with whatever landed meanwhile.
 
-Note the trigger is `v[0-9]*`, not an exact pattern. A tag that matches
-nothing in a trigger fires no workflow at all and fails *silently*, so the
-filter is deliberately a little loose and the strict `x.y.z` check lives in
-the job, where failing produces a readable error.
+Stamping in the build tree gives the whole benefit (nobody edits the file to
+ship, and the tree the build reads always agrees with the tag) with none of
+that. `release.yml` therefore runs with `contents: read`.
+
+### What the stamp actually does
+
+`scripts`-free inline logic in the "Stamp the release version into
+pubspec.yaml" step:
+
+- Replaces the top-level `version:` line, anchored at column 0 — an indented
+  `version:` belonging to a dependency is neither matched nor rewritten.
+- If there is no top-level `version:` line at all (a hand-written app pubspec
+  can omit one), inserts one straight after `name:` so the key stays
+  top-level and the file stays valid YAML.
+- Re-reads the file afterwards and fails if it does not now read the tag's
+  version — a substitution that silently did nothing is exactly the failure
+  that would ship the wrong version, so it is checked rather than assumed.
+- Is idempotent: a second stamp is a byte-for-byte no-op.
+- Comments around the version line survive; only the line itself is replaced.
+
+The value substituted is validated to `^[0-9]+\.[0-9]+\.[0-9]+$` before it
+gets anywhere near `sed` or `awk -v`, so a tag cannot smuggle a replacement
+expression, a newline or a shell metacharacter into the rewrite.
 
 ## No native deployment
 
@@ -90,11 +126,13 @@ track.
 
 `android/`, `ios/` and `scripts/generate_build_config.sh` are untouched, so
 a native build can be brought back later as its own job — nothing outside CI
-was deleted to make the web the only shipping target.
+was deleted to make the web the only shipping target. (`flutter_launcher_icons`
+is still a dev dependency and its `flutter_icons:` config is android/ios
+only, so the web bundle never needed it.)
 
 The `release-*` and `beta-*` tags this repo used to make automatically are
 gone as a scheme. Old tags of that shape stay in history and do nothing; the
-`v*` scheme is the live one.
+versioned `v*` tag on a published release is the live thing.
 
 ## Required repository secrets
 
@@ -150,6 +188,27 @@ not have the real credential:
 WEB_API_KEY=local-dev scripts/generate_build_config.sh web
 ```
 
+Note the one place a workflow *does* rewrite a tracked file is the version
+stamp in `release.yml` — on an untracked checkout, in a build tree nobody
+commits from, with a value that is validated digits-and-dots. Different
+threat model from writing a credential into a tracked file, which is what the
+rule above is really guarding.
+
+## Ordering inside the release job
+
+```
+resolve version → checkout the tag → stamp pubspec.yaml → setup Flutter
+→ tests → render web config → build → cache-bust → deploy Pages
+```
+
+- Resolve comes **before checkout** so a re-deploy can name a tag other than
+  the one the run came from.
+- The stamp comes **before `flutter pub get`**, so the single dependency
+  resolution this run performs sees the final file rather than re-resolving
+  after a mutation.
+- Tests come **before any secret is touched**, so a red suite fails without
+  pulling credentials.
+
 ## Caching
 
 Every workflow that installs Flutter caches, so a run that does not touch
@@ -174,10 +233,8 @@ actionlint's bundled action metadata snapshot can lag the actions it checks
 out would break an otherwise clean lint for no behavioural gain.
 
 `flutter clean` does not undo any of this: it clears `build/` and
-`.dart_tool/`, not `~/.pub-cache`, so the cache survives the clean that runs
-before `flutter pub get`.
-
-The Gradle cache went with the Android build.
+`.dart_tool/`, not `~/.pub-cache`, so the cache survives a clean. The Gradle
+cache went with the Android build.
 
 ## Cache-busting the web bundle
 
@@ -218,8 +275,13 @@ Documented rather than quietly left out:
   the action's `flutter-version-file` input) is the eventual fix.
 - `release.yml` runs the suite itself rather than reusing `test.yaml`, so a
   release runs the tests again even when the PR already passed them. That is
-  the point: the thing that ships is gated by a run of its own, on the commit
-  that is tagged.
+  the point: the thing that ships is gated by a run of its own.
+- `pubspec.yaml` in the repository can read lower than the newest release for
+  as long as nobody commits a bump — which is intended, but is a visible
+  inconsistency if you look at the file expecting it to track deployments. The
+  alternative (CI committing the bump) was rejected above; if the visible
+  inconsistency ever becomes the bigger problem, the fix is a release-PR
+  rather than a push from the deploy job.
 
 Two things worth recording that are *not* defects, because both look like
 unfinished version bumps and neither is:
@@ -241,8 +303,20 @@ unfinished version bumps and neither is:
 actionlint .github/workflows/*.yml .github/workflows/*.yaml
 ```
 
-A release workflow cannot be exercised without a real tag, so the version-check
-logic was run on its own against the cases it has to get right — a good tag,
-a tag with a suffix, a tag that does not match pubspec, and a pubspec with no
-readable version — rather than being discovered at release time. The first
-production release after this change is still worth watching end to end.
+A release workflow cannot be exercised without a real release, so the shell
+logic was run on its own, extracted from the workflow file, against the cases
+it has to get right:
+
+- resolving: release tag present, dispatch tag present, both at once (release
+  tag wins), neither (fails), `v1.6` / `-beta` / `+build` / `latest` /
+  `release-1.6.11` (all rejected), and tags carrying `;rm -rf /` and `$(id)`
+  (rejected before reaching a ref or a flag).
+- stamping: the repo's own pubspec, an old `+build` suffix, a pubspec with no
+  `version:` key at all (inserted after `name:`, re-parsed as valid YAML), a
+  pubspec with neither `version:` nor `name:` (fails loudly), an indented
+  dependency `version:` left alone, the file's comments preserved, a single
+  top-level `version:` line afterwards, and a second stamp being a byte-exact
+  no-op.
+
+The first production release after a change to this pipeline is still worth
+watching end to end — lint and logic tests cannot cover a real Pages deploy.
