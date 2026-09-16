@@ -78,10 +78,10 @@ class ApiBloc extends Bloc<ApiEvents, ApiState> {
   ///   `add(ApiEvents.RequestApiKey)` — a second event queued from inside a
   ///   running handler, so the token fetch depended on how the event queue
   ///   drained between handlers. The token request is now awaited directly by
-  ///   the handler that owns the credential, via the same [_requestApiKey]
+  ///   the handler that established the session, via the same [_requestApiKey]
   ///   body the `RequestApiKey` handler runs. Behaviour is identical when the
   ///   queue is empty, but a token request can no longer be reordered with
-  ///   respect to the sign-in that produced the credential it authorises.
+  ///   respect to the sign-in that authorises it.
   ///
   /// The sign-in failure path is handled here, which was *new* relative to the
   /// generator it replaces: previously the provider error (normally the user
@@ -101,13 +101,15 @@ class ApiBloc extends Bloc<ApiEvents, ApiState> {
   /// no retry affordance, which is the wrong thing to show for "the login
   /// dialog did not work; try again".
   Future<void> _signInThenFetchToken(
-    Future<AuthCredential> Function() signIn,
+    Future<User> Function() signIn,
     Emitter<ApiState> emit,
   ) async {
     emit(ApiIsFetching());
-    final AuthCredential credential;
     try {
-      credential = await signIn();
+      // The sign-in is complete when this returns: it leaves [firebaseAuth]
+      // signed in, which is what [_requestApiKey] reads back. The returned user
+      // is not needed here, so it is not bound.
+      await signIn();
     } catch (error, stackTrace) {
       // debugPrint rather than developer.log: the latter needs a listener on the
       // Dart developer-event channel, which a released web build does not have.
@@ -115,7 +117,6 @@ class ApiBloc extends Bloc<ApiEvents, ApiState> {
       emit(ApiNoData(message: _describeSignInFailure(error)));
       return;
     }
-    await apiRepository.convertCredentialToUser(firebaseAuth, credential);
     await _requestApiKey(emit);
   }
 

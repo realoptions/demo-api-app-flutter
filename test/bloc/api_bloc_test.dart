@@ -66,7 +66,9 @@ void main() {
       act: (bloc) => bloc.handleGoogleSignIn(),
       expect: () => [ApiIsFetching(), ApiToken(token: "fake_token")],
       verify: (bloc) {
-        expect(repo.calls, ['google', 'convert:google.com', 'token']);
+        // Sign-in now ends in a user rather than a credential the bloc has to
+        // exchange, so the route is two calls, not three.
+        expect(repo.calls, ['google', 'token']);
       },
     );
   });
@@ -141,9 +143,11 @@ void main() {
   });
 }
 
-/// Records which [AuthRepository] methods the bloc calls, and with which
-/// credential provider, so routing can be asserted without a real (or mocked)
-/// identity-provider round-trip.
+/// Records which [AuthRepository] methods the bloc calls, so routing can be
+/// asserted without a real (or mocked) identity-provider round-trip.
+///
+/// Hands back the [User] it was constructed with, so the bloc's success path is
+/// exercised without touching a Firebase plugin.
 class _RecordingAuthRepository implements AuthRepository {
   _RecordingAuthRepository(this.user);
 
@@ -151,19 +155,8 @@ class _RecordingAuthRepository implements AuthRepository {
   final List<String> calls = <String>[];
 
   @override
-  Future<AuthCredential> handleGoogleSignIn(FirebaseAuth auth) async {
+  Future<User> handleGoogleSignIn(FirebaseAuth auth) async {
     calls.add('google');
-    return GoogleAuthProvider.credential(
-        accessToken: 'fake_google_access_token',
-        idToken: 'fake_google_id_token');
-  }
-
-  @override
-  Future<User> convertCredentialToUser(
-      FirebaseAuth auth, AuthCredential credential) async {
-    calls.add('convert:${credential.providerId}');
-    // Return the already-signed-in mock user rather than calling back into the
-    // auth plugin, so the test asserts routing only.
     return user;
   }
 
@@ -175,8 +168,8 @@ class _RecordingAuthRepository implements AuthRepository {
 }
 
 /// [AuthRepository] whose Google sign-in throws [error] instead of returning a
-/// credential, so the bloc's failure contract can be asserted without standing
-/// up a failing identity provider.
+/// user, so the bloc's failure contract can be asserted without standing up a
+/// failing identity provider.
 class _FailingAuthRepository implements AuthRepository {
   _FailingAuthRepository(this.user, this.error);
 
@@ -185,16 +178,9 @@ class _FailingAuthRepository implements AuthRepository {
   final List<String> calls = <String>[];
 
   @override
-  Future<AuthCredential> handleGoogleSignIn(FirebaseAuth auth) async {
+  Future<User> handleGoogleSignIn(FirebaseAuth auth) async {
     calls.add('google');
     throw error;
-  }
-
-  @override
-  Future<User> convertCredentialToUser(
-      FirebaseAuth auth, AuthCredential credential) async {
-    calls.add('convert:${credential.providerId}');
-    return user;
   }
 
   @override

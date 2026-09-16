@@ -20,31 +20,16 @@ import 'package:flutter/foundation.dart';
 /// This replaces the previous setup, where the key, a pinned Firebase JS SDK
 /// (7.9.3, several majors behind the one `firebase_core_web` was built against)
 /// and a Google OAuth client ID were all pasted into `web/index.html`. The JS
-/// SDK is now owned by `firebase_core_web`, and the Google client ID comes from
-/// the Firebase web stack rather than a `google-signin-client_id` meta tag.
+/// SDK is now owned by `firebase_core_web`. The app carries no Google OAuth
+/// client ID at all: web sign-in goes through Firebase's own popup, and Google
+/// is configured on the Firebase project — see `ApiRepository._signInWithPopup`
+/// in `lib/repositories/api_repository.dart`.
 class FirebaseConfig {
   const FirebaseConfig._();
 
   /// The Firebase web API key, or `''` when it was not supplied at build time.
   static const String webApiKey =
       String.fromEnvironment('FIREBASE_WEB_API_KEY');
-
-  /// Google OAuth client ID for this app, used by `google_sign_in` on the web.
-  ///
-  /// Not a secret — it identifies the app to Google and authenticates nothing,
-  /// which is why the previous copy of it could sit in a public `<meta>` tag on
-  /// every page of the demo. It lives here rather than in HTML so there is one
-  /// place that knows it, and it can be overridden per build with
-  /// `--dart-define=GOOGLE_WEB_CLIENT_ID=...` (or via
-  /// `config/firebase_config.json`).
-  ///
-  /// Off the web this is not used: Android and iOS take the client ID from their
-  /// own platform configuration files.
-  static const String googleWebClientId = String.fromEnvironment(
-    'GOOGLE_WEB_CLIENT_ID',
-    defaultValue:
-        '117231459701-t0t85k3egn6f6770e1kt5a4uh0gk693b.apps.googleusercontent.com',
-  );
 
   /// Web app options; [apiKey] comes from the build environment, see above.
   static const FirebaseOptions webOptions = FirebaseOptions(
