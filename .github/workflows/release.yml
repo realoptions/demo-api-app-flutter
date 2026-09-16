@@ -1,0 +1,195 @@
+# The web release. A release is a GitHub Release you publish by hand, and
+# nothing here runs from a branch push - merging code never deploys anything.
+#
+#   gh release create v1.6.12 --generate-notes      (or the Releases UI)
+#
+# The release tag is the version, and CI writes it *into* pubspec.yaml before
+# anything resolves or builds, so releasing is one human action instead of
+# two. You no longer bump `version:` by hand, and a pubspec that disagrees
+# with the tag can no longer reach production: the tag overwrites it.
+#
+# Google Play is not part of this pipeline any more. `android/`, `ios/` and
+# scripts/generate_build_config.sh are untouched, so a native build could be
+# re-added later as its own job; it is simply not wanted now.
+#
+# See docs/release-flow.md.
+name: release
+
+on:
+  release:
+    # `published` only. `edited` is deliberately not listed: fixing a typo in
+    # the release notes of an already-shipped release must not silently
+    # redeploy the app.
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to re-deploy, e.g. v1.6.12"
+        required: false
+        type: string
+
+jobs:
+  release-web:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      # `contents: read` and nothing more, on purpose: the release job reads
+      # the tree and builds it, but never pushes a version bump back. See the
+      # note in docs/release-flow.md for why writing pubspec.yaml back to the
+      # repository is the one thing this deliberately does not do.
+      contents: read
+      pages: write    # to deploy to Pages
+      id-token: write # to verify the deployment originates from this workflow
+    steps:
+      # Runs before the checkout because it has to turn the release into a ref
+      # to check out, and because it is where the version is decided.
+      - name: Resolve the release version
+        env:
+          # The tag name is text someone typed - into a release form or a
+          # dispatch box - so it arrives through a mapping and is validated
+          # before it reaches a checkout ref or a build flag.
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          DISPATCH_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          # A published release carries tag_name; a re-deploy carries the
+          # dispatched tag. Both are the same kind of value afterwards.
+          TAG="${RELEASE_TAG:-$DISPATCH_TAG}"
+          if [ -z "$TAG" ]; then
+            echo "::error::no tag on this run - it was neither a published release nor a workflow_dispatch with a tag input"
+            exit 1
+          fi
+
+          VERSION="${TAG#v}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::'$TAG' is not a release tag. Cut releases as v<MAJOR>.<MINOR>.<PATCH> - e.g. v1.6.12, with no -beta suffix and no +build suffix."
+            exit 1
+          fi
+
+          # The tag decides what ships. BUILD_NUMBER is the Actions run
+          # number, which only ever increases, so a re-deploy is newer than
+          # what it replaces rather than a byte-identical retry, and no
+          # `+build` suffix has to be remembered by anyone.
+          echo "RELEASE_TAG=$TAG" >> "$GITHUB_ENV"
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "BUILD_NUMBER=$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
+          echo "Releasing $TAG as version $VERSION (run $GITHUB_RUN_NUMBER)"
+
+      # Checked out after the tag is resolved so a re-deploy can name a tag
+      # other than the one this run came from. `actions/checkout` resolves a
+      # bare tag name to refs/tags/<name>; the tag must exist, which is what
+      # makes a typo in the dispatch box fail here instead of building
+      # whatever HEAD happened to be.
+      - name: Checkout the release tag
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+
+      # The version flows tag -> pubspec.yaml, not pubspec.yaml -> tag.
+      #
+      # This rewrites pubspec.yaml in the build tree only. Nothing is
+      # committed or pushed: a version bump that CI commits on release would
+      # land on the branch as a commit that is not inside the tag it just
+      # released, which is a new way to be out of sync (and needs a write
+      # credential to do it). Overwriting in the tree gives the same benefit -
+      # nobody hand-edits this file to ship - without inventing drift.
+      - name: Stamp the release version into pubspec.yaml
+        env:
+          APP_VERSION: ${{ env.APP_VERSION }}
+        run: |
+          # `$APP_VERSION` is validated above to ^[0-9.]+, so it is inert in
+          # the sed replacement and in awk's -v assignment.
+          before="$(sed -n 's/^version: *\([0-9][0-9.]*\).*/\1/p' pubspec.yaml | tail -n1)"
+
+          if grep -q '^version:' pubspec.yaml; then
+            # Anchored at column 0 on purpose: `version:` is a top-level
+            # pubspec key, so an indented `version:` under a dependency is
+            # neither matched nor rewritten.
+            sed -i "s/^version:.*/version: $APP_VERSION/" pubspec.yaml
+          elif grep -q '^name:' pubspec.yaml; then
+            # No top-level version line at all (a hand-written pubspec can
+            # omit one for an app): insert it straight after `name:` so the
+            # key stays top-level and the file stays valid YAML.
+            awk -v v="$APP_VERSION" '{ print } /^name:/ && !inserted { print "version: " v; inserted = 1 }' \
+              pubspec.yaml > pubspec.yaml.tmp
+            mv pubspec.yaml.tmp pubspec.yaml
+          else
+            echo "::error::pubspec.yaml has no version: line to rewrite and no name: line to anchor an insert on"
+            exit 1
+          fi
+
+          # Re-read what we just wrote rather than trusting the substitution.
+          # A rewrite that silently did nothing is the failure mode that would
+          # ship the wrong version, so it is checked, not assumed.
+          after="$(sed -n 's/^version: *\([0-9][0-9.]*\).*/\1/p' pubspec.yaml | tail -n1)"
+          if [ "$after" != "$APP_VERSION" ]; then
+            echo "::error::pubspec.yaml reads '$after' after stamping, expected '$APP_VERSION'"
+            exit 1
+          fi
+
+          if [ -n "$before" ] && [ "$before" != "$APP_VERSION" ]; then
+            echo "::notice::the repo's pubspec.yaml said $before; releasing as $APP_VERSION from $RELEASE_TAG (build-tree overwrite only, nothing pushed back)"
+          fi
+          echo "pubspec.yaml now reads: version: $APP_VERSION"
+
+      # Same pin as test.yaml (and .metadata). Two literals rather than one
+      # because an action input cannot read a shared repo value without adding
+      # a whole indirection step; see the note in docs/release-flow.md.
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.4'
+          channel: 'stable'
+          cache: true
+
+      # Gate before building, and before anything touches a secret: a release
+      # whose tests fail never reaches Pages. `flutter pub get` comes after
+      # the stamp so the one resolution this run does sees the final file.
+      - name: Run tests
+        run: |
+          flutter pub get
+          flutter test
+
+      # The credential is never substituted into a tracked file. The tracked
+      # artifact is config/firebase_config.json.template with no live value in
+      # it; this renders the real config into the gitignored path the build
+      # reads. The secret appears only in this `env:` mapping, never in the
+      # script body, and the script keeps it out of any child process argv.
+      - name: Generate web Firebase config
+        env:
+          WEB_API_KEY: ${{ secrets.WEB_API_KEY }}
+        # Renders web/index.html plus config/firebase_config.json; the key is
+        # read back from that file by the build below.
+        run: scripts/generate_build_config.sh web
+
+      - name: Build web release
+        env:
+          APP_VERSION: ${{ env.APP_VERSION }}
+          BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
+        run: |
+          flutter build web --release \
+            --build-name="$APP_VERSION" \
+            --build-number="$BUILD_NUMBER" \
+            --dart-define-from-file=config/firebase_config.json
+
+      # `flutter build web` emits unversioned filenames, and GitHub Pages
+      # answers them with max-age=600, so without this a visitor can keep
+      # getting the previous release's bootstrap - and through it the previous
+      # app - for as long as that cache holds. Tagging each URL with a content
+      # hash makes every deploy a cache miss for what changed and still
+      # cacheable for what did not. See scripts/cache_bust_web.sh.
+      - name: Cache-bust the web bundle
+        run: scripts/cache_bust_web.sh build/web
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: "build/web"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

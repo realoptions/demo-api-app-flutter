@@ -1,32 +1,32 @@
 name: realoptions
 description: An app for interacting with Finside RealOption apis.
 
-# The following defines the version and build number for your application.
-# A version number is three numbers separated by dots, like 1.2.43
-# followed by an optional build number separated by a +.
-# Both the version and the builder number may be overridden in flutter
-# build by specifying --build-name and --build-number, respectively.
-# In Android, build-name is used as versionName while build-number used as versionCode.
-# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
-# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
-# Read more about iOS versioning at
-# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-
-# Version authority.
+# Version.
 #
-# This line is the single source of the app's *semantic* version. It is read
-# by .github/workflows/tag.yml, which turns it into the `release-<version>` /
-# `beta-<version>` tag that drives deployment; the release build then takes
-# its version name from that tag rather than re-reading this file, so the tag
-# that triggered a deploy is what the shipped artifact is versioned with.
+# You do not edit this line to release. The version comes from the tag on the
+# GitHub Release you publish, and .github/workflows/release.yml writes that
+# version into this file in the build tree before it resolves or builds, so
+# releasing is one action rather than two:
 #
-# There is deliberately no `+<build>` suffix here. The build number (Android
-# versionCode / iOS CFBundleVersion) is assigned by CI from the Actions run
-# number, which only ever increases, so a release needs no hand-incrementing.
-# The previous `version: 1.6.11+22` carried a comment saying the `+n` had to
-# be bumped by hand on every release even when the semantic version moved - a
-# ritual that was easy to forget and that failed late, at the Play upload.
-# See docs/release-flow.md.
+#   gh release create v1.6.12 --generate-notes
+#
+# What sits below is therefore a copy of the last release's version (or of
+# whatever you set locally), not a number someone has to remember to bump.
+# A checkout reading 1.6.11 while the newest release is 1.7.0 is not a bug:
+# the tag is the authority and this line follows it, not the reverse - so
+# this file also cannot make a release wrong.
+#
+# Nothing pushes the stamped value back to the repository. A version bump
+# committed by CI at release time would land on the branch as a commit that
+# is not inside the release it just cut, which is a new kind of drift rather
+# than the removal of one. See "Version authority" in docs/release-flow.md.
+#
+# There is deliberately no `+<build>` suffix here. The build number is CI's -
+# the Actions run number, which only ever increases. The previous
+# `version: 1.6.11+22` came with a comment saying the `+n` had to be bumped
+# by hand on every release even when the semantic version moved: a ritual
+# that was easy to forget and that failed late, at the Play upload this
+# pipeline no longer performs.
 version: 1.6.11
 
 # Dart 3 / sound null safety. Every pin below comes out of a resolution that
